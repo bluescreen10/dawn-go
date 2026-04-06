@@ -129,12 +129,18 @@ func extractObjects(spec DawnSpec) map[string]Entry {
 
 				if ret, ok := m.Returns.(string); ok {
 					m.GoReturns = toGoType(ret)
+				} else {
+					if m.Returns != nil {
+						fmt.Println(m.GoName)
+						m.GoReturns = "(*Buffer, error)"
+					}
 				}
 
 				for k := 0; k < len(m.Args); k++ {
 					m.Args[k].GoName = toGoArgName(m.Args[k].Name)
 					m.Args[k].GoType = toGoType(m.Args[k].Type)
 				}
+
 				entry.Methods[j] = m
 				j++
 			}

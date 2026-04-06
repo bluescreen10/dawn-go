@@ -2,6 +2,82 @@
 //go:generate go run ./cmd/wrapper/. 
 package wgpu
 
+type StencilOperation int
+
+const (
+	StencilOperationUndefined StencilOperation =  0
+	StencilOperationKeep = 1
+	StencilOperationZero = 2
+	StencilOperationReplace = 3
+	StencilOperationInvert = 4
+	StencilOperationIncrementClamp = 5
+	StencilOperationDecrementClamp = 6
+	StencilOperationIncrementWrap = 7
+	StencilOperationDecrementWrap = 8
+)
+
+type ComponentSwizzle int
+
+const (
+	ComponentSwizzleUndefined ComponentSwizzle =  0
+	ComponentSwizzleZero = 1
+	ComponentSwizzleOne = 2
+	ComponentSwizzleR = 3
+	ComponentSwizzleG = 4
+	ComponentSwizzleB = 5
+	ComponentSwizzleA = 6
+)
+
+type IndexFormat int
+
+const (
+	IndexFormatUndefined IndexFormat =  0
+	IndexFormatUint16 = 1
+	IndexFormatUint32 = 2
+)
+
+type PopErrorScopeStatus int
+
+const (
+	PopErrorScopeStatusSuccess PopErrorScopeStatus =  1
+	PopErrorScopeStatusCallbackCancelled = 2
+	PopErrorScopeStatusError = 3
+)
+
+type CreatePipelineAsyncStatus int
+
+const (
+	CreatePipelineAsyncStatusSuccess CreatePipelineAsyncStatus =  1
+	CreatePipelineAsyncStatusCallbackCancelled = 2
+	CreatePipelineAsyncStatusValidationError = 3
+	CreatePipelineAsyncStatusInternalError = 4
+)
+
+type FrontFace int
+
+const (
+	FrontFaceUndefined FrontFace =  0
+	FrontFaceCCW = 1
+	FrontFaceCW = 2
+)
+
+type BufferMapState int
+
+const (
+	BufferMapStateUnmapped BufferMapState =  1
+	BufferMapStatePending = 2
+	BufferMapStateMapped = 3
+)
+
+type AdapterType int
+
+const (
+	AdapterTypeDiscreteGPU AdapterType =  1
+	AdapterTypeIntegratedGPU = 2
+	AdapterTypeCPU = 3
+	AdapterTypeUnknown = 4
+)
+
 type DeviceLostReason int
 
 const (
@@ -11,12 +87,227 @@ const (
 	DeviceLostReasonFailedCreation = 4
 )
 
-type ErrorFilter int
+type OptionalBool int
 
 const (
-	ErrorFilterValidation ErrorFilter =  1
-	ErrorFilterOutOfMemory = 2
-	ErrorFilterInternal = 3
+	OptionalBoolFalse OptionalBool =  0
+	OptionalBoolTrue = 1
+	OptionalBoolUndefined = 2
+)
+
+type FeatureName int
+
+const (
+	FeatureNameCoreFeaturesAndLimits FeatureName =  1
+	FeatureNameDepthClipControl = 2
+	FeatureNameDepth32FloatStencil8 = 3
+	FeatureNameTextureCompressionBC = 4
+	FeatureNameTextureCompressionBCSliced3D = 5
+	FeatureNameTextureCompressionETC2 = 6
+	FeatureNameTextureCompressionASTC = 7
+	FeatureNameTextureCompressionASTCSliced3D = 8
+	FeatureNameTimestampQuery = 9
+	FeatureNameIndirectFirstInstance = 10
+	FeatureNameShaderF16 = 11
+	FeatureNameRG11B10UfloatRenderable = 12
+	FeatureNameBGRA8UnormStorage = 13
+	FeatureNameFloat32Filterable = 14
+	FeatureNameFloat32Blendable = 15
+	FeatureNameClipDistances = 16
+	FeatureNameDualSourceBlending = 17
+	FeatureNameSubgroups = 18
+	FeatureNameTextureFormatsTier1 = 19
+	FeatureNameTextureFormatsTier2 = 20
+	FeatureNamePrimitiveIndex = 21
+	FeatureNameTextureComponentSwizzle = 22
+	FeatureNameDawnInternalUsages = 0
+	FeatureNameDawnMultiPlanarFormats = 1
+	FeatureNameDawnNative = 2
+	FeatureNameChromiumExperimentalTimestampQueryInsidePasses = 3
+	FeatureNameImplicitDeviceSynchronization = 4
+	FeatureNameTransientAttachments = 6
+	FeatureNameMSAARenderToSingleSampled = 7
+	FeatureNameD3D11MultithreadProtected = 8
+	FeatureNameANGLETextureSharing = 9
+	FeatureNamePixelLocalStorageCoherent = 10
+	FeatureNamePixelLocalStorageNonCoherent = 11
+	FeatureNameUnorm16TextureFormats = 12
+	FeatureNameMultiPlanarFormatExtendedUsages = 13
+	FeatureNameMultiPlanarFormatP010 = 14
+	FeatureNameHostMappedPointer = 15
+	FeatureNameMultiPlanarRenderTargets = 16
+	FeatureNameMultiPlanarFormatNv12a = 17
+	FeatureNameFramebufferFetch = 18
+	FeatureNameBufferMapExtendedUsages = 19
+	FeatureNameAdapterPropertiesMemoryHeaps = 20
+	FeatureNameAdapterPropertiesD3D = 21
+	FeatureNameAdapterPropertiesVk = 22
+	FeatureNameDawnFormatCapabilities = 23
+	FeatureNameDawnDrmFormatCapabilities = 24
+	FeatureNameMultiPlanarFormatNv16 = 25
+	FeatureNameMultiPlanarFormatNv24 = 26
+	FeatureNameMultiPlanarFormatP210 = 27
+	FeatureNameMultiPlanarFormatP410 = 28
+	FeatureNameSharedTextureMemoryVkDedicatedAllocation = 29
+	FeatureNameSharedTextureMemoryAHardwareBuffer = 30
+	FeatureNameSharedTextureMemoryDmaBuf = 31
+	FeatureNameSharedTextureMemoryOpaqueFD = 32
+	FeatureNameSharedTextureMemoryZirconHandle = 33
+	FeatureNameSharedTextureMemoryDXGISharedHandle = 34
+	FeatureNameSharedTextureMemoryD3D11Texture2D = 35
+	FeatureNameSharedTextureMemoryIOSurface = 36
+	FeatureNameSharedTextureMemoryEGLImage = 37
+	FeatureNameSharedFenceVkSemaphoreOpaqueFD = 38
+	FeatureNameSharedFenceSyncFD = 39
+	FeatureNameSharedFenceVkSemaphoreZirconHandle = 40
+	FeatureNameSharedFenceDXGISharedHandle = 41
+	FeatureNameSharedFenceMTLSharedEvent = 42
+	FeatureNameSharedBufferMemoryD3D12Resource = 43
+	FeatureNameStaticSamplers = 44
+	FeatureNameYCbCrVulkanSamplers = 45
+	FeatureNameShaderModuleCompilationOptions = 46
+	FeatureNameDawnLoadResolveTexture = 47
+	FeatureNameDawnPartialLoadResolveTexture = 48
+	FeatureNameMultiDrawIndirect = 49
+	FeatureNameDawnTexelCopyBufferRowAlignment = 50
+	FeatureNameFlexibleTextureViews = 51
+	FeatureNameChromiumExperimentalSubgroupMatrix = 52
+	FeatureNameSharedFenceEGLSync = 53
+	FeatureNameDawnDeviceAllocatorControl = 54
+	FeatureNameAdapterPropertiesWGPU = 55
+	FeatureNameSharedBufferMemoryD3D12SharedMemoryFileMappingHandle = 56
+	FeatureNameSharedTextureMemoryD3D12Resource = 57
+	FeatureNameChromiumExperimentalSamplingResourceTable = 58
+	FeatureNameChromiumExperimentalSubgroupSizeControl = 59
+	FeatureNameAtomicVec2uMinMax = 60
+	FeatureNameUnorm16FormatsForExternalTexture = 61
+	FeatureNameOpaqueYCbCrAndroidForExternalTexture = 62
+	FeatureNameUnorm16Filterable = 63
+	FeatureNameRenderPassRenderArea = 64
+	FeatureNameDawnNativeSpontaneousQueueEvents = 65
+	FeatureNameAdapterPropertiesDrm = 66
+)
+
+type SurfaceGetCurrentTextureStatus int
+
+const (
+	SurfaceGetCurrentTextureStatusSuccessOptimal SurfaceGetCurrentTextureStatus =  1
+	SurfaceGetCurrentTextureStatusSuccessSuboptimal = 2
+	SurfaceGetCurrentTextureStatusTimeout = 3
+	SurfaceGetCurrentTextureStatusOutdated = 4
+	SurfaceGetCurrentTextureStatusLost = 5
+	SurfaceGetCurrentTextureStatusError = 6
+)
+
+type RequestAdapterStatus int
+
+const (
+	RequestAdapterStatusSuccess RequestAdapterStatus =  1
+	RequestAdapterStatusCallbackCancelled = 2
+	RequestAdapterStatusUnavailable = 3
+	RequestAdapterStatusError = 4
+)
+
+type SType int
+
+const (
+	STypeShaderSourceSPIRV SType =  1
+	STypeShaderSourceWGSL = 2
+	STypeRenderPassMaxDrawCount = 3
+	STypeSurfaceSourceMetalLayer = 4
+	STypeSurfaceSourceWindowsHWND = 5
+	STypeSurfaceSourceXlibWindow = 6
+	STypeSurfaceSourceWaylandSurface = 7
+	STypeSurfaceSourceAndroidNativeWindow = 8
+	STypeSurfaceSourceXCBWindow = 9
+	STypeSurfaceColorManagement = 10
+	STypeRequestAdapterWebXROptions = 11
+	STypeTextureComponentSwizzleDescriptor = 12
+	STypeExternalTextureBindingLayout = 13
+	STypeExternalTextureBindingEntry = 14
+	STypeCompatibilityModeLimits = 15
+	STypeTextureBindingViewDimension = 16
+	STypeEmscriptenSurfaceSourceCanvasHTMLSelector = 0
+	STypeSurfaceDescriptorFromWindowsCoreWindow = 0
+	STypeSurfaceDescriptorFromWindowsUWPSwapChainPanel = 3
+	STypeDawnTextureInternalUsageDescriptor = 4
+	STypeDawnEncoderInternalUsageDescriptor = 5
+	STypeDawnInstanceDescriptor = 6
+	STypeDawnCacheDeviceDescriptor = 7
+	STypeDawnAdapterPropertiesPowerPreference = 8
+	STypeDawnBufferDescriptorErrorInfoFromWireClient = 9
+	STypeDawnTogglesDescriptor = 10
+	STypeDawnShaderModuleSPIRVOptionsDescriptor = 11
+	STypeRequestAdapterOptionsLUID = 12
+	STypeRequestAdapterOptionsGetGLProc = 13
+	STypeRequestAdapterOptionsD3D11Device = 14
+	STypeDawnRenderPassSampleCount = 15
+	STypeRenderPassPixelLocalStorage = 16
+	STypePipelineLayoutPixelLocalStorage = 17
+	STypeBufferHostMappedPointer = 18
+	STypeAdapterPropertiesMemoryHeaps = 19
+	STypeAdapterPropertiesD3D = 20
+	STypeAdapterPropertiesVk = 21
+	STypeDawnWireWGSLControl = 22
+	STypeDawnWGSLBlocklist = 23
+	STypeDawnDrmFormatCapabilities = 24
+	STypeShaderModuleCompilationOptions = 25
+	STypeColorTargetStateExpandResolveTextureDawn = 26
+	STypeRenderPassRenderAreaRect = 27
+	STypeSharedTextureMemoryVkDedicatedAllocationDescriptor = 28
+	STypeSharedTextureMemoryAHardwareBufferDescriptor = 29
+	STypeSharedTextureMemoryDmaBufDescriptor = 30
+	STypeSharedTextureMemoryOpaqueFDDescriptor = 31
+	STypeSharedTextureMemoryZirconHandleDescriptor = 32
+	STypeSharedTextureMemoryDXGISharedHandleDescriptor = 33
+	STypeSharedTextureMemoryD3D11Texture2DDescriptor = 34
+	STypeSharedTextureMemoryIOSurfaceDescriptor = 35
+	STypeSharedTextureMemoryEGLImageDescriptor = 36
+	STypeSharedTextureMemoryInitializedBeginState = 37
+	STypeSharedTextureMemoryInitializedEndState = 38
+	STypeSharedTextureMemoryVkImageLayoutBeginState = 39
+	STypeSharedTextureMemoryVkImageLayoutEndState = 40
+	STypeSharedTextureMemoryD3DSwapchainBeginState = 41
+	STypeSharedFenceVkSemaphoreOpaqueFDDescriptor = 42
+	STypeSharedFenceVkSemaphoreOpaqueFDExportInfo = 43
+	STypeSharedFenceSyncFDDescriptor = 44
+	STypeSharedFenceSyncFDExportInfo = 45
+	STypeSharedFenceVkSemaphoreZirconHandleDescriptor = 46
+	STypeSharedFenceVkSemaphoreZirconHandleExportInfo = 47
+	STypeSharedFenceDXGISharedHandleDescriptor = 48
+	STypeSharedFenceDXGISharedHandleExportInfo = 49
+	STypeSharedFenceMTLSharedEventDescriptor = 50
+	STypeSharedFenceMTLSharedEventExportInfo = 51
+	STypeSharedBufferMemoryD3D12ResourceDescriptor = 52
+	STypeStaticSamplerBindingLayout = 53
+	STypeYCbCrVkDescriptor = 54
+	STypeSharedTextureMemoryAHardwareBufferProperties = 55
+	STypeAHardwareBufferProperties = 56
+	STypeDawnTexelCopyBufferRowAlignmentLimits = 58
+	STypeAdapterPropertiesSubgroupMatrixConfigs = 59
+	STypeSharedFenceEGLSyncDescriptor = 60
+	STypeSharedFenceEGLSyncExportInfo = 61
+	STypeDawnInjectedInvalidSType = 62
+	STypeDawnCompilationMessageUtf16 = 63
+	STypeDawnFakeBufferOOMForTesting = 64
+	STypeSurfaceDescriptorFromWindowsWinUISwapChainPanel = 65
+	STypeDawnDeviceAllocatorControl = 66
+	STypeDawnHostMappedPointerLimits = 67
+	STypeRenderPassDescriptorResolveRect = 68
+	STypeRequestAdapterWebGPUBackendOptions = 69
+	STypeDawnFakeDeviceInitializeErrorForTesting = 70
+	STypeSharedTextureMemoryD3D11BeginState = 71
+	STypeDawnConsumeAdapterDescriptor = 72
+	STypeTexelBufferBindingEntry = 73
+	STypeTexelBufferBindingLayout = 74
+	STypeSharedTextureMemoryMetalEndAccessState = 75
+	STypeAdapterPropertiesWGPU = 76
+	STypeSharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor = 77
+	STypeSharedTextureMemoryD3D12ResourceDescriptor = 78
+	STypeRequestAdapterOptionsAngleVirtualizationGroup = 79
+	STypePipelineLayoutResourceTable = 80
+	STypeAdapterPropertiesExplicitComputeSubgroupSizeConfigs = 81
+	STypeAdapterPropertiesDrm = 82
 )
 
 type TextureFormat int
@@ -134,48 +425,13 @@ const (
 	TextureFormatOpaqueYCbCrAndroid = 7
 )
 
-type WGSLLanguageFeatureName int
+type TextureDimension int
 
 const (
-	WGSLLanguageFeatureNameReadonlyAndReadwriteStorageTextures WGSLLanguageFeatureName =  1
-	WGSLLanguageFeatureNamePacked4x8IntegerDotProduct = 2
-	WGSLLanguageFeatureNameUnrestrictedPointerParameters = 3
-	WGSLLanguageFeatureNamePointerCompositeAccess = 4
-	WGSLLanguageFeatureNameUniformBufferStandardLayout = 5
-	WGSLLanguageFeatureNameSubgroupId = 6
-	WGSLLanguageFeatureNameTextureAndSamplerLet = 7
-	WGSLLanguageFeatureNameSubgroupUniformity = 8
-	WGSLLanguageFeatureNameTextureFormatsTier1 = 9
-	WGSLLanguageFeatureNameChromiumTestingUnimplemented = 0
-	WGSLLanguageFeatureNameChromiumTestingUnsafeExperimental = 1
-	WGSLLanguageFeatureNameChromiumTestingExperimental = 2
-	WGSLLanguageFeatureNameChromiumTestingShippedWithKillswitch = 3
-	WGSLLanguageFeatureNameChromiumTestingShipped = 4
-	WGSLLanguageFeatureNameSizedBindingArray = 5
-	WGSLLanguageFeatureNameTexelBuffers = 6
-	WGSLLanguageFeatureNameChromiumPrint = 7
-	WGSLLanguageFeatureNameFragmentDepth = 8
-	WGSLLanguageFeatureNameImmediateAddressSpace = 9
-	WGSLLanguageFeatureNameBufferView = 11
-	WGSLLanguageFeatureNameFilteringParameters = 12
-	WGSLLanguageFeatureNameSwizzleAssignment = 13
-	WGSLLanguageFeatureNameLinearIndexing = 14
-)
-
-type PredefinedColorSpace int
-
-const (
-	PredefinedColorSpaceSRGB PredefinedColorSpace =  1
-	PredefinedColorSpaceDisplayP3 = 2
-	PredefinedColorSpaceSRGBLinear = 3
-	PredefinedColorSpaceDisplayP3Linear = 4
-)
-
-type CompilationInfoRequestStatus int
-
-const (
-	CompilationInfoRequestStatusSuccess CompilationInfoRequestStatus =  1
-	CompilationInfoRequestStatusCallbackCancelled = 2
+	TextureDimensionUndefined TextureDimension =  0
+	TextureDimension1D = 1
+	TextureDimension2D = 2
+	TextureDimension3D = 3
 )
 
 type ColorWriteMask int
@@ -189,33 +445,60 @@ const (
 	ColorWriteMaskAll = 15
 )
 
-type AddressMode int
+type CompilationInfoRequestStatus int
 
 const (
-	AddressModeUndefined AddressMode =  0
-	AddressModeClampToEdge = 1
-	AddressModeRepeat = 2
-	AddressModeMirrorRepeat = 3
+	CompilationInfoRequestStatusSuccess CompilationInfoRequestStatus =  1
+	CompilationInfoRequestStatusCallbackCancelled = 2
 )
 
-type StoreOp int
+type QueryType int
 
 const (
-	StoreOpUndefined StoreOp =  0
-	StoreOpStore = 1
-	StoreOpDiscard = 2
+	QueryTypeOcclusion QueryType =  1
+	QueryTypeTimestamp = 2
 )
 
-type ComponentSwizzle int
+type CullMode int
 
 const (
-	ComponentSwizzleUndefined ComponentSwizzle =  0
-	ComponentSwizzleZero = 1
-	ComponentSwizzleOne = 2
-	ComponentSwizzleR = 3
-	ComponentSwizzleG = 4
-	ComponentSwizzleB = 5
-	ComponentSwizzleA = 6
+	CullModeUndefined CullMode =  0
+	CullModeNone = 1
+	CullModeFront = 2
+	CullModeBack = 3
+)
+
+type VertexStepMode int
+
+const (
+	VertexStepModeUndefined VertexStepMode =  0
+	VertexStepModeVertex = 1
+	VertexStepModeInstance = 2
+)
+
+type FilterMode int
+
+const (
+	FilterModeUndefined FilterMode =  0
+	FilterModeNearest = 1
+	FilterModeLinear = 2
+)
+
+type ToneMappingMode int
+
+const (
+	ToneMappingModeStandard ToneMappingMode =  1
+	ToneMappingModeExtended = 2
+)
+
+type ErrorType int
+
+const (
+	ErrorTypeNoError ErrorType =  1
+	ErrorTypeValidation = 2
+	ErrorTypeOutOfMemory = 3
+	ErrorTypeInternal = 4
+	ErrorTypeUnknown = 5
 )
 
 type BlendOperation int
@@ -229,40 +512,96 @@ const (
 	BlendOperationMax = 5
 )
 
-type ShaderStage int
+type MapAsyncStatus int
 
 const (
-	ShaderStageNone ShaderStage =  0
-	ShaderStageVertex = 1
-	ShaderStageFragment = 2
-	ShaderStageCompute = 4
+	MapAsyncStatusSuccess MapAsyncStatus =  1
+	MapAsyncStatusCallbackCancelled = 2
+	MapAsyncStatusError = 3
+	MapAsyncStatusAborted = 4
 )
 
-type CreatePipelineAsyncStatus int
+type SamplerBindingType int
 
 const (
-	CreatePipelineAsyncStatusSuccess CreatePipelineAsyncStatus =  1
-	CreatePipelineAsyncStatusCallbackCancelled = 2
-	CreatePipelineAsyncStatusValidationError = 3
-	CreatePipelineAsyncStatusInternalError = 4
+	SamplerBindingTypeBindingNotUsed SamplerBindingType =  0
+	SamplerBindingTypeUndefined = 1
+	SamplerBindingTypeFiltering = 2
+	SamplerBindingTypeNonFiltering = 3
+	SamplerBindingTypeComparison = 4
 )
 
-type VertexStepMode int
+type MipmapFilterMode int
 
 const (
-	VertexStepModeUndefined VertexStepMode =  0
-	VertexStepModeVertex = 1
-	VertexStepModeInstance = 2
+	MipmapFilterModeUndefined MipmapFilterMode =  0
+	MipmapFilterModeNearest = 1
+	MipmapFilterModeLinear = 2
 )
 
-type ErrorType int
+type ErrorFilter int
 
 const (
-	ErrorTypeNoError ErrorType =  1
-	ErrorTypeValidation = 2
-	ErrorTypeOutOfMemory = 3
-	ErrorTypeInternal = 4
-	ErrorTypeUnknown = 5
+	ErrorFilterValidation ErrorFilter =  1
+	ErrorFilterOutOfMemory = 2
+	ErrorFilterInternal = 3
+)
+
+type TextureViewDimension int
+
+const (
+	TextureViewDimensionUndefined TextureViewDimension =  0
+	TextureViewDimension1D = 1
+	TextureViewDimension2D = 2
+	TextureViewDimension2DArray = 3
+	TextureViewDimensionCube = 4
+	TextureViewDimensionCubeArray = 5
+	TextureViewDimension3D = 6
+)
+
+type BufferBindingType int
+
+const (
+	BufferBindingTypeBindingNotUsed BufferBindingType =  0
+	BufferBindingTypeUndefined = 1
+	BufferBindingTypeUniform = 2
+	BufferBindingTypeStorage = 3
+	BufferBindingTypeReadOnlyStorage = 4
+)
+
+type CompositeAlphaMode int
+
+const (
+	CompositeAlphaModeAuto CompositeAlphaMode =  0
+	CompositeAlphaModeOpaque = 1
+	CompositeAlphaModePremultiplied = 2
+	CompositeAlphaModeUnpremultiplied = 3
+	CompositeAlphaModeInherit = 4
+)
+
+type PowerPreference int
+
+const (
+	PowerPreferenceUndefined PowerPreference =  0
+	PowerPreferenceLowPower = 1
+	PowerPreferenceHighPerformance = 2
+)
+
+type FeatureLevel int
+
+const (
+	FeatureLevelUndefined FeatureLevel =  0
+	FeatureLevelCompatibility = 1
+	FeatureLevelCore = 2
+)
+
+type LoadOp int
+
+const (
+	LoadOpUndefined LoadOp =  0
+	LoadOpLoad = 1
+	LoadOpClear = 2
+	LoadOpExpandResolveTexture = 3
 )
 
 type BlendFactor int
@@ -288,192 +627,6 @@ const (
 	BlendFactorOneMinusSrc1Alpha = 17
 )
 
-type IndexFormat int
-
-const (
-	IndexFormatUndefined IndexFormat =  0
-	IndexFormatUint16 = 1
-	IndexFormatUint32 = 2
-)
-
-type SamplerBindingType int
-
-const (
-	SamplerBindingTypeBindingNotUsed SamplerBindingType =  0
-	SamplerBindingTypeUndefined = 1
-	SamplerBindingTypeFiltering = 2
-	SamplerBindingTypeNonFiltering = 3
-	SamplerBindingTypeComparison = 4
-)
-
-type FilterMode int
-
-const (
-	FilterModeUndefined FilterMode =  0
-	FilterModeNearest = 1
-	FilterModeLinear = 2
-)
-
-type CallbackMode int
-
-const (
-	CallbackModeWaitAnyOnly CallbackMode =  1
-	CallbackModeAllowProcessEvents = 2
-	CallbackModeAllowSpontaneous = 3
-)
-
-type BufferBindingType int
-
-const (
-	BufferBindingTypeBindingNotUsed BufferBindingType =  0
-	BufferBindingTypeUndefined = 1
-	BufferBindingTypeUniform = 2
-	BufferBindingTypeStorage = 3
-	BufferBindingTypeReadOnlyStorage = 4
-)
-
-type PopErrorScopeStatus int
-
-const (
-	PopErrorScopeStatusSuccess PopErrorScopeStatus =  1
-	PopErrorScopeStatusCallbackCancelled = 2
-	PopErrorScopeStatusError = 3
-)
-
-type MapAsyncStatus int
-
-const (
-	MapAsyncStatusSuccess MapAsyncStatus =  1
-	MapAsyncStatusCallbackCancelled = 2
-	MapAsyncStatusError = 3
-	MapAsyncStatusAborted = 4
-)
-
-type TextureAspect int
-
-const (
-	TextureAspectUndefined TextureAspect =  0
-	TextureAspectAll = 1
-	TextureAspectStencilOnly = 2
-	TextureAspectDepthOnly = 3
-	TextureAspectPlane0Only = 0
-	TextureAspectPlane1Only = 1
-	TextureAspectPlane2Only = 2
-)
-
-type AdapterType int
-
-const (
-	AdapterTypeDiscreteGPU AdapterType =  1
-	AdapterTypeIntegratedGPU = 2
-	AdapterTypeCPU = 3
-	AdapterTypeUnknown = 4
-)
-
-type RequestDeviceStatus int
-
-const (
-	RequestDeviceStatusSuccess RequestDeviceStatus =  1
-	RequestDeviceStatusCallbackCancelled = 2
-	RequestDeviceStatusError = 3
-)
-
-type StencilOperation int
-
-const (
-	StencilOperationUndefined StencilOperation =  0
-	StencilOperationKeep = 1
-	StencilOperationZero = 2
-	StencilOperationReplace = 3
-	StencilOperationInvert = 4
-	StencilOperationIncrementClamp = 5
-	StencilOperationDecrementClamp = 6
-	StencilOperationIncrementWrap = 7
-	StencilOperationDecrementWrap = 8
-)
-
-type TextureViewDimension int
-
-const (
-	TextureViewDimensionUndefined TextureViewDimension =  0
-	TextureViewDimension1D = 1
-	TextureViewDimension2D = 2
-	TextureViewDimension2DArray = 3
-	TextureViewDimensionCube = 4
-	TextureViewDimensionCubeArray = 5
-	TextureViewDimension3D = 6
-)
-
-type BufferMapState int
-
-const (
-	BufferMapStateUnmapped BufferMapState =  1
-	BufferMapStatePending = 2
-	BufferMapStateMapped = 3
-)
-
-type CompositeAlphaMode int
-
-const (
-	CompositeAlphaModeAuto CompositeAlphaMode =  0
-	CompositeAlphaModeOpaque = 1
-	CompositeAlphaModePremultiplied = 2
-	CompositeAlphaModeUnpremultiplied = 3
-	CompositeAlphaModeInherit = 4
-)
-
-type CompilationMessageType int
-
-const (
-	CompilationMessageTypeError CompilationMessageType =  1
-	CompilationMessageTypeWarning = 2
-	CompilationMessageTypeInfo = 3
-)
-
-type QueryType int
-
-const (
-	QueryTypeOcclusion QueryType =  1
-	QueryTypeTimestamp = 2
-)
-
-type TextureUsage int
-
-const (
-	TextureUsageNone TextureUsage =  0
-	TextureUsageCopySrc = 1
-	TextureUsageCopyDst = 2
-	TextureUsageTextureBinding = 4
-	TextureUsageStorageBinding = 8
-	TextureUsageRenderAttachment = 16
-	TextureUsageTransientAttachment = 32
-	TextureUsageStorageAttachment = 64
-)
-
-type TextureDimension int
-
-const (
-	TextureDimensionUndefined TextureDimension =  0
-	TextureDimension1D = 1
-	TextureDimension2D = 2
-	TextureDimension3D = 3
-)
-
-type OptionalBool int
-
-const (
-	OptionalBoolFalse OptionalBool =  0
-	OptionalBoolTrue = 1
-	OptionalBoolUndefined = 2
-)
-
-type Status int
-
-const (
-	StatusSuccess Status =  1
-	StatusError = 2
-)
-
 type CompareFunction int
 
 const (
@@ -488,14 +641,42 @@ const (
 	CompareFunctionAlways = 8
 )
 
-type StorageTextureAccess int
+type CallbackMode int
 
 const (
-	StorageTextureAccessBindingNotUsed StorageTextureAccess =  0
-	StorageTextureAccessUndefined = 1
-	StorageTextureAccessWriteOnly = 2
-	StorageTextureAccessReadOnly = 3
-	StorageTextureAccessReadWrite = 4
+	CallbackModeWaitAnyOnly CallbackMode =  1
+	CallbackModeAllowProcessEvents = 2
+	CallbackModeAllowSpontaneous = 3
+)
+
+type BackendType int
+
+const (
+	BackendTypeUndefined BackendType =  0
+	BackendTypeNull = 1
+	BackendTypeWebGPU = 2
+	BackendTypeD3D11 = 3
+	BackendTypeD3D12 = 4
+	BackendTypeMetal = 5
+	BackendTypeVulkan = 6
+	BackendTypeOpenGL = 7
+	BackendTypeOpenGLES = 8
+)
+
+type RequestDeviceStatus int
+
+const (
+	RequestDeviceStatusSuccess RequestDeviceStatus =  1
+	RequestDeviceStatusCallbackCancelled = 2
+	RequestDeviceStatusError = 3
+)
+
+type QueueWorkDoneStatus int
+
+const (
+	QueueWorkDoneStatusSuccess QueueWorkDoneStatus =  1
+	QueueWorkDoneStatusCallbackCancelled = 2
+	QueueWorkDoneStatusError = 3
 )
 
 type BufferUsage int
@@ -515,174 +696,33 @@ const (
 	BufferUsageTexelBuffer = 1024
 )
 
-type SType int
+type AddressMode int
 
 const (
-	STypeShaderSourceSPIRV SType =  1
-	STypeShaderSourceWGSL = 2
-	STypeRenderPassMaxDrawCount = 3
-	STypeSurfaceSourceMetalLayer = 4
-	STypeSurfaceSourceWindowsHWND = 5
-	STypeSurfaceSourceXlibWindow = 6
-	STypeSurfaceSourceWaylandSurface = 7
-	STypeSurfaceSourceAndroidNativeWindow = 8
-	STypeSurfaceSourceXCBWindow = 9
-	STypeSurfaceColorManagement = 10
-	STypeRequestAdapterWebXROptions = 11
-	STypeTextureComponentSwizzleDescriptor = 12
-	STypeExternalTextureBindingLayout = 13
-	STypeExternalTextureBindingEntry = 14
-	STypeCompatibilityModeLimits = 15
-	STypeTextureBindingViewDimension = 16
-	STypeEmscriptenSurfaceSourceCanvasHTMLSelector = 0
-	STypeSurfaceDescriptorFromWindowsCoreWindow = 0
-	STypeSurfaceDescriptorFromWindowsUWPSwapChainPanel = 3
-	STypeDawnTextureInternalUsageDescriptor = 4
-	STypeDawnEncoderInternalUsageDescriptor = 5
-	STypeDawnInstanceDescriptor = 6
-	STypeDawnCacheDeviceDescriptor = 7
-	STypeDawnAdapterPropertiesPowerPreference = 8
-	STypeDawnBufferDescriptorErrorInfoFromWireClient = 9
-	STypeDawnTogglesDescriptor = 10
-	STypeDawnShaderModuleSPIRVOptionsDescriptor = 11
-	STypeRequestAdapterOptionsLUID = 12
-	STypeRequestAdapterOptionsGetGLProc = 13
-	STypeRequestAdapterOptionsD3D11Device = 14
-	STypeDawnRenderPassSampleCount = 15
-	STypeRenderPassPixelLocalStorage = 16
-	STypePipelineLayoutPixelLocalStorage = 17
-	STypeBufferHostMappedPointer = 18
-	STypeAdapterPropertiesMemoryHeaps = 19
-	STypeAdapterPropertiesD3D = 20
-	STypeAdapterPropertiesVk = 21
-	STypeDawnWireWGSLControl = 22
-	STypeDawnWGSLBlocklist = 23
-	STypeDawnDrmFormatCapabilities = 24
-	STypeShaderModuleCompilationOptions = 25
-	STypeColorTargetStateExpandResolveTextureDawn = 26
-	STypeRenderPassRenderAreaRect = 27
-	STypeSharedTextureMemoryVkDedicatedAllocationDescriptor = 28
-	STypeSharedTextureMemoryAHardwareBufferDescriptor = 29
-	STypeSharedTextureMemoryDmaBufDescriptor = 30
-	STypeSharedTextureMemoryOpaqueFDDescriptor = 31
-	STypeSharedTextureMemoryZirconHandleDescriptor = 32
-	STypeSharedTextureMemoryDXGISharedHandleDescriptor = 33
-	STypeSharedTextureMemoryD3D11Texture2DDescriptor = 34
-	STypeSharedTextureMemoryIOSurfaceDescriptor = 35
-	STypeSharedTextureMemoryEGLImageDescriptor = 36
-	STypeSharedTextureMemoryInitializedBeginState = 37
-	STypeSharedTextureMemoryInitializedEndState = 38
-	STypeSharedTextureMemoryVkImageLayoutBeginState = 39
-	STypeSharedTextureMemoryVkImageLayoutEndState = 40
-	STypeSharedTextureMemoryD3DSwapchainBeginState = 41
-	STypeSharedFenceVkSemaphoreOpaqueFDDescriptor = 42
-	STypeSharedFenceVkSemaphoreOpaqueFDExportInfo = 43
-	STypeSharedFenceSyncFDDescriptor = 44
-	STypeSharedFenceSyncFDExportInfo = 45
-	STypeSharedFenceVkSemaphoreZirconHandleDescriptor = 46
-	STypeSharedFenceVkSemaphoreZirconHandleExportInfo = 47
-	STypeSharedFenceDXGISharedHandleDescriptor = 48
-	STypeSharedFenceDXGISharedHandleExportInfo = 49
-	STypeSharedFenceMTLSharedEventDescriptor = 50
-	STypeSharedFenceMTLSharedEventExportInfo = 51
-	STypeSharedBufferMemoryD3D12ResourceDescriptor = 52
-	STypeStaticSamplerBindingLayout = 53
-	STypeYCbCrVkDescriptor = 54
-	STypeSharedTextureMemoryAHardwareBufferProperties = 55
-	STypeAHardwareBufferProperties = 56
-	STypeDawnTexelCopyBufferRowAlignmentLimits = 58
-	STypeAdapterPropertiesSubgroupMatrixConfigs = 59
-	STypeSharedFenceEGLSyncDescriptor = 60
-	STypeSharedFenceEGLSyncExportInfo = 61
-	STypeDawnInjectedInvalidSType = 62
-	STypeDawnCompilationMessageUtf16 = 63
-	STypeDawnFakeBufferOOMForTesting = 64
-	STypeSurfaceDescriptorFromWindowsWinUISwapChainPanel = 65
-	STypeDawnDeviceAllocatorControl = 66
-	STypeDawnHostMappedPointerLimits = 67
-	STypeRenderPassDescriptorResolveRect = 68
-	STypeRequestAdapterWebGPUBackendOptions = 69
-	STypeDawnFakeDeviceInitializeErrorForTesting = 70
-	STypeSharedTextureMemoryD3D11BeginState = 71
-	STypeDawnConsumeAdapterDescriptor = 72
-	STypeTexelBufferBindingEntry = 73
-	STypeTexelBufferBindingLayout = 74
-	STypeSharedTextureMemoryMetalEndAccessState = 75
-	STypeAdapterPropertiesWGPU = 76
-	STypeSharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor = 77
-	STypeSharedTextureMemoryD3D12ResourceDescriptor = 78
-	STypeRequestAdapterOptionsAngleVirtualizationGroup = 79
-	STypePipelineLayoutResourceTable = 80
-	STypeAdapterPropertiesExplicitComputeSubgroupSizeConfigs = 81
-	STypeAdapterPropertiesDrm = 82
+	AddressModeUndefined AddressMode =  0
+	AddressModeClampToEdge = 1
+	AddressModeRepeat = 2
+	AddressModeMirrorRepeat = 3
 )
 
-type QueueWorkDoneStatus int
+type InstanceFeatureName int
 
 const (
-	QueueWorkDoneStatusSuccess QueueWorkDoneStatus =  1
-	QueueWorkDoneStatusCallbackCancelled = 2
-	QueueWorkDoneStatusError = 3
+	InstanceFeatureNameTimedWaitAny InstanceFeatureName =  1
+	InstanceFeatureNameShaderSourceSPIRV = 2
+	InstanceFeatureNameMultipleDevicesPerAdapter = 3
 )
 
-type CullMode int
+type TextureSampleType int
 
 const (
-	CullModeUndefined CullMode =  0
-	CullModeNone = 1
-	CullModeFront = 2
-	CullModeBack = 3
-)
-
-type MipmapFilterMode int
-
-const (
-	MipmapFilterModeUndefined MipmapFilterMode =  0
-	MipmapFilterModeNearest = 1
-	MipmapFilterModeLinear = 2
-)
-
-type PowerPreference int
-
-const (
-	PowerPreferenceUndefined PowerPreference =  0
-	PowerPreferenceLowPower = 1
-	PowerPreferenceHighPerformance = 2
-)
-
-type SurfaceGetCurrentTextureStatus int
-
-const (
-	SurfaceGetCurrentTextureStatusSuccessOptimal SurfaceGetCurrentTextureStatus =  1
-	SurfaceGetCurrentTextureStatusSuccessSuboptimal = 2
-	SurfaceGetCurrentTextureStatusTimeout = 3
-	SurfaceGetCurrentTextureStatusOutdated = 4
-	SurfaceGetCurrentTextureStatusLost = 5
-	SurfaceGetCurrentTextureStatusError = 6
-)
-
-type WaitStatus int
-
-const (
-	WaitStatusSuccess WaitStatus =  1
-	WaitStatusTimedOut = 2
-	WaitStatusError = 3
-)
-
-type ToneMappingMode int
-
-const (
-	ToneMappingModeStandard ToneMappingMode =  1
-	ToneMappingModeExtended = 2
-)
-
-type RequestAdapterStatus int
-
-const (
-	RequestAdapterStatusSuccess RequestAdapterStatus =  1
-	RequestAdapterStatusCallbackCancelled = 2
-	RequestAdapterStatusUnavailable = 3
-	RequestAdapterStatusError = 4
+	TextureSampleTypeBindingNotUsed TextureSampleType =  0
+	TextureSampleTypeUndefined = 1
+	TextureSampleTypeFloat = 2
+	TextureSampleTypeUnfilterableFloat = 3
+	TextureSampleTypeDepth = 4
+	TextureSampleTypeSint = 5
+	TextureSampleTypeUint = 6
 )
 
 type VertexFormat int
@@ -731,166 +771,19 @@ const (
 	VertexFormatUnorm8x4BGRA = 41
 )
 
-type FrontFace int
+type WaitStatus int
 
 const (
-	FrontFaceUndefined FrontFace =  0
-	FrontFaceCCW = 1
-	FrontFaceCW = 2
+	WaitStatusSuccess WaitStatus =  1
+	WaitStatusTimedOut = 2
+	WaitStatusError = 3
 )
 
-type LoadOp int
+type Status int
 
 const (
-	LoadOpUndefined LoadOp =  0
-	LoadOpLoad = 1
-	LoadOpClear = 2
-	LoadOpExpandResolveTexture = 3
-)
-
-type BackendType int
-
-const (
-	BackendTypeUndefined BackendType =  0
-	BackendTypeNull = 1
-	BackendTypeWebGPU = 2
-	BackendTypeD3D11 = 3
-	BackendTypeD3D12 = 4
-	BackendTypeMetal = 5
-	BackendTypeVulkan = 6
-	BackendTypeOpenGL = 7
-	BackendTypeOpenGLES = 8
-)
-
-type FeatureName int
-
-const (
-	FeatureNameCoreFeaturesAndLimits FeatureName =  1
-	FeatureNameDepthClipControl = 2
-	FeatureNameDepth32FloatStencil8 = 3
-	FeatureNameTextureCompressionBC = 4
-	FeatureNameTextureCompressionBCSliced3D = 5
-	FeatureNameTextureCompressionETC2 = 6
-	FeatureNameTextureCompressionASTC = 7
-	FeatureNameTextureCompressionASTCSliced3D = 8
-	FeatureNameTimestampQuery = 9
-	FeatureNameIndirectFirstInstance = 10
-	FeatureNameShaderF16 = 11
-	FeatureNameRG11B10UfloatRenderable = 12
-	FeatureNameBGRA8UnormStorage = 13
-	FeatureNameFloat32Filterable = 14
-	FeatureNameFloat32Blendable = 15
-	FeatureNameClipDistances = 16
-	FeatureNameDualSourceBlending = 17
-	FeatureNameSubgroups = 18
-	FeatureNameTextureFormatsTier1 = 19
-	FeatureNameTextureFormatsTier2 = 20
-	FeatureNamePrimitiveIndex = 21
-	FeatureNameTextureComponentSwizzle = 22
-	FeatureNameDawnInternalUsages = 0
-	FeatureNameDawnMultiPlanarFormats = 1
-	FeatureNameDawnNative = 2
-	FeatureNameChromiumExperimentalTimestampQueryInsidePasses = 3
-	FeatureNameImplicitDeviceSynchronization = 4
-	FeatureNameTransientAttachments = 6
-	FeatureNameMSAARenderToSingleSampled = 7
-	FeatureNameD3D11MultithreadProtected = 8
-	FeatureNameANGLETextureSharing = 9
-	FeatureNamePixelLocalStorageCoherent = 10
-	FeatureNamePixelLocalStorageNonCoherent = 11
-	FeatureNameUnorm16TextureFormats = 12
-	FeatureNameMultiPlanarFormatExtendedUsages = 13
-	FeatureNameMultiPlanarFormatP010 = 14
-	FeatureNameHostMappedPointer = 15
-	FeatureNameMultiPlanarRenderTargets = 16
-	FeatureNameMultiPlanarFormatNv12a = 17
-	FeatureNameFramebufferFetch = 18
-	FeatureNameBufferMapExtendedUsages = 19
-	FeatureNameAdapterPropertiesMemoryHeaps = 20
-	FeatureNameAdapterPropertiesD3D = 21
-	FeatureNameAdapterPropertiesVk = 22
-	FeatureNameDawnFormatCapabilities = 23
-	FeatureNameDawnDrmFormatCapabilities = 24
-	FeatureNameMultiPlanarFormatNv16 = 25
-	FeatureNameMultiPlanarFormatNv24 = 26
-	FeatureNameMultiPlanarFormatP210 = 27
-	FeatureNameMultiPlanarFormatP410 = 28
-	FeatureNameSharedTextureMemoryVkDedicatedAllocation = 29
-	FeatureNameSharedTextureMemoryAHardwareBuffer = 30
-	FeatureNameSharedTextureMemoryDmaBuf = 31
-	FeatureNameSharedTextureMemoryOpaqueFD = 32
-	FeatureNameSharedTextureMemoryZirconHandle = 33
-	FeatureNameSharedTextureMemoryDXGISharedHandle = 34
-	FeatureNameSharedTextureMemoryD3D11Texture2D = 35
-	FeatureNameSharedTextureMemoryIOSurface = 36
-	FeatureNameSharedTextureMemoryEGLImage = 37
-	FeatureNameSharedFenceVkSemaphoreOpaqueFD = 38
-	FeatureNameSharedFenceSyncFD = 39
-	FeatureNameSharedFenceVkSemaphoreZirconHandle = 40
-	FeatureNameSharedFenceDXGISharedHandle = 41
-	FeatureNameSharedFenceMTLSharedEvent = 42
-	FeatureNameSharedBufferMemoryD3D12Resource = 43
-	FeatureNameStaticSamplers = 44
-	FeatureNameYCbCrVulkanSamplers = 45
-	FeatureNameShaderModuleCompilationOptions = 46
-	FeatureNameDawnLoadResolveTexture = 47
-	FeatureNameDawnPartialLoadResolveTexture = 48
-	FeatureNameMultiDrawIndirect = 49
-	FeatureNameDawnTexelCopyBufferRowAlignment = 50
-	FeatureNameFlexibleTextureViews = 51
-	FeatureNameChromiumExperimentalSubgroupMatrix = 52
-	FeatureNameSharedFenceEGLSync = 53
-	FeatureNameDawnDeviceAllocatorControl = 54
-	FeatureNameAdapterPropertiesWGPU = 55
-	FeatureNameSharedBufferMemoryD3D12SharedMemoryFileMappingHandle = 56
-	FeatureNameSharedTextureMemoryD3D12Resource = 57
-	FeatureNameChromiumExperimentalSamplingResourceTable = 58
-	FeatureNameChromiumExperimentalSubgroupSizeControl = 59
-	FeatureNameAtomicVec2uMinMax = 60
-	FeatureNameUnorm16FormatsForExternalTexture = 61
-	FeatureNameOpaqueYCbCrAndroidForExternalTexture = 62
-	FeatureNameUnorm16Filterable = 63
-	FeatureNameRenderPassRenderArea = 64
-	FeatureNameDawnNativeSpontaneousQueueEvents = 65
-	FeatureNameAdapterPropertiesDrm = 66
-)
-
-type TextureSampleType int
-
-const (
-	TextureSampleTypeBindingNotUsed TextureSampleType =  0
-	TextureSampleTypeUndefined = 1
-	TextureSampleTypeFloat = 2
-	TextureSampleTypeUnfilterableFloat = 3
-	TextureSampleTypeDepth = 4
-	TextureSampleTypeSint = 5
-	TextureSampleTypeUint = 6
-)
-
-type InstanceFeatureName int
-
-const (
-	InstanceFeatureNameTimedWaitAny InstanceFeatureName =  1
-	InstanceFeatureNameShaderSourceSPIRV = 2
-	InstanceFeatureNameMultipleDevicesPerAdapter = 3
-)
-
-type FeatureLevel int
-
-const (
-	FeatureLevelUndefined FeatureLevel =  0
-	FeatureLevelCompatibility = 1
-	FeatureLevelCore = 2
-)
-
-type PresentMode int
-
-const (
-	PresentModeUndefined PresentMode =  0
-	PresentModeFifo = 1
-	PresentModeFifoRelaxed = 2
-	PresentModeImmediate = 3
-	PresentModeMailbox = 4
+	StatusSuccess Status =  1
+	StatusError = 2
 )
 
 type PrimitiveTopology int
@@ -904,11 +797,118 @@ const (
 	PrimitiveTopologyTriangleStrip = 5
 )
 
+type PresentMode int
+
+const (
+	PresentModeUndefined PresentMode =  0
+	PresentModeFifo = 1
+	PresentModeFifoRelaxed = 2
+	PresentModeImmediate = 3
+	PresentModeMailbox = 4
+)
+
+type CompilationMessageType int
+
+const (
+	CompilationMessageTypeError CompilationMessageType =  1
+	CompilationMessageTypeWarning = 2
+	CompilationMessageTypeInfo = 3
+)
+
+type TextureUsage int
+
+const (
+	TextureUsageNone TextureUsage =  0
+	TextureUsageCopySrc = 1
+	TextureUsageCopyDst = 2
+	TextureUsageTextureBinding = 4
+	TextureUsageStorageBinding = 8
+	TextureUsageRenderAttachment = 16
+	TextureUsageTransientAttachment = 32
+	TextureUsageStorageAttachment = 64
+)
+
+type TextureAspect int
+
+const (
+	TextureAspectUndefined TextureAspect =  0
+	TextureAspectAll = 1
+	TextureAspectStencilOnly = 2
+	TextureAspectDepthOnly = 3
+	TextureAspectPlane0Only = 0
+	TextureAspectPlane1Only = 1
+	TextureAspectPlane2Only = 2
+)
+
+type WGSLLanguageFeatureName int
+
+const (
+	WGSLLanguageFeatureNameReadonlyAndReadwriteStorageTextures WGSLLanguageFeatureName =  1
+	WGSLLanguageFeatureNamePacked4x8IntegerDotProduct = 2
+	WGSLLanguageFeatureNameUnrestrictedPointerParameters = 3
+	WGSLLanguageFeatureNamePointerCompositeAccess = 4
+	WGSLLanguageFeatureNameUniformBufferStandardLayout = 5
+	WGSLLanguageFeatureNameSubgroupId = 6
+	WGSLLanguageFeatureNameTextureAndSamplerLet = 7
+	WGSLLanguageFeatureNameSubgroupUniformity = 8
+	WGSLLanguageFeatureNameTextureFormatsTier1 = 9
+	WGSLLanguageFeatureNameChromiumTestingUnimplemented = 0
+	WGSLLanguageFeatureNameChromiumTestingUnsafeExperimental = 1
+	WGSLLanguageFeatureNameChromiumTestingExperimental = 2
+	WGSLLanguageFeatureNameChromiumTestingShippedWithKillswitch = 3
+	WGSLLanguageFeatureNameChromiumTestingShipped = 4
+	WGSLLanguageFeatureNameSizedBindingArray = 5
+	WGSLLanguageFeatureNameTexelBuffers = 6
+	WGSLLanguageFeatureNameChromiumPrint = 7
+	WGSLLanguageFeatureNameFragmentDepth = 8
+	WGSLLanguageFeatureNameImmediateAddressSpace = 9
+	WGSLLanguageFeatureNameBufferView = 11
+	WGSLLanguageFeatureNameFilteringParameters = 12
+	WGSLLanguageFeatureNameSwizzleAssignment = 13
+	WGSLLanguageFeatureNameLinearIndexing = 14
+)
+
+type ShaderStage int
+
+const (
+	ShaderStageNone ShaderStage =  0
+	ShaderStageVertex = 1
+	ShaderStageFragment = 2
+	ShaderStageCompute = 4
+)
+
+type StorageTextureAccess int
+
+const (
+	StorageTextureAccessBindingNotUsed StorageTextureAccess =  0
+	StorageTextureAccessUndefined = 1
+	StorageTextureAccessWriteOnly = 2
+	StorageTextureAccessReadOnly = 3
+	StorageTextureAccessReadWrite = 4
+)
+
 type MapMode int
 
 const (
 	MapModeNone MapMode =  0
 	MapModeRead = 1
 	MapModeWrite = 2
+)
+
+type StoreOp int
+
+const (
+	StoreOpUndefined StoreOp =  0
+	StoreOpStore = 1
+	StoreOpDiscard = 2
+)
+
+type PredefinedColorSpace int
+
+const (
+	PredefinedColorSpaceSRGB PredefinedColorSpace =  1
+	PredefinedColorSpaceDisplayP3 = 2
+	PredefinedColorSpaceSRGBLinear = 3
+	PredefinedColorSpaceDisplayP3Linear = 4
 )
 

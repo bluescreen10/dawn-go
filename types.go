@@ -2,10 +2,112 @@
 //go:generate go run ./cmd/wrapper/. 
 package wgpu
 
-type InstanceDescriptor struct{
-	RequiredFeatureCount int
-	RequiredFeatures InstanceFeatureName
-	RequiredLimits InstanceLimits
+type TexelCopyBufferInfo struct{
+	Layout TexelCopyBufferLayout
+	Buffer *Buffer
+}
+
+type BindGroupDescriptor struct{
+	Label string
+	Layout *BindGroupLayout
+	EntryCount int
+	Entries BindGroupEntry
+}
+
+type RequestAdapterOptions struct{
+	FeatureLevel FeatureLevel
+	PowerPreference PowerPreference
+	ForceFallbackAdapter bool
+	BackendType BackendType
+	CompatibleSurface *Surface
+}
+
+type ShaderModuleDescriptor struct{
+	Label string
+}
+
+type CommandBufferDescriptor struct{
+	Label string
+}
+
+type TexelCopyTextureInfo struct{
+	Texture *Texture
+	MipLevel uint32
+	Origin Origin3D
+	Aspect TextureAspect
+}
+
+type SupportedWGSLLanguageFeatures struct{
+	FeatureCount int
+	Features WGSLLanguageFeatureName
+}
+
+type AdapterInfo struct{
+	Vendor string
+	Architecture string
+	Device string
+	Description string
+	BackendType BackendType
+	AdapterType AdapterType
+	VendorID uint32
+	DeviceID uint32
+	SubgroupMinSize uint32
+	SubgroupMaxSize uint32
+}
+
+type SamplerBindingLayout struct{
+	Type SamplerBindingType
+}
+
+type FragmentState struct{
+	Module *ShaderModule
+	EntryPoint string
+	ConstantCount int
+	Constants ConstantEntry
+	TargetCount int
+	Targets ColorTargetState
+}
+
+type TextureDescriptor struct{
+	Label string
+	Usage TextureUsage
+	Dimension TextureDimension
+	Size Extent3D
+	Format TextureFormat
+	MipLevelCount uint32
+	SampleCount uint32
+	ViewFormatCount int
+	ViewFormats TextureFormat
+}
+
+type RenderPassMaxDrawCount struct{
+	MaxDrawCount uint64
+}
+
+type ConstantEntry struct{
+	Key string
+	Value float64
+}
+
+type BufferBindingLayout struct{
+	Type BufferBindingType
+	HasDynamicOffset bool
+	MinBindingSize uint64
+}
+
+type CompatibilityModeLimits struct{
+	MaxStorageBuffersInVertexStage uint32
+	MaxStorageTexturesInVertexStage uint32
+	MaxStorageBuffersInFragmentStage uint32
+	MaxStorageTexturesInFragmentStage uint32
+}
+
+type RenderBundleDescriptor struct{
+	Label string
+}
+
+type RequestAdapterWebXROptions struct{
+	XrCompatible bool
 }
 
 type StencilFaceState struct{
@@ -15,9 +117,285 @@ type StencilFaceState struct{
 	PassOp StencilOperation
 }
 
-type TexelCopyBufferInfo struct{
-	Layout TexelCopyBufferLayout
+type TextureComponentSwizzleDescriptor struct{
+	Swizzle TextureComponentSwizzle
+}
+
+type SurfaceConfiguration struct{
+	Device *Device
+	Format TextureFormat
+	Usage TextureUsage
+	Width uint32
+	Height uint32
+	ViewFormatCount int
+	ViewFormats TextureFormat
+	AlphaMode CompositeAlphaMode
+	PresentMode PresentMode
+}
+
+type RenderPassDepthStencilAttachment struct{
+	View *TextureView
+	DepthLoadOp LoadOp
+	DepthStoreOp StoreOp
+	DepthClearValue float32
+	DepthReadOnly bool
+	StencilLoadOp LoadOp
+	StencilStoreOp StoreOp
+	StencilClearValue uint32
+	StencilReadOnly bool
+}
+
+type BlendComponent struct{
+	Operation BlendOperation
+	SrcFactor BlendFactor
+	DstFactor BlendFactor
+}
+
+type VertexAttribute struct{
+	Format VertexFormat
+	Offset uint64
+	ShaderLocation uint32
+}
+
+type BlendState struct{
+	Color BlendComponent
+	Alpha BlendComponent
+}
+
+type TextureBindingViewDimension struct{
+	TextureBindingViewDimension TextureViewDimension
+}
+
+type ExternalTextureBindingEntry struct{
+	ExternalTexture *ExternalTexture
+}
+
+type SurfaceColorManagement struct{
+	ColorSpace PredefinedColorSpace
+	ToneMappingMode ToneMappingMode
+}
+
+type CommandEncoderDescriptor struct{
+	Label string
+}
+
+type RenderPassDescriptor struct{
+	Label string
+	ColorAttachmentCount int
+	ColorAttachments RenderPassColorAttachment
+	DepthStencilAttachment RenderPassDepthStencilAttachment
+	OcclusionQuerySet *QuerySet
+	TimestampWrites PassTimestampWrites
+}
+
+type CompilationInfo struct{
+	MessageCount int
+	Messages CompilationMessage
+}
+
+type CreateRenderPipelineAsyncCallbackInfo struct{
+	Mode CallbackMode
+	Callback CreateRenderPipelineAsyncCallback
+}
+
+type BindGroupEntry struct{
+	Binding uint32
 	Buffer *Buffer
+	Offset uint64
+	Size uint64
+	Sampler *Sampler
+	TextureView *TextureView
+}
+
+type InstanceDescriptor struct{
+	RequiredFeatureCount int
+	RequiredFeatures InstanceFeatureName
+	RequiredLimits InstanceLimits
+}
+
+type SupportedFeatures struct{
+	FeatureCount int
+	Features FeatureName
+}
+
+type RequestDeviceCallbackInfo struct{
+	Mode CallbackMode
+	Callback RequestDeviceCallback
+}
+
+type VertexBufferLayout struct{
+	StepMode VertexStepMode
+	ArrayStride uint64
+	AttributeCount int
+	Attributes VertexAttribute
+}
+
+type DepthStencilState struct{
+	Format TextureFormat
+	DepthWriteEnabled OptionalBool
+	DepthCompare CompareFunction
+	StencilFront StencilFaceState
+	StencilBack StencilFaceState
+	StencilReadMask uint32
+	StencilWriteMask uint32
+	DepthBias int32
+	DepthBiasSlopeScale float32
+	DepthBiasClamp float32
+}
+
+type Extent3D struct{
+	Width uint32
+	Height uint32
+	DepthOrArrayLayers uint32
+}
+
+type ComputePassDescriptor struct{
+	Label string
+	TimestampWrites PassTimestampWrites
+}
+
+type DeviceDescriptor struct{
+	Label string
+	RequiredFeatureCount int
+	RequiredFeatures FeatureName
+	RequiredLimits Limits
+	DefaultQueue QueueDescriptor
+	DeviceLostCallbackInfo DeviceLostCallbackInfo
+	UncapturedErrorCallbackInfo UncapturedErrorCallbackInfo
+}
+
+type BufferMapCallbackInfo struct{
+	Mode CallbackMode
+	Callback BufferMapCallback
+}
+
+type Future struct{
+	Id uint64
+}
+
+type QueueWorkDoneCallbackInfo struct{
+	Mode CallbackMode
+	Callback QueueWorkDoneCallback
+}
+
+type SurfaceDescriptor struct{
+	Label string
+}
+
+type BufferDescriptor struct{
+	Label string
+	Usage BufferUsage
+	Size uint64
+	MappedAtCreation bool
+}
+
+type SupportedInstanceFeatures struct{
+	FeatureCount int
+	Features InstanceFeatureName
+}
+
+type FutureWaitInfo struct{
+	Future Future
+	Completed bool
+}
+
+type TextureBindingLayout struct{
+	SampleType TextureSampleType
+	ViewDimension TextureViewDimension
+	Multisampled bool
+}
+
+type ShaderSourceSPIRV struct{
+	CodeSize uint32
+	Code uint32
+}
+
+type QuerySetDescriptor struct{
+	Label string
+	Type QueryType
+	Count uint32
+}
+
+type CompilationInfoCallbackInfo struct{
+	Mode CallbackMode
+	Callback CompilationInfoCallback
+}
+
+type Color struct{
+	R float64
+	G float64
+	B float64
+	A float64
+}
+
+type TexelCopyBufferLayout struct{
+	Offset uint64
+	BytesPerRow uint32
+	RowsPerImage uint32
+}
+
+type ShaderSourceWGSL struct{
+	Code string
+}
+
+type MultisampleState struct{
+	Count uint32
+	Mask uint32
+	AlphaToCoverageEnabled bool
+}
+
+type SurfaceCapabilities struct{
+	Usages TextureUsage
+	FormatCount int
+	Formats TextureFormat
+	PresentModeCount int
+	PresentModes PresentMode
+	AlphaModeCount int
+	AlphaModes CompositeAlphaMode
+}
+
+type StorageTextureBindingLayout struct{
+	Access StorageTextureAccess
+	Format TextureFormat
+	ViewDimension TextureViewDimension
+}
+
+type PassTimestampWrites struct{
+	QuerySet *QuerySet
+	BeginningOfPassWriteIndex uint32
+	EndOfPassWriteIndex uint32
+}
+
+type ComputeState struct{
+	Module *ShaderModule
+	EntryPoint string
+	ConstantCount int
+	Constants ConstantEntry
+}
+
+type InstanceLimits struct{
+	TimedWaitAnyMaxCount int
+}
+
+type RenderBundleEncoderDescriptor struct{
+	Label string
+	ColorFormatCount int
+	ColorFormats TextureFormat
+	DepthStencilFormat TextureFormat
+	SampleCount uint32
+	DepthReadOnly bool
+	StencilReadOnly bool
+}
+
+type TextureComponentSwizzle struct{
+	R ComponentSwizzle
+	G ComponentSwizzle
+	B ComponentSwizzle
+	A ComponentSwizzle
+}
+
+type UncapturedErrorCallbackInfo struct{
+	Callback UncapturedErrorCallback
 }
 
 type RenderPassColorAttachment struct{
@@ -29,25 +407,40 @@ type RenderPassColorAttachment struct{
 	ClearValue Color
 }
 
-type InstanceLimits struct{
-	TimedWaitAnyMaxCount int
+type Origin3D struct{
+	X uint32
+	Y uint32
+	Z uint32
 }
 
-type SurfaceColorManagement struct{
-	ColorSpace PredefinedColorSpace
-	ToneMappingMode ToneMappingMode
+type PopErrorScopeCallbackInfo struct{
+	Mode CallbackMode
+	Callback PopErrorScopeCallback
 }
 
-type TextureViewDescriptor struct{
+type BindGroupLayoutDescriptor struct{
 	Label string
-	Format TextureFormat
-	Dimension TextureViewDimension
-	BaseMipLevel uint32
-	MipLevelCount uint32
-	BaseArrayLayer uint32
-	ArrayLayerCount uint32
-	Aspect TextureAspect
-	Usage TextureUsage
+	EntryCount int
+	Entries BindGroupLayoutEntry
+}
+
+type BindGroupLayoutEntry struct{
+	Binding uint32
+	Visibility ShaderStage
+	BindingArraySize uint32
+	Buffer BufferBindingLayout
+	Sampler SamplerBindingLayout
+	Texture TextureBindingLayout
+	StorageTexture StorageTextureBindingLayout
+}
+
+type SurfaceTexture struct{
+	Texture *Texture
+	Status SurfaceGetCurrentTextureStatus
+}
+
+type QueueDescriptor struct{
+	Label string
 }
 
 type Limits struct{
@@ -85,154 +478,6 @@ type Limits struct{
 	MaxImmediateSize uint32
 }
 
-type CompilationMessage struct{
-	Message string
-	Type CompilationMessageType
-	LineNum uint64
-	LinePos uint64
-	Offset uint64
-	Length uint64
-}
-
-type SurfaceDescriptor struct{
-	Label string
-}
-
-type CompilationInfoCallbackInfo struct{
-	Mode CallbackMode
-	Callback CompilationInfoCallback
-}
-
-type TextureBindingViewDimension struct{
-	TextureBindingViewDimension TextureViewDimension
-}
-
-type ShaderModuleDescriptor struct{
-	Label string
-}
-
-type RenderBundleEncoderDescriptor struct{
-	Label string
-	ColorFormatCount int
-	ColorFormats TextureFormat
-	DepthStencilFormat TextureFormat
-	SampleCount uint32
-	DepthReadOnly bool
-	StencilReadOnly bool
-}
-
-type DeviceLostCallbackInfo struct{
-	Mode CallbackMode
-	Callback DeviceLostCallback
-}
-
-type RequestAdapterOptions struct{
-	FeatureLevel FeatureLevel
-	PowerPreference PowerPreference
-	ForceFallbackAdapter bool
-	BackendType BackendType
-	CompatibleSurface *Surface
-}
-
-type VertexAttribute struct{
-	Format VertexFormat
-	Offset uint64
-	ShaderLocation uint32
-}
-
-type ShaderSourceWGSL struct{
-	Code string
-}
-
-type CompilationInfo struct{
-	MessageCount int
-	Messages CompilationMessage
-}
-
-type DeviceDescriptor struct{
-	Label string
-	RequiredFeatureCount int
-	RequiredFeatures FeatureName
-	RequiredLimits Limits
-	DefaultQueue QueueDescriptor
-	DeviceLostCallbackInfo DeviceLostCallbackInfo
-	UncapturedErrorCallbackInfo UncapturedErrorCallbackInfo
-}
-
-type SupportedInstanceFeatures struct{
-	FeatureCount int
-	Features InstanceFeatureName
-}
-
-type RenderPassDescriptor struct{
-	Label string
-	ColorAttachmentCount int
-	ColorAttachments RenderPassColorAttachment
-	DepthStencilAttachment RenderPassDepthStencilAttachment
-	OcclusionQuerySet *QuerySet
-	TimestampWrites PassTimestampWrites
-}
-
-type ComputeState struct{
-	Module *ShaderModule
-	EntryPoint string
-	ConstantCount int
-	Constants ConstantEntry
-}
-
-type TextureDescriptor struct{
-	Label string
-	Usage TextureUsage
-	Dimension TextureDimension
-	Size Extent3D
-	Format TextureFormat
-	MipLevelCount uint32
-	SampleCount uint32
-	ViewFormatCount int
-	ViewFormats TextureFormat
-}
-
-type CommandBufferDescriptor struct{
-	Label string
-}
-
-type TexelCopyBufferLayout struct{
-	Offset uint64
-	BytesPerRow uint32
-	RowsPerImage uint32
-}
-
-type PassTimestampWrites struct{
-	QuerySet *QuerySet
-	BeginningOfPassWriteIndex uint32
-	EndOfPassWriteIndex uint32
-}
-
-type UncapturedErrorCallbackInfo struct{
-	Callback UncapturedErrorCallback
-}
-
-type ShaderSourceSPIRV struct{
-	CodeSize uint32
-	Code uint32
-}
-
-type ConstantEntry struct{
-	Key string
-	Value float64
-}
-
-type Color struct{
-	R float64
-	G float64
-	B float64
-	A float64
-}
-
-type Future struct{
-	Id uint64
-}
-
 type PipelineLayoutDescriptor struct{
 	Label string
 	BindGroupLayoutCount int
@@ -240,34 +485,10 @@ type PipelineLayoutDescriptor struct{
 	ImmediateSize uint32
 }
 
-type SurfaceTexture struct{
-	Texture *Texture
-	Status SurfaceGetCurrentTextureStatus
-}
-
-type PopErrorScopeCallbackInfo struct{
-	Mode CallbackMode
-	Callback PopErrorScopeCallback
-}
-
-type RequestAdapterCallbackInfo struct{
-	Mode CallbackMode
-	Callback RequestAdapterCallback
-}
-
-type ExternalTextureBindingEntry struct{
-	ExternalTexture *ExternalTexture
-}
-
-type ComputePassDescriptor struct{
+type ComputePipelineDescriptor struct{
 	Label string
-	TimestampWrites PassTimestampWrites
-}
-
-type StorageTextureBindingLayout struct{
-	Access StorageTextureAccess
-	Format TextureFormat
-	ViewDimension TextureViewDimension
+	Layout *PipelineLayout
+	Compute ComputeState
 }
 
 type RenderPipelineDescriptor struct{
@@ -280,74 +501,12 @@ type RenderPipelineDescriptor struct{
 	Fragment FragmentState
 }
 
-type Origin3D struct{
-	X uint32
-	Y uint32
-	Z uint32
-}
-
-type Extent3D struct{
-	Width uint32
-	Height uint32
-	DepthOrArrayLayers uint32
-}
-
-type BindGroupEntry struct{
-	Binding uint32
-	Buffer *Buffer
-	Offset uint64
-	Size uint64
-	Sampler *Sampler
-	TextureView *TextureView
-}
-
-type TexelCopyTextureInfo struct{
-	Texture *Texture
-	MipLevel uint32
-	Origin Origin3D
-	Aspect TextureAspect
-}
-
-type FragmentState struct{
-	Module *ShaderModule
-	EntryPoint string
-	ConstantCount int
-	Constants ConstantEntry
-	TargetCount int
-	Targets ColorTargetState
-}
-
-type TextureComponentSwizzleDescriptor struct{
-	Swizzle TextureComponentSwizzle
-}
-
-type BlendComponent struct{
-	Operation BlendOperation
-	SrcFactor BlendFactor
-	DstFactor BlendFactor
-}
-
-type BindGroupLayoutDescriptor struct{
-	Label string
-	EntryCount int
-	Entries BindGroupLayoutEntry
-}
-
 type PrimitiveState struct{
 	Topology PrimitiveTopology
 	StripIndexFormat IndexFormat
 	FrontFace FrontFace
 	CullMode CullMode
 	UnclippedDepth bool
-}
-
-type RequestAdapterWebXROptions struct{
-	XrCompatible bool
-}
-
-type SupportedFeatures struct{
-	FeatureCount int
-	Features FeatureName
 }
 
 type VertexState struct{
@@ -359,69 +518,18 @@ type VertexState struct{
 	Buffers VertexBufferLayout
 }
 
-type AdapterInfo struct{
-	Vendor string
-	Architecture string
-	Device string
-	Description string
-	BackendType BackendType
-	AdapterType AdapterType
-	VendorID uint32
-	DeviceID uint32
-	SubgroupMinSize uint32
-	SubgroupMaxSize uint32
-}
-
-type BufferMapCallbackInfo struct{
+type CreateComputePipelineAsyncCallbackInfo struct{
 	Mode CallbackMode
-	Callback BufferMapCallback
+	Callback CreateComputePipelineAsyncCallback
 }
 
-type SamplerBindingLayout struct{
-	Type SamplerBindingType
-}
-
-type BindGroupDescriptor struct{
-	Label string
-	Layout *BindGroupLayout
-	EntryCount int
-	Entries BindGroupEntry
-}
-
-type BindGroupLayoutEntry struct{
-	Binding uint32
-	Visibility ShaderStage
-	BindingArraySize uint32
-	Buffer BufferBindingLayout
-	Sampler SamplerBindingLayout
-	Texture TextureBindingLayout
-	StorageTexture StorageTextureBindingLayout
-}
-
-type QueueDescriptor struct{
-	Label string
-}
-
-type BlendState struct{
-	Color BlendComponent
-	Alpha BlendComponent
-}
-
-type RenderPassDepthStencilAttachment struct{
-	View *TextureView
-	DepthLoadOp LoadOp
-	DepthStoreOp StoreOp
-	DepthClearValue float32
-	DepthReadOnly bool
-	StencilLoadOp LoadOp
-	StencilStoreOp StoreOp
-	StencilClearValue uint32
-	StencilReadOnly bool
-}
-
-type RequestDeviceCallbackInfo struct{
-	Mode CallbackMode
-	Callback RequestDeviceCallback
+type CompilationMessage struct{
+	Message string
+	Type CompilationMessageType
+	LineNum uint64
+	LinePos uint64
+	Offset uint64
+	Length uint64
 }
 
 type SamplerDescriptor struct{
@@ -438,56 +546,24 @@ type SamplerDescriptor struct{
 	MaxAnisotropy uint16
 }
 
-type QuerySetDescriptor struct{
+type TextureViewDescriptor struct{
 	Label string
-	Type QueryType
-	Count uint32
-}
-
-type TextureBindingLayout struct{
-	SampleType TextureSampleType
-	ViewDimension TextureViewDimension
-	Multisampled bool
-}
-
-type TextureComponentSwizzle struct{
-	R ComponentSwizzle
-	G ComponentSwizzle
-	B ComponentSwizzle
-	A ComponentSwizzle
-}
-
-type RenderBundleDescriptor struct{
-	Label string
-}
-
-type SurfaceConfiguration struct{
-	Device *Device
 	Format TextureFormat
+	Dimension TextureViewDimension
+	BaseMipLevel uint32
+	MipLevelCount uint32
+	BaseArrayLayer uint32
+	ArrayLayerCount uint32
+	Aspect TextureAspect
 	Usage TextureUsage
-	Width uint32
-	Height uint32
-	ViewFormatCount int
-	ViewFormats TextureFormat
-	AlphaMode CompositeAlphaMode
-	PresentMode PresentMode
 }
 
-type BufferDescriptor struct{
-	Label string
-	Usage BufferUsage
-	Size uint64
-	MappedAtCreation bool
-}
-
-type QueueWorkDoneCallbackInfo struct{
+type RequestAdapterCallbackInfo struct{
 	Mode CallbackMode
-	Callback QueueWorkDoneCallback
+	Callback RequestAdapterCallback
 }
 
-type CreateComputePipelineAsyncCallbackInfo struct{
-	Mode CallbackMode
-	Callback CreateComputePipelineAsyncCallback
+type ExternalTextureBindingLayout struct{
 }
 
 type ColorTargetState struct{
@@ -496,94 +572,18 @@ type ColorTargetState struct{
 	WriteMask ColorWriteMask
 }
 
-type RenderPassMaxDrawCount struct{
-	MaxDrawCount uint64
-}
-
-type SurfaceCapabilities struct{
-	Usages TextureUsage
-	FormatCount int
-	Formats TextureFormat
-	PresentModeCount int
-	PresentModes PresentMode
-	AlphaModeCount int
-	AlphaModes CompositeAlphaMode
-}
-
-type CreateRenderPipelineAsyncCallbackInfo struct{
+type DeviceLostCallbackInfo struct{
 	Mode CallbackMode
-	Callback CreateRenderPipelineAsyncCallback
+	Callback DeviceLostCallback
 }
 
-type CommandEncoderDescriptor struct{
-	Label string
-}
-
-type CompatibilityModeLimits struct{
-	MaxStorageBuffersInVertexStage uint32
-	MaxStorageTexturesInVertexStage uint32
-	MaxStorageBuffersInFragmentStage uint32
-	MaxStorageTexturesInFragmentStage uint32
-}
-
-type VertexBufferLayout struct{
-	StepMode VertexStepMode
-	ArrayStride uint64
-	AttributeCount int
-	Attributes VertexAttribute
-}
-
-type SupportedWGSLLanguageFeatures struct{
-	FeatureCount int
-	Features WGSLLanguageFeatureName
-}
-
-type DepthStencilState struct{
-	Format TextureFormat
-	DepthWriteEnabled OptionalBool
-	DepthCompare CompareFunction
-	StencilFront StencilFaceState
-	StencilBack StencilFaceState
-	StencilReadMask uint32
-	StencilWriteMask uint32
-	DepthBias int32
-	DepthBiasSlopeScale float32
-	DepthBiasClamp float32
-}
-
-type FutureWaitInfo struct{
-	Future Future
-	Completed bool
-}
-
-type ExternalTextureBindingLayout struct{
-}
-
-type MultisampleState struct{
-	Count uint32
-	Mask uint32
-	AlphaToCoverageEnabled bool
-}
-
-type ComputePipelineDescriptor struct{
-	Label string
-	Layout *PipelineLayout
-	Compute ComputeState
-}
-
-type BufferBindingLayout struct{
-	Type BufferBindingType
-	HasDynamicOffset bool
-	MinBindingSize uint64
-}
-
-type PopErrorScopeCallback func (status PopErrorScopeStatus, typ ErrorType, message string)
 type RequestAdapterCallback func (status RequestAdapterStatus, adapter *Adapter, message string)
-type UncapturedErrorCallback func (device *Device, typ ErrorType, message string)
-type QueueWorkDoneCallback func (status QueueWorkDoneStatus, message string)
-type BufferMapCallback func (status MapAsyncStatus, message string)
-type CreateComputePipelineAsyncCallback func (status CreatePipelineAsyncStatus, pipeline *ComputePipeline, message string)
-type CreateRenderPipelineAsyncCallback func (status CreatePipelineAsyncStatus, pipeline *RenderPipeline, message string)
-type RequestDeviceCallback func (status RequestDeviceStatus, device *Device, message string)
 type CompilationInfoCallback func (status CompilationInfoRequestStatus, compilationInfo CompilationInfo)
+type UncapturedErrorCallback func (device *Device, typ ErrorType, message string)
+type PopErrorScopeCallback func (status PopErrorScopeStatus, typ ErrorType, message string)
+type RequestDeviceCallback func (status RequestDeviceStatus, device *Device, message string)
+type BufferMapCallback func (status MapAsyncStatus, message string)
+type QueueWorkDoneCallback func (status QueueWorkDoneStatus, message string)
+type CreateRenderPipelineAsyncCallback func (status CreatePipelineAsyncStatus, pipeline *RenderPipeline, message string)
+type CreateComputePipelineAsyncCallback func (status CreatePipelineAsyncStatus, pipeline *ComputePipeline, message string)
 type DeviceLostCallback func (device *Device, reason DeviceLostReason, message string)
