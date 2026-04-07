@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"go/format"
 	"io"
 	"os"
 	"strings"
@@ -27,8 +29,10 @@ type Entry struct {
 	Args     []Member `json:"args"`
 	Returns  string   `json:"returns"`
 
-	Name   string
-	GoName string
+	Name      string
+	GoName    string
+	CName     string
+	GoReturns string
 }
 
 type Method struct {
@@ -38,15 +42,18 @@ type Method struct {
 	Tags    []string `json:"tags"`
 
 	GoName    string
+	CName     string
 	GoReturns string
 }
 
 type Member struct {
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Optional bool   `json:"optional"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`
+	Optional   bool   `json:"optional"`
+	Annotation string `json:"annotation"`
 
 	GoName string
+	CName  string
 	GoType string
 }
 
@@ -65,10 +72,11 @@ func main() {
 	objects := extractObjects(spec)
 	structs := extractStructs(spec, objects)
 	funcs := extractFunctions(spec, objects)
+	enums := extractEnums(spec)
 
 	writeTypes(TypesFile, structs, funcs)
-	writeEnums(EnumsFile, spec)
-	writeObjects(ObjectsFile, objects)
+	writeEnums(EnumsFile, enums)
+	writeObjects(ObjectsFile, objects, funcs, structs, enums)
 	// writeConstants(spec)
 	// objs := writeObjects(spec)
 	// writeTypes(spec, objs)
@@ -94,11 +102,6 @@ func loadSpec(path string) DawnSpec {
 			if entry.Category != "" {
 				filtered[k] = entry
 			}
-		} else {
-
-			if k == "device" {
-				fmt.Println(err)
-			}
 		}
 	}
 	return filtered
@@ -119,26 +122,26 @@ func extractObjects(spec DawnSpec) map[string]Entry {
 		}
 
 		entry.Name = name
-		entry.GoName = toGoName(name)
+		entry.GoName = GoName(name)
 
 		var j int
 		for i := 0; i < len(entry.Methods); i++ {
 			if len(entry.Methods[i].Tags) == 0 {
 				m := entry.Methods[i]
-				m.GoName = toGoName(m.Name)
+				m.GoName = GoName(m.Name)
+				m.CName = CFuncName(name, m.Name)
 
 				if ret, ok := m.Returns.(string); ok {
-					m.GoReturns = toGoType(ret)
+					m.GoReturns = GoType(ret)
 				} else {
 					if m.Returns != nil {
-						fmt.Println(m.GoName)
 						m.GoReturns = "(*Buffer, error)"
 					}
 				}
 
 				for k := 0; k < len(m.Args); k++ {
-					m.Args[k].GoName = toGoArgName(m.Args[k].Name)
-					m.Args[k].GoType = toGoType(m.Args[k].Type)
+					m.Args[k].GoName = GoArgName(m.Args[k].Name)
+					m.Args[k].GoType = GoType(m.Args[k].Type)
 				}
 
 				entry.Methods[j] = m
@@ -167,11 +170,13 @@ func extractStructs(spec DawnSpec, objects map[string]Entry) map[string]Entry {
 			continue
 		}
 
-		entry.GoName = toGoName(name)
+		entry.Name = name
+		entry.GoName = GoName(name)
 
 		for i := 0; i < len(entry.Members); i++ {
-			entry.Members[i].GoName = toGoName(entry.Members[i].Name)
-			entry.Members[i].GoType = toGoType(entry.Members[i].Type)
+			entry.Members[i].GoName = GoName(entry.Members[i].Name)
+			entry.Members[i].GoType = GoType(entry.Members[i].Type)
+			entry.Members[i].CName = CMemberName(entry.Members[i].Name)
 
 			if _, ok := objects[entry.Members[i].Type]; ok {
 				entry.Members[i].GoType = "*" + entry.Members[i].GoType
@@ -194,15 +199,17 @@ func extractFunctions(spec DawnSpec, objects map[string]Entry) map[string]Entry 
 		}
 
 		// Skip non-funcs
-		if entry.Category != "callback function" {
+		if entry.Category != "callback function" && entry.Category != "function" {
 			continue
 		}
 
-		entry.GoName = toGoName(name)
+		entry.GoName = GoName(name)
+		entry.GoReturns = GoType(entry.Returns)
+		entry.CName = CFuncName("", name)
 
 		for i := 0; i < len(entry.Args); i++ {
-			entry.Args[i].GoName = toGoArgName(entry.Args[i].Name)
-			entry.Args[i].GoType = toGoType(entry.Args[i].Type)
+			entry.Args[i].GoName = GoArgName(entry.Args[i].Name)
+			entry.Args[i].GoType = GoType(entry.Args[i].Type)
 
 			if _, ok := objects[entry.Args[i].Type]; ok {
 				entry.Args[i].GoType = "*" + entry.Args[i].GoType
@@ -213,6 +220,29 @@ func extractFunctions(spec DawnSpec, objects map[string]Entry) map[string]Entry 
 	}
 
 	return funcs
+}
+
+func extractEnums(spec DawnSpec) map[string]Entry {
+	enums := make(map[string]Entry)
+
+	for name, entry := range spec {
+		// Skip Dawn definitions
+		if len(entry.Tags) > 0 {
+			continue
+		}
+
+		// Skip non-enums or non-bitmasks
+		if entry.Category != "enum" && entry.Category != "bitmask" {
+			continue
+		}
+
+		// Write definition
+		entry.GoName = GoName(name)
+		entry.Name = name
+		enums[name] = entry
+	}
+
+	return enums
 }
 
 func writeTypes(path string, structs map[string]Entry, funcs map[string]Entry) {
@@ -243,8 +273,13 @@ func writeTypes(path string, structs map[string]Entry, funcs map[string]Entry) {
 		fmt.Fprintf(w, "}\n\n")
 	}
 
-	// Write Functions
+	// Write Func Types
 	for _, f := range funcs {
+
+		if f.Category != "callback function" {
+			continue
+		}
+
 		var args []string
 		for _, a := range f.Args {
 			typ := a.GoType
@@ -258,7 +293,7 @@ func writeTypes(path string, structs map[string]Entry, funcs map[string]Entry) {
 	}
 }
 
-func writeEnums(path string, spec DawnSpec) {
+func writeEnums(path string, enums map[string]Entry) {
 	w, err := os.Create(path)
 	if err != nil {
 		panic(err)
@@ -266,69 +301,277 @@ func writeEnums(path string, spec DawnSpec) {
 
 	writePreable(w)
 
-	for name, entry := range spec {
-		// Skip Dawn definitions
-		if len(entry.Tags) > 0 {
-			continue
-		}
-
-		// Skip non-enums or non-bitmasks
-		if entry.Category != "enum" && entry.Category != "bitmask" {
-			continue
-		}
-
-		// Write definition
-		goName := toGoName(name)
-		fmt.Fprintf(w, "type %s int\n\n", goName)
+	for _, entry := range enums {
+		fmt.Fprintf(w, "type %s int\n\n", entry.GoName)
 
 		fmt.Fprintf(w, "const (\n")
 		for i, v := range entry.Values {
 			if i == 0 {
-				fmt.Fprintf(w, "\t%s%s %s =  %v\n", goName, toGoName(v.Name), goName, v.Value)
+				fmt.Fprintf(w, "\t%s%s %s =  %v\n", entry.GoName, GoName(v.Name), entry.GoName, v.Value)
 			} else {
-				fmt.Fprintf(w, "\t%s%s = %v\n", goName, toGoName(v.Name), v.Value)
+				fmt.Fprintf(w, "\t%s%s = %v\n", entry.GoName, GoName(v.Name), v.Value)
 			}
 		}
 		fmt.Fprintf(w, ")\n\n")
 	}
 }
 
-func writeObjects(path string, objects map[string]Entry) {
-	w, err := os.Create(path)
-	if err != nil {
-		panic(err)
-	}
-
+func writeObjects(path string, objects, funcs, types, enums map[string]Entry) {
+	w := new(bytes.Buffer)
 	writePreable(w)
+	writeCGoPreamble(w)
+	writeCUtils(w)
 
-	for name, object := range objects {
+	for _, object := range objects {
 		fmt.Fprintf(w, "type %s struct{\n", object.GoName)
-		fmt.Fprintf(w, "\tref uintptr\n")
+		fmt.Fprintf(w, "ref uintptr\n")
 		fmt.Fprintf(w, "}\n\n")
 
-		initial := string(name[0])
-
 		for _, m := range object.Methods {
-			var args []string
-			for _, a := range m.Args {
-				typ := a.GoType
-				if a.Optional {
-					typ = "*" + typ
-				}
-				args = append(args, a.GoName+" "+a.GoType)
-			}
-
-			fmt.Fprintf(w, "func (%s *%s) %s(%s) %s\n",
-				initial,
-				object.GoName,
-				m.GoName,
-				strings.Join(args, ", "),
-				m.GoReturns,
-			)
+			writeMethodBody(w, object, m, objects, types, enums)
 		}
 		fmt.Fprintf(w, "\n\n")
 	}
 
+	for _, f := range funcs {
+		if f.Category != "function" {
+			continue
+		}
+
+		writeFuncBody(w, f, objects, types, enums)
+	}
+
+	src, err := format.Source(w.Bytes())
+	if err != nil {
+		fmt.Println(w.String())
+		panic(err)
+	}
+
+	err = os.WriteFile(path, src, 0o644)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func writeMethodBody(w io.Writer, object Entry, method Method, objects, types, enums map[string]Entry) {
+	receiver := strings.ToLower(string(object.GoName[0]))
+
+	var funcSignature []string
+	for _, a := range method.Args {
+		typ := a.GoType
+		if a.Optional {
+			typ = "*" + typ
+		}
+		funcSignature = append(funcSignature, a.GoName+" "+typ)
+	}
+
+	// Write Method Signature
+	fmt.Fprintf(w, "func (%s *%s) %s(%s) %s {\n",
+		receiver,
+		object.GoName,
+		method.GoName,
+		strings.Join(funcSignature, ", "),
+		method.GoReturns,
+	)
+
+	cReciever := fmt.Sprintf("c%s", object.GoName)
+	fmt.Fprintf(w, "%s := C.WGPU%s(unsafe.Pointer(%s.ref))\n", cReciever, object.GoName, receiver)
+
+	cCallArgs := []string{cReciever}
+
+	for _, a := range method.Args {
+		cVar := "c" + capitalize(a.GoName)
+		if a.Optional {
+			cVar = "p" + capitalize(a.GoName)
+		}
+		if typ, ok := types[a.Type]; ok {
+			writeStructConvert(w, a.GoName, typ, a.Optional)
+		} else if obj, ok := objects[a.Type]; ok {
+			fmt.Fprintf(w, "%s := C.WGPU%s(unsafe.Pointer(%s.ref))\n", cVar, obj.GoName, a.GoName)
+		} else if enum, ok := enums[a.Type]; ok {
+			fmt.Fprintf(w, "%s := C.WGPU%s(%s)\n", cVar, enum.GoName, a.GoName)
+		} else if a.GoType == "[]byte" {
+			fmt.Fprintf(w, "%s := unsafe.Pointer(&%s[0])\n", cVar, a.GoName)
+			a.Annotation = ""
+		} else {
+			fmt.Fprintf(w, "%s := C.%s(%s)\n", cVar, a.Type, a.GoName)
+		}
+
+		if (a.Annotation == "const*" || a.Annotation == "*") && !a.Optional {
+			cVar = "&" + cVar
+		}
+
+		cCallArgs = append(cCallArgs, cVar)
+	}
+
+	cCall := fmt.Sprintf("C.%s(%s)", method.CName, strings.Join(cCallArgs, ", "))
+
+	// 3. Handle Returns
+	if method.GoReturns == "" {
+		fmt.Fprintf(w, "%s\n", cCall)
+	} else if strings.HasPrefix(method.GoReturns, "*") {
+		// It's a WebGPU Object (Handle). We wrap the C pointer in our Go struct.
+		resType := strings.TrimPrefix(method.GoReturns, "*")
+		fmt.Fprintf(w, "return &%s{ref: uintptr(%s)}\n", resType, cCall)
+	} else if method.GoReturns == "(*Buffer, error)" {
+		// Special case for async or complex returns identified in extractObjects
+		fmt.Fprintf(w, "_ = %s // TODO: Implement async/error logic\n", cCall)
+		fmt.Fprintf(w, "return nil, nil\n")
+	} else if method.Returns == "future" {
+		fmt.Fprintf(w, "return %s{Id: uint64(%s.id)}\n", method.GoReturns, cCall)
+	} else if method.Returns == "bool" {
+		fmt.Fprintf(w, "return %s(%s != 0)\n", method.GoReturns, cCall)
+	} else if _, ok := objects[method.Returns.(string)]; ok {
+		fmt.Fprintf(w, "return %s{ref: uintptr(unsafe.Pointer(%s))}\n", method.GoReturns, cCall)
+	} else {
+		// It's a basic type (int, bool, etc.)
+		fmt.Fprintf(w, "return %s(%s)\n", method.GoReturns, cCall)
+	}
+
+	// End
+	fmt.Fprintf(w, "}\n\n")
+}
+
+func writeFuncBody(w io.Writer, method Entry, objects, types, enums map[string]Entry) {
+
+	var funcSignature []string
+	for _, a := range method.Args {
+		typ := a.GoType
+		if a.Optional {
+			typ = "*" + typ
+		}
+		funcSignature = append(funcSignature, a.GoName+" "+typ)
+	}
+
+	// Write Method Signature
+	fmt.Fprintf(w, "func %s(%s) %s {\n",
+		method.GoName,
+		strings.Join(funcSignature, ", "),
+		method.GoReturns,
+	)
+
+	cCallArgs := []string{}
+
+	for _, a := range method.Args {
+		cVar := "c" + capitalize(a.GoName)
+		if a.Optional {
+			cVar = "p" + capitalize(a.GoName)
+		}
+		if typ, ok := types[a.Type]; ok {
+			writeStructConvert(w, a.GoName, typ, a.Optional)
+		} else if obj, ok := objects[a.Type]; ok {
+			fmt.Fprintf(w, "%s := C.WGPU%s(unsafe.Pointer(%s.ref))\n", cVar, obj.GoName, a.GoName)
+		} else if enum, ok := enums[a.Type]; ok {
+			fmt.Fprintf(w, "%s := C.WGPU%s(%s)\n", cVar, enum.GoName, a.GoName)
+		} else {
+			fmt.Fprintf(w, "%s := C.%s(%s)\n", cVar, a.Type, a.GoName)
+		}
+
+		if (a.Annotation == "const*" || a.Annotation == "*") && !a.Optional {
+			cVar = "&" + cVar
+		}
+
+		cCallArgs = append(cCallArgs, cVar)
+	}
+
+	cCall := fmt.Sprintf("C.%s(%s)", method.CName, strings.Join(cCallArgs, ", "))
+
+	// 3. Handle Returns
+	if method.GoReturns == "" {
+		fmt.Fprintf(w, "%s\n", cCall)
+	} else if strings.HasPrefix(method.GoReturns, "*") {
+		// It's a WebGPU Object (Handle). We wrap the C pointer in our Go struct.
+		resType := strings.TrimPrefix(method.GoReturns, "*")
+		fmt.Fprintf(w, "return &%s{ref: uintptr(%s)}\n", resType, cCall)
+	} else if method.GoReturns == "(*Buffer, error)" {
+		// Special case for async or complex returns identified in extractObjects
+		fmt.Fprintf(w, "_ = %s // TODO: Implement async/error logic\n", cCall)
+		fmt.Fprintf(w, "return nil, nil\n")
+	} else if method.Returns == "future" {
+		fmt.Fprintf(w, "return %s{id: uint64(%s.id)}\n", method.GoReturns, cCall)
+	} else if method.Returns == "bool" {
+		fmt.Fprintf(w, "return %s(%s != 0)\n", method.GoReturns, cCall)
+	} else if _, ok := objects[method.Returns]; ok {
+		fmt.Fprintf(w, "return %s{ref: uintptr(unsafe.Pointer(%s))}\n", method.GoReturns, cCall)
+	} else {
+		// It's a basic type (int, bool, etc.)
+		fmt.Fprintf(w, "return %s(%s)\n", method.GoReturns, cCall)
+	}
+
+	// End
+	fmt.Fprintf(w, "}\n\n")
+}
+
+func writeStructConvert(w io.Writer, argName string, entry Entry, optional bool) {
+	cTypeName := "C.WGPU" + entry.GoName
+	cVarName := "c" + capitalize(argName)
+
+	fmt.Fprintf(w, "\t// Convert %s to %s\n", argName, cTypeName)
+
+	if optional {
+		// If optional, we define a pointer to the C struct that can stay nil
+		fmt.Fprintf(w, "\tvar p%s *%s\n", capitalize(argName), cTypeName)
+		fmt.Fprintf(w, "\tif %s != nil {\n", argName)
+
+		// Internal scope for the actual struct value
+		writeStructFields(w, "\t\t", argName, cVarName, entry)
+
+		fmt.Fprintf(w, "\t\tp%s = &%s\n", capitalize(argName), cVarName)
+		fmt.Fprintf(w, "\t}\n")
+	} else {
+		// If not optional, we define the struct on the stack
+		if entry.Name == "string view" {
+			tempVar := cVarName + "Str"
+			fmt.Fprintf(w, "\tvar %s C.WGPUStringView\n", cVarName)
+			fmt.Fprintf(w, "\t%s := C.CString(%s)\n", tempVar, argName)
+			fmt.Fprintf(w, "\t%s.data = %s\n", cVarName, tempVar)
+			fmt.Fprintf(w, "\t%s.length = C.size_t(len(%s))\n", cVarName, argName)
+			fmt.Fprintf(w, "\tdefer C.free(unsafe.Pointer(%s))\n", tempVar)
+		} else {
+			writeStructFields(w, "\t", argName, cVarName, entry)
+		}
+
+	}
+}
+
+// Internal helper to handle the member-by-member assignment
+func writeStructFields(w io.Writer, indent, goVar, cVar string, entry Entry) {
+	fmt.Fprintf(w, "%svar %s %s\n", indent, cVar, "C.WGPU"+entry.GoName)
+
+	for i, m := range entry.Members {
+		goField := goVar + "." + m.GoName
+		cField := cVar + "." + m.CName
+
+		switch {
+		case m.Type == "string view":
+			// Note: In a real production scenario, you would need to defer C.free
+			// or use a specialized memory tracker here.
+			tempVar := fmt.Sprintf("c%sStr%d", m.GoName, i)
+			fmt.Fprintf(w, "%s%s := C.CString(%s)\n", indent, tempVar, goField)
+			fmt.Fprintf(w, "%s%s.data = %s\n", indent, cField, tempVar)
+			fmt.Fprintf(w, "%s%s.length = C.size_t(len(%s))\n", indent, cField, goField)
+			fmt.Fprintf(w, "%sdefer C.free(unsafe.Pointer(%s))\n", indent, tempVar)
+
+		case strings.HasPrefix(m.GoType, "*"):
+			// It's a WebGPU Object (Handle). Cast the uintptr ref.
+			typeName := strings.TrimPrefix(m.GoType, "*")
+			fmt.Fprintf(w, "%sif %s != nil {\n", indent, goField)
+			fmt.Fprintf(w, "%s\t%s = C.WGPU%s(unsafe.Pointer(%s.ref))\n", indent, cField, typeName, goField)
+			fmt.Fprintf(w, "%s}\n", indent)
+
+		case m.Type == "bool":
+			// Cgo often handles bool, but sometimes C expects C.WGPUBool
+			fmt.Fprintf(w, "%s%s = boolToWGPUBool(%s)\n", indent, cField, goField)
+		case m.Type == "size_t":
+			// Cgo often handles bool, but sometimes C expects C.WGPUBool
+			fmt.Fprintf(w, "%s%s = C.size_t(%s)\n", indent, cField, goField)
+
+		default:
+			// Basic numeric types (uint32, etc)
+			// We cast to the C type to be safe
+			//fmt.Fprintf(w, "%s%s = C.WGPU%s(%s)\n", indent, cField, m.Type, goField)
+		}
+	}
 }
 
 func writePreable(w io.Writer) {
@@ -337,235 +580,32 @@ func writePreable(w io.Writer) {
 	fmt.Fprintf(w, "package wgpu\n\n")
 }
 
-// func writeObjects(spec DawnSpec) map[string]struct{} {
-// 	objects := make(map[string]struct{})
+func writeCGoPreamble(w io.Writer) {
+	fmt.Fprintf(w, "/*\n")
+	fmt.Fprintf(w, "#include <stdio.h>\n")
+	fmt.Fprintf(w, "#include <stdlib.h>\n\n")
+	fmt.Fprintf(w, "#cgo CFLAGS: -I./include\n")
+	fmt.Fprintf(w, "#cgo LDFLAGS: -L./lib -lwebgpu_dawn -framework Metal -framework IOKit -framework QuartzCore -framework Foundation -framework IOSurface -lc++\n")
+	fmt.Fprintf(w, "#include <webgpu/webgpu.h>\n")
+	fmt.Fprintf(w, "*/\n")
 
-// 	w, err := os.Create(ObjectsFile)
+	fmt.Fprintf(w, "import \"C\"\n\n")
+	fmt.Fprintf(w, "import (\n")
+	fmt.Fprintf(w, "\"unsafe\"\n")
+	fmt.Fprintf(w, ")\n\n")
+}
 
-// 	if err != nil {
-// 		panic(err)
-// 	}
+func writeCUtils(w io.Writer) {
+	fmt.Fprintf(w, "func boolToWGPUBool(in bool) C.WGPUBool {\n")
+	fmt.Fprintf(w, "if in {\n")
+	fmt.Fprintf(w, "return 1\n")
+	fmt.Fprintf(w, "} else {\n")
+	fmt.Fprintf(w, "return 0\n")
+	fmt.Fprintf(w, "}\n")
+	fmt.Fprintf(w, "}\n")
+}
 
-// 	fmt.Fprintf(w, "// CODE GENERATED DO NOT EDIT\n")
-// 	fmt.Fprintf(w, "package wgpu\n")
-
-// 	//extract objects
-// 	for name, value := range spec {
-
-// 		prefix := toGoName(name)
-
-// 		cat, catOk := obj["category"]
-// 		_, tagsOk := obj["tags"]
-
-// 		if catOk && cat == "object" && !tagsOk {
-// 			objects[prefix] = struct{}{}
-// 		}
-// 	}
-
-// 	for name, value := range spec {
-// 		obj, ok := value.(map[string]any)
-// 		if !ok {
-// 			continue
-// 		}
-
-// 		prefix := toGoName(name)
-
-// 		cat, catOk := obj["category"]
-// 		_, tagsOk := obj["tags"]
-
-// 		methodsd := make([]method, 0)
-
-// 		if catOk && cat == "object" && !tagsOk {
-// 			methods, methodsOk := obj["methods"]
-// 			fmt.Fprintf(w, "type %s struct{\n", prefix)
-// 			if methodsOk {
-// 				for _, m := range methods.([]any) {
-// 					metd := m.(map[string]any)
-// 					if _, ok := metd["tags"]; ok {
-// 						continue
-// 					}
-// 					metdd := method{name: metd["name"].(string)}
-
-// 					if retType, ok := metd["returns"]; ok {
-// 						switch val := retType.(type) {
-// 						case string:
-// 							metdd.ret = val
-// 						}
-// 					}
-
-// 					args := make([]arg, 0)
-// 					if _, ok := metd["args"].([]any); ok {
-// 						for _, a := range metd["args"].([]any) {
-// 							arga := a.(map[string]any)
-// 							args = append(args, arg{
-// 								name: arga["name"].(string),
-// 								typ:  arga["type"].(string),
-// 							})
-// 						}
-// 					}
-
-// 					metdd.args = args
-// 					methodsd = append(methodsd, metdd)
-// 				}
-// 			}
-// 			fmt.Fprintf(w, "}\n")
-
-// 			first := strings.ToLower(string(prefix[0]))
-// 			for _, m := range methodsd {
-// 				methodName := toGoName(m.name)
-// 				args := make([]string, 0)
-// 				for _, a := range m.args {
-// 					typ := toGoType(a.typ)
-// 					if _, ok := objects[typ]; ok {
-// 						typ = "*" + typ
-// 					}
-// 					args = append(args, toGoArgName(a.name)+" "+typ)
-// 				}
-// 				argss := strings.Join(args, ", ")
-
-// 				ret := toGoType(m.ret)
-// 				if _, ok := objects[ret]; ok {
-// 					ret = "*" + ret
-// 				}
-// 				fmt.Fprintf(w, "func (%s *%s) %s(%s) %s{}\n", first, prefix, methodName, argss, ret)
-// 			}
-
-// 			fmt.Fprintf(w, "\n")
-// 		}
-// 	}
-
-// 	return objects
-// }
-
-// func writeConstants(spec DawnSpec) {
-// 	w, err := os.Create(ConstantFile)
-
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	fmt.Fprintf(w, "// CODE GENERATED DO NOT EDIT\n")
-// 	fmt.Fprintf(w, "package wgpu\n")
-
-// 	for name, value := range spec {
-// 		obj, ok := value.(map[string]any)
-// 		if !ok {
-// 			continue
-// 		}
-
-// 		prefix := toGoName(name)
-
-// 		cat, catOk := obj["category"]
-// 		_, tagsOk := obj["tags"]
-// 		values, valuesOk := obj["values"]
-
-// 		if catOk && cat == "enum" && !tagsOk && valuesOk {
-// 			fmt.Fprintf(w, "type %s int\n", prefix)
-// 			fmt.Fprintf(w, "const (\n")
-
-// 			for i, v := range values.([]any) {
-// 				val := v.(map[string]any)
-// 				name := toGoName(val["name"].(string))
-// 				if i == 0 {
-// 					fmt.Fprintf(w, "\t %s%s %s = %v\n", prefix, name, prefix, val["value"])
-// 				} else {
-// 					fmt.Fprintf(w, "\t %s%s = %v\n", prefix, name, val["value"])
-// 				}
-// 			}
-
-// 			fmt.Fprintf(w, ")\n\n")
-// 		}
-
-// 		if catOk && cat == "bitmask" && !tagsOk && valuesOk {
-// 			fmt.Fprintf(w, "type %s int\n", prefix)
-// 			fmt.Fprintf(w, "const (\n")
-
-// 			for i, v := range values.([]any) {
-// 				val := v.(map[string]any)
-// 				name := toGoName(val["name"].(string))
-// 				if i == 0 {
-// 					fmt.Fprintf(w, "\t %s%s %s = %v\n", prefix, name, prefix, val["value"])
-// 				} else {
-// 					fmt.Fprintf(w, "\t %s%s = %v\n", prefix, name, val["value"])
-// 				}
-// 			}
-
-// 			fmt.Fprintf(w, ")\n\n")
-// 		}
-// 	}
-// }
-
-// func writeTypes(spec DawnSpec, objects map[string]struct{}) {
-// 	w, err := os.Create(TypesFile)
-
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	fmt.Fprintf(w, "// CODE GENERATED DO NOT EDIT\n")
-// 	fmt.Fprintf(w, "package wgpu\n")
-
-// 	for name, value := range spec {
-// 		obj, ok := value.(map[string]any)
-// 		if !ok {
-// 			continue
-// 		}
-
-// 		cat, catOk := obj["category"]
-// 		_, tagsOk := obj["tags"]
-
-// 		prefix := toGoName(name)
-
-// 		if catOk && (cat == "structure" || cat == "callback info") && !tagsOk {
-// 			fmt.Fprintf(w, "type %s struct {\n", prefix)
-
-// 			for _, m := range obj["members"].([]any) {
-// 				mMap, ok := m.(map[string]any)
-// 				if !ok {
-// 					continue
-// 				}
-
-// 				name := toGoName(mMap["name"].(string))
-// 				typ := toGoType(mMap["type"].(string))
-
-// 				if _, ok := objects[typ]; ok {
-// 					typ = "*" + typ
-// 				}
-
-// 				fmt.Fprintf(w, "\t %s %s\n", name, typ)
-// 			}
-
-// 			fmt.Fprintf(w, "}\n\n")
-// 		}
-
-// 		if catOk && (cat == "callback function") && !tagsOk {
-// 			fmt.Fprintf(w, "type %s func(", prefix)
-
-// 			var args []string
-
-// 			for _, m := range obj["args"].([]any) {
-// 				mMap, ok := m.(map[string]any)
-// 				if !ok {
-// 					continue
-// 				}
-
-// 				name := toGoArgName(mMap["name"].(string))
-// 				typ := toGoType(mMap["type"].(string))
-
-// 				if _, ok := objects[typ]; ok {
-// 					typ = "*" + typ
-// 				}
-
-// 				args = append(args, name+" "+typ)
-// 			}
-// 			fmt.Fprintf(w, strings.Join(args, ","))
-// 			fmt.Fprintf(w, ")\n\n")
-// 		}
-// 	}
-
-// }
-
-func toGoName(in string) string {
+func GoName(in string) string {
 	parts := strings.Split(in, " ")
 	var out strings.Builder
 
@@ -576,7 +616,11 @@ func toGoName(in string) string {
 	return out.String()
 }
 
-func toGoArgName(in string) string {
+func CFuncName(class, method string) string {
+	return "wgpu" + GoName(class+" "+method)
+}
+
+func GoArgName(in string) string {
 	parts := strings.Split(in, " ")
 	var out strings.Builder
 
@@ -594,7 +638,11 @@ func toGoArgName(in string) string {
 	return out.String()
 }
 
-func toGoType(cType string) string {
+func CMemberName(in string) string {
+	return GoArgName(in)
+}
+
+func GoType(cType string) string {
 	switch cType {
 	case "uint8_t":
 		return "uint8"
@@ -630,8 +678,10 @@ func toGoType(cType string) string {
 		return "[]byte"
 	case "string view":
 		return "string"
+	case "proc":
+		return "uintptr"
 	default:
-		return toGoName(cType)
+		return GoName(cType)
 	}
 }
 
