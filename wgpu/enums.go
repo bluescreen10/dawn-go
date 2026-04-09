@@ -492,12 +492,12 @@ const (
 	requestAdapterStatusError                                  = 4
 )
 
-type RequestDeviceStatus int
+type requestDeviceStatus int
 
 const (
-	RequestDeviceStatusSuccess           RequestDeviceStatus = 1
-	RequestDeviceStatusCallbackCancelled                     = 2
-	RequestDeviceStatusError                                 = 3
+	requestDeviceStatusSuccess           requestDeviceStatus = 1
+	requestDeviceStatusCallbackCancelled                     = 2
+	requestDeviceStatusError                                 = 3
 )
 
 type SType int

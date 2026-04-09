@@ -160,7 +160,7 @@ func goRequestDeviceCallbackHandler(status C.WGPURequestDeviceStatus, device C.W
 	}
 
 	fn(
-		RequestDeviceStatus(status),
+		requestDeviceStatus(status),
 		&Device{ref: uintptr(unsafe.Pointer(device))},
 		msg,
 	)
@@ -300,15 +300,15 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 		}
 	}
 
-	var status requestAdapterStatus
+	var status requestDeviceStatus
 	var message string
 	var device *Device
 
-	callback := func(s requestAdapterStatus, d *Device, m string) {
+	callback := requestDeviceCallback(func(s requestDeviceStatus, d *Device, m string) {
 		status = s
 		device = d
 		message = m
-	}
+	})
 
 	handle := cgo.NewHandle(callback)
 
@@ -320,7 +320,7 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 
 	C.wgpuAdapterRequestDevice(cAdapter, &pDescriptor, cCallbackInfo)
 
-	if status != requestAdapterStatusSuccess {
+	if status != requestDeviceStatusSuccess {
 		return nil, fmt.Errorf("error requesting adapter: %s", message)
 	}
 
