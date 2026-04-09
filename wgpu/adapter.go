@@ -326,3 +326,8 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 
 	return device, nil
 }
+
+func (a *Adapter) Release() {
+	cAdapter := C.WGPUAdapter(unsafe.Pointer(a.ref))
+	C.wgpuAdapterRelease(cAdapter)
+}

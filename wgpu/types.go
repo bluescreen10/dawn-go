@@ -3,6 +3,8 @@
 //go:generate go run ./cmd/wrapper/.
 package wgpu
 
+import "unsafe"
+
 type AdapterInfo struct {
 	Vendor          string
 	Architecture    string
@@ -17,10 +19,9 @@ type AdapterInfo struct {
 }
 
 type BindGroupDescriptor struct {
-	Label      string
-	Layout     *BindGroupLayout
-	EntryCount int
-	Entries    BindGroupEntry
+	Label   string
+	Layout  *BindGroupLayout
+	Entries []BindGroupEntry
 }
 
 type BindGroupEntry struct {
@@ -72,6 +73,12 @@ type BufferDescriptor struct {
 	MappedAtCreation bool
 }
 
+type BufferInitDescriptor struct {
+	Label    string
+	Usage    BufferUsage
+	Contents []byte
+}
+
 type BufferMapCallbackInfo struct {
 	Mode     callbackMode
 	Callback BufferMapCallback
@@ -107,11 +114,6 @@ type CompatibilityModeLimits struct {
 
 type CompilationInfo struct {
 	Messages []CompilationMessage
-}
-
-type compilationInfoCallbackInfo struct {
-	Mode     callbackMode
-	Callback compilationInfoCallback
 }
 
 type CompilationMessage struct {
@@ -197,12 +199,10 @@ type ExternalTextureBindingLayout struct {
 }
 
 type FragmentState struct {
-	Module        *ShaderModule
-	EntryPoint    string
-	ConstantCount int
-	Constants     ConstantEntry
-	TargetCount   int
-	Targets       ColorTargetState
+	Module     *ShaderModule
+	EntryPoint string
+	Constants  []ConstantEntry
+	Targets    []ColorTargetState
 }
 
 type Future struct {
@@ -285,7 +285,7 @@ type PipelineLayoutDescriptor struct {
 
 type popErrorScopeCallbackInfo struct {
 	Mode     callbackMode
-	Callback PopErrorScopeCallback
+	Callback popErrorScopeCallback
 }
 
 type PrimitiveState struct {
@@ -347,8 +347,7 @@ type RenderPassDepthStencilAttachment struct {
 
 type RenderPassDescriptor struct {
 	Label                  string
-	ColorAttachmentCount   int
-	ColorAttachments       RenderPassColorAttachment
+	ColorAttachments       []RenderPassColorAttachment
 	DepthStencilAttachment *RenderPassDepthStencilAttachment
 	OcclusionQuerySet      *QuerySet
 	TimestampWrites        *PassTimestampWrites
@@ -410,11 +409,13 @@ type SamplerDescriptor struct {
 
 type ShaderModuleDescriptor struct {
 	Label string
+
+	SPIRVSource *ShaderSourceSPIRV
+	WGSLSource  *ShaderSourceWGSL
 }
 
 type ShaderSourceSPIRV struct {
-	CodeSize uint32
-	Code     uint32
+	Code []uint32
 }
 
 type ShaderSourceWGSL struct {
@@ -463,12 +464,12 @@ type SurfaceConfiguration struct {
 }
 
 type SurfaceDescriptor struct {
-	Label string
+	Label      string
+	MetalLayer *SurfaceSourceMetalLayer
 }
 
-type SurfaceTexture struct {
-	Texture *Texture
-	Status  SurfaceGetCurrentTextureStatus
+type SurfaceSourceMetalLayer struct {
+	Layer unsafe.Pointer
 }
 
 type TexelCopyBufferInfo struct {
@@ -544,19 +545,16 @@ type VertexAttribute struct {
 }
 
 type VertexBufferLayout struct {
-	StepMode       VertexStepMode
-	ArrayStride    uint64
-	AttributeCount int
-	Attributes     VertexAttribute
+	StepMode    VertexStepMode
+	ArrayStride uint64
+	Attributes  []VertexAttribute
 }
 
 type VertexState struct {
-	Module        *ShaderModule
-	EntryPoint    string
-	ConstantCount int
-	Constants     ConstantEntry
-	BufferCount   int
-	Buffers       VertexBufferLayout
+	Module     *ShaderModule
+	EntryPoint string
+	Constants  []ConstantEntry
+	Buffers    []VertexBufferLayout
 }
 
 type BufferMapCallback func(status MapAsyncStatus, message string)
@@ -564,10 +562,10 @@ type BufferMapCallback func(status MapAsyncStatus, message string)
 type CreateComputePipelineAsyncCallback func(status CreatePipelineAsyncStatus, pipeline *ComputePipeline, message string)
 type CreateRenderPipelineAsyncCallback func(status CreatePipelineAsyncStatus, pipeline *RenderPipeline, message string)
 type DeviceLostCallback func(device *Device, reason DeviceLostReason, message string)
-type PopErrorScopeCallback func(status PopErrorScopeStatus, typ ErrorType, message string)
 type QueueWorkDoneCallback func(status QueueWorkDoneStatus, message string)
 type UncapturedErrorCallback func(device *Device, typ ErrorType, message string)
 
-type requestDeviceCallback func(status RequestDeviceStatus, device *Device, message string)
-type requestAdapterCallback func(status requestAdapterStatus, adapter *Adapter, message string)
 type compilationInfoCallback func(status compilationInfoRequestStatus, compilationInfo CompilationInfo)
+type popErrorScopeCallback func(status popErrorScopeStatus, typ ErrorType, message string)
+type requestAdapterCallback func(status requestAdapterStatus, adapter *Adapter, message string)
+type requestDeviceCallback func(status RequestDeviceStatus, device *Device, message string)

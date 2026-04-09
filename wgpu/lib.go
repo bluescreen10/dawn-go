@@ -35,7 +35,6 @@ extern void cgo_callback_BufferMapCallback(WGPUMapAsyncStatus status, WGPUString
 extern void cgo_callback_CompilationInfoCallback(WGPUCompilationInfoRequestStatus status, WGPUCompilationInfo compilationInfo, void *userData1, void *userData2);
 extern void cgo_callback_CreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline, WGPUStringView message, void *userData1, void *userData2);
 extern void cgo_callback_CreateRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline, WGPUStringView message, void *userData1, void *userData2);
-extern void cgo_callback_PopErrorScopeCallback(WGPUPopErrorScopeStatus status, WGPUErrorType typ, WGPUStringView message, void *userData1, void *userData2);
 extern void cgo_callback_QueueWorkDoneCallback(WGPUQueueWorkDoneStatus status, WGPUStringView message, void *userData1, void *userData2);
 extern void cgo_callback_RequestAdapterCallback(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message, void *userData1, void *userData2);
 */
@@ -63,6 +62,11 @@ func (b *BindGroup) SetLabel(label string) {
 	C.wgpuBindGroupSetLabel(cBindGroup, cLabel)
 }
 
+func (b *BindGroup) Release() {
+	cBindGroup := C.WGPUBindGroup(unsafe.Pointer(b.ref))
+	C.wgpuBindGroupRelease(cBindGroup)
+}
+
 type BindGroupLayout struct {
 	ref uintptr
 }
@@ -77,6 +81,11 @@ func (b *BindGroupLayout) SetLabel(label string) {
 	cLabel.length = C.size_t(len(label))
 	// Call and return
 	C.wgpuBindGroupLayoutSetLabel(cBindGroupLayout, cLabel)
+}
+
+func (b *BindGroupLayout) Release() {
+	cBindGroupLayout := C.WGPUBindGroupLayout(unsafe.Pointer(b.ref))
+	C.wgpuBindGroupLayoutRelease(cBindGroupLayout)
 }
 
 type Buffer struct {
@@ -226,22 +235,39 @@ func (c *CommandBuffer) SetLabel(label string) {
 	C.wgpuCommandBufferSetLabel(cCommandBuffer, cLabel)
 }
 
+func (c *CommandBuffer) Release() {
+	cCommandBuffer := C.WGPUCommandBuffer(unsafe.Pointer(c.ref))
+	C.wgpuCommandBufferRelease(cCommandBuffer)
+}
+
 type CommandEncoder struct {
 	ref uintptr
 }
 
-func (c *CommandEncoder) Finish(descriptor *CommandBufferDescriptor) CommandBuffer {
+func (c *CommandEncoder) Finish(descriptor *CommandBufferDescriptor) *CommandBuffer {
+	commandBuffer, err := c.TryFinish(descriptor)
+	if err != nil {
+		panic(err)
+	}
+	return commandBuffer
+}
+
+func (c *CommandEncoder) TryFinish(descriptor *CommandBufferDescriptor) (*CommandBuffer, error) {
 	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
 
 	var pDescriptor C.WGPUCommandBufferDescriptor
-	if descriptor != nil {
-		pDescriptorlabelStr := C.CString(descriptor.Label)
-		defer C.free(unsafe.Pointer(pDescriptorlabelStr))
-		pDescriptor.label.data = pDescriptorlabelStr
+	if descriptor != nil && descriptor.Label != "" {
+		pDescriptor.label.data = C.CString(descriptor.Label)
 		pDescriptor.label.length = C.size_t(len(descriptor.Label))
+		defer C.free(unsafe.Pointer(pDescriptor.label.data))
 	}
-	// Call and return
-	return CommandBuffer{ref: uintptr(unsafe.Pointer(C.wgpuCommandEncoderFinish(cCommandEncoder, &pDescriptor)))}
+
+	ptr := unsafe.Pointer(C.wgpuCommandEncoderFinish(cCommandEncoder, &pDescriptor))
+	if ptr == nil {
+		return nil, fmt.Errorf("error finishing command encoder")
+	}
+
+	return &CommandBuffer{ref: uintptr(ptr)}, nil
 }
 
 func (c *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) ComputePassEncoder {
@@ -264,27 +290,57 @@ func (c *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) Com
 	return ComputePassEncoder{ref: uintptr(unsafe.Pointer(C.wgpuCommandEncoderBeginComputePass(cCommandEncoder, &pDescriptor)))}
 }
 
-func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) RenderPassEncoder {
+func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) *RenderPassEncoder {
+	renderPassEncoder, err := c.TryBeginRenderPass(descriptor)
+	if err != nil {
+		panic(err)
+	}
+	return renderPassEncoder
+}
+
+func (c *CommandEncoder) TryBeginRenderPass(descriptor RenderPassDescriptor) (*RenderPassEncoder, error) {
 	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
 
 	var cDescriptor C.WGPURenderPassDescriptor
-	cDescriptorlabelStr := C.CString(descriptor.Label)
-	defer C.free(unsafe.Pointer(cDescriptorlabelStr))
-	cDescriptor.label.data = cDescriptorlabelStr
-	cDescriptor.label.length = C.size_t(len(descriptor.Label))
-	cDescriptor.colorAttachmentCount = C.size_t(descriptor.ColorAttachmentCount)
-	cDescriptor.colorAttachments.view = C.WGPUTextureView(unsafe.Pointer(descriptor.ColorAttachments.View.ref))
-	cDescriptor.colorAttachments.depthSlice = C.uint32_t(descriptor.ColorAttachments.DepthSlice)
-	cDescriptor.colorAttachments.resolveTarget = C.WGPUTextureView(unsafe.Pointer(descriptor.ColorAttachments.ResolveTarget.ref))
-	cDescriptor.colorAttachments.loadOp = C.WGPULoadOp(descriptor.ColorAttachments.LoadOp)
-	cDescriptor.colorAttachments.storeOp = C.WGPUStoreOp(descriptor.ColorAttachments.StoreOp)
-	cDescriptor.colorAttachments.clearValue.r = C.double(descriptor.ColorAttachments.ClearValue.R)
-	cDescriptor.colorAttachments.clearValue.g = C.double(descriptor.ColorAttachments.ClearValue.G)
-	cDescriptor.colorAttachments.clearValue.b = C.double(descriptor.ColorAttachments.ClearValue.B)
-	cDescriptor.colorAttachments.clearValue.a = C.double(descriptor.ColorAttachments.ClearValue.A)
+
+	if descriptor.Label != "" {
+		cDescriptor.label.data = C.CString(descriptor.Label)
+		cDescriptor.label.length = C.size_t(len(descriptor.Label))
+		defer C.free(unsafe.Pointer(cDescriptor.label.data))
+	}
+
+	colorAttachmentsCount := len(descriptor.ColorAttachments)
+	if colorAttachmentsCount > 0 {
+		colorAttachments := C.malloc(C.size_t(colorAttachmentsCount) * C.size_t(unsafe.Sizeof(C.WGPURenderPassColorAttachment{})))
+		slice := unsafe.Slice((*C.WGPURenderPassColorAttachment)(colorAttachments), colorAttachmentsCount)
+		defer C.free(unsafe.Pointer(colorAttachments))
+
+		for i, a := range descriptor.ColorAttachments {
+			slice[i].depthSlice = C.uint32_t(a.DepthSlice)
+			slice[i].loadOp = C.WGPULoadOp(a.LoadOp)
+			slice[i].storeOp = C.WGPUStoreOp(a.StoreOp)
+			slice[i].clearValue.r = C.double(a.ClearValue.R)
+			slice[i].clearValue.g = C.double(a.ClearValue.G)
+			slice[i].clearValue.b = C.double(a.ClearValue.B)
+			slice[i].clearValue.a = C.double(a.ClearValue.A)
+
+			if a.View != nil {
+				slice[i].view = C.WGPUTextureView(unsafe.Pointer(a.View.ref))
+			}
+
+			if a.ResolveTarget != nil {
+				slice[i].resolveTarget = C.WGPUTextureView(unsafe.Pointer(a.ResolveTarget.ref))
+			}
+		}
+
+		cDescriptor.colorAttachments = (*C.WGPURenderPassColorAttachment)(colorAttachments)
+		cDescriptor.colorAttachmentCount = C.size_t(colorAttachmentsCount)
+	}
 
 	if descriptor.DepthStencilAttachment != nil {
-		cDescriptor.depthStencilAttachment.view = C.WGPUTextureView(unsafe.Pointer(descriptor.DepthStencilAttachment.View.ref))
+		if descriptor.DepthStencilAttachment.View != nil {
+			cDescriptor.depthStencilAttachment.view = C.WGPUTextureView(unsafe.Pointer(descriptor.DepthStencilAttachment.View.ref))
+		}
 		cDescriptor.depthStencilAttachment.depthLoadOp = C.WGPULoadOp(descriptor.DepthStencilAttachment.DepthLoadOp)
 		cDescriptor.depthStencilAttachment.depthStoreOp = C.WGPUStoreOp(descriptor.DepthStencilAttachment.DepthStoreOp)
 		cDescriptor.depthStencilAttachment.depthClearValue = C.float(descriptor.DepthStencilAttachment.DepthClearValue)
@@ -304,8 +360,13 @@ func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) Render
 		cDescriptor.timestampWrites.beginningOfPassWriteIndex = C.uint32_t(descriptor.TimestampWrites.BeginningOfPassWriteIndex)
 		cDescriptor.timestampWrites.endOfPassWriteIndex = C.uint32_t(descriptor.TimestampWrites.EndOfPassWriteIndex)
 	}
-	// Call and return
-	return RenderPassEncoder{ref: uintptr(unsafe.Pointer(C.wgpuCommandEncoderBeginRenderPass(cCommandEncoder, &cDescriptor)))}
+
+	ptr := unsafe.Pointer(C.wgpuCommandEncoderBeginRenderPass(cCommandEncoder, &cDescriptor))
+	if ptr == nil {
+		return nil, fmt.Errorf("error beginning render pass")
+	}
+
+	return &RenderPassEncoder{ref: uintptr(ptr)}, nil
 }
 
 func (c *CommandEncoder) CopyBufferToBuffer(source *Buffer, sourceOffset uint64, destination *Buffer, destinationOffset uint64, size uint64) {
@@ -465,6 +526,11 @@ func (c *CommandEncoder) SetLabel(label string) {
 	C.wgpuCommandEncoderSetLabel(cCommandEncoder, cLabel)
 }
 
+func (c *CommandEncoder) Release() {
+	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
+	C.wgpuCommandEncoderRelease(cCommandEncoder)
+}
+
 type ComputePassEncoder struct {
 	ref uintptr
 }
@@ -585,24 +651,65 @@ type Device struct {
 	ref uintptr
 }
 
-func (d *Device) CreateBindGroup(descriptor BindGroupDescriptor) BindGroup {
+func (d *Device) CreateBindGroup(descriptor BindGroupDescriptor) *BindGroup {
+	bindGroup, err := d.TryCreateBindGroup(descriptor)
+	if err != nil {
+		panic(err)
+	}
+	return bindGroup
+}
+
+func (d *Device) TryCreateBindGroup(descriptor BindGroupDescriptor) (*BindGroup, error) {
 	cDevice := C.WGPUDevice(unsafe.Pointer(d.ref))
 
 	var cDescriptor C.WGPUBindGroupDescriptor
-	cDescriptorlabelStr := C.CString(descriptor.Label)
-	defer C.free(unsafe.Pointer(cDescriptorlabelStr))
-	cDescriptor.label.data = cDescriptorlabelStr
-	cDescriptor.label.length = C.size_t(len(descriptor.Label))
+
+	if descriptor.Label != "" {
+		cDescriptor.label.data = C.CString(descriptor.Label)
+		cDescriptor.label.length = C.size_t(len(descriptor.Label))
+		defer C.free(unsafe.Pointer(cDescriptor.label.data))
+	}
+
 	cDescriptor.layout = C.WGPUBindGroupLayout(unsafe.Pointer(descriptor.Layout.ref))
-	cDescriptor.entryCount = C.size_t(descriptor.EntryCount)
-	cDescriptor.entries.binding = C.uint32_t(descriptor.Entries.Binding)
-	cDescriptor.entries.buffer = C.WGPUBuffer(unsafe.Pointer(descriptor.Entries.Buffer.ref))
-	cDescriptor.entries.offset = C.uint64_t(descriptor.Entries.Offset)
-	cDescriptor.entries.size = C.uint64_t(descriptor.Entries.Size)
-	cDescriptor.entries.sampler = C.WGPUSampler(unsafe.Pointer(descriptor.Entries.Sampler.ref))
-	cDescriptor.entries.textureView = C.WGPUTextureView(unsafe.Pointer(descriptor.Entries.TextureView.ref))
-	// Call and return
-	return BindGroup{ref: uintptr(unsafe.Pointer(C.wgpuDeviceCreateBindGroup(cDevice, &cDescriptor)))}
+
+	entriesCount := len(descriptor.Entries)
+	if entriesCount > 0 {
+		entries := C.malloc(C.size_t(entriesCount) * C.size_t(unsafe.Sizeof(C.WGPUBindGroupEntry{})))
+		slice := unsafe.Slice((*C.WGPUBindGroupEntry)(entries), entriesCount)
+		defer C.free(unsafe.Pointer(entries))
+
+		for i, e := range descriptor.Entries {
+			slice[i].binding = C.uint32_t(e.Binding)
+			slice[i].offset = C.uint64_t(e.Offset)
+			slice[i].size = C.uint64_t(e.Size)
+
+			if e.Buffer != nil {
+				slice[i].buffer = C.WGPUBuffer(unsafe.Pointer(e.Buffer.ref))
+			}
+
+			if e.Sampler != nil {
+				slice[i].sampler = C.WGPUSampler(unsafe.Pointer(e.Sampler.ref))
+			}
+
+			if e.TextureView != nil {
+				slice[i].sampler = C.WGPUSampler(unsafe.Pointer(e.TextureView.ref))
+			}
+		}
+
+		cDescriptor.entries = (*C.WGPUBindGroupEntry)(entries)
+		cDescriptor.entryCount = C.size_t(entriesCount)
+	}
+
+	ptr := unsafe.Pointer(C.wgpuDeviceCreateBindGroup(cDevice, &cDescriptor))
+
+	if ptr == nil {
+		var err error
+		cCallbackInfo := makeErrorCallback(&err)
+		C.wgpuDevicePopErrorScope(cDevice, cCallbackInfo)
+		return nil, fmt.Errorf("error creating bind group: %v", err)
+	}
+
+	return &BindGroup{ref: uintptr(ptr)}, nil
 }
 
 func (d *Device) CreateBindGroupLayout(descriptor BindGroupLayoutDescriptor) BindGroupLayout {
@@ -631,7 +738,38 @@ func (d *Device) CreateBindGroupLayout(descriptor BindGroupLayoutDescriptor) Bin
 	return BindGroupLayout{ref: uintptr(unsafe.Pointer(C.wgpuDeviceCreateBindGroupLayout(cDevice, &cDescriptor)))}
 }
 
+func (d *Device) CreateBufferInit(descriptor BufferInitDescriptor) *Buffer {
+	buffer, err := d.TryCreateBufferInit(descriptor)
+	if err != nil {
+		panic(err)
+	}
+	return buffer
+}
+
+func (d *Device) TryCreateBufferInit(descriptor BufferInitDescriptor) (*Buffer, error) {
+	buffer, err := d.TryCreateBuffer(BufferDescriptor{
+		Label: descriptor.Label,
+		Size:  uint64(len(descriptor.Contents)),
+		Usage: descriptor.Usage,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = d.GetQueue().TryWriteBuffer(buffer, 0, descriptor.Contents)
+
+	return buffer, err
+}
+
 func (d *Device) CreateBuffer(descriptor BufferDescriptor) *Buffer {
+	buffer, err := d.TryCreateBuffer(descriptor)
+	if err != nil {
+		panic(err)
+	}
+	return buffer
+}
+
+func (d *Device) TryCreateBuffer(descriptor BufferDescriptor) (*Buffer, error) {
 	cDevice := C.WGPUDevice(unsafe.Pointer(d.ref))
 
 	var cDescriptor C.WGPUBufferDescriptor
@@ -642,22 +780,43 @@ func (d *Device) CreateBuffer(descriptor BufferDescriptor) *Buffer {
 	cDescriptor.usage = C.WGPUBufferUsage(descriptor.Usage)
 	cDescriptor.size = C.uint64_t(descriptor.Size)
 	cDescriptor.mappedAtCreation = boolToWGPUBool(descriptor.MappedAtCreation)
-	// Call and return
-	return &Buffer{ref: uintptr(unsafe.Pointer(C.wgpuDeviceCreateBuffer(cDevice, &cDescriptor)))}
+
+	buffer := &Buffer{ref: uintptr(unsafe.Pointer(C.wgpuDeviceCreateBuffer(cDevice, &cDescriptor)))}
+
+	var err error
+	cCallbackInfo := makeErrorCallback(&err)
+	C.wgpuDevicePopErrorScope(cDevice, cCallbackInfo)
+
+	return buffer, err
 }
 
-func (d *Device) CreateCommandEncoder(descriptor *CommandEncoderDescriptor) CommandEncoder {
+func (d *Device) CreateCommandEncoder(descriptor *CommandEncoderDescriptor) *CommandEncoder {
+	commandEncoder, err := d.TryCreateCommandEncoder(descriptor)
+	if err != nil {
+		panic(err)
+	}
+	return commandEncoder
+}
+
+func (d *Device) TryCreateCommandEncoder(descriptor *CommandEncoderDescriptor) (*CommandEncoder, error) {
 	cDevice := C.WGPUDevice(unsafe.Pointer(d.ref))
 
 	var pDescriptor C.WGPUCommandEncoderDescriptor
-	if descriptor != nil {
-		pDescriptorlabelStr := C.CString(descriptor.Label)
-		defer C.free(unsafe.Pointer(pDescriptorlabelStr))
-		pDescriptor.label.data = pDescriptorlabelStr
+	if descriptor != nil && descriptor.Label != "" {
+		pDescriptor.label.data = C.CString(descriptor.Label)
 		pDescriptor.label.length = C.size_t(len(descriptor.Label))
+		defer C.free(unsafe.Pointer(C.CString(descriptor.Label)))
 	}
-	// Call and return
-	return CommandEncoder{ref: uintptr(unsafe.Pointer(C.wgpuDeviceCreateCommandEncoder(cDevice, &pDescriptor)))}
+
+	ptr := unsafe.Pointer(C.wgpuDeviceCreateCommandEncoder(cDevice, &pDescriptor))
+	if ptr == nil {
+		var err error
+		cCallbackInfo := makeErrorCallback(&err)
+		C.wgpuDevicePopErrorScope(cDevice, cCallbackInfo)
+		fmt.Errorf("error creating command encoder: %v", err)
+	}
+
+	return &CommandEncoder{ref: uintptr(ptr)}, nil
 }
 
 func (d *Device) CreateComputePipeline(descriptor ComputePipelineDescriptor) ComputePipeline {
@@ -776,6 +935,7 @@ func (d *Device) CreateQuerySet(descriptor QuerySetDescriptor) QuerySet {
 //export goCreateRenderPipelineAsyncCallbackHandler
 func goCreateRenderPipelineAsyncCallbackHandler(status C.WGPUCreatePipelineAsyncStatus, pipeline C.WGPURenderPipeline, message C.WGPUStringView, userData1 unsafe.Pointer, userData2 unsafe.Pointer) {
 	handleID := uintptr(userData1)
+	devRef := uintptr(userData2)
 	if handleID == 0 {
 		return
 	}
@@ -790,7 +950,7 @@ func goCreateRenderPipelineAsyncCallbackHandler(status C.WGPUCreatePipelineAsync
 	}
 	fn(
 		CreatePipelineAsyncStatus(status),
-		&RenderPipeline{ref: uintptr(unsafe.Pointer(pipeline))},
+		&RenderPipeline{ref: uintptr(unsafe.Pointer(pipeline)), devRef: devRef},
 		msg,
 	)
 }
@@ -798,29 +958,67 @@ func (d *Device) CreateRenderPipelineAsync(descriptor RenderPipelineDescriptor, 
 	cDevice := C.WGPUDevice(unsafe.Pointer(d.ref))
 
 	var cDescriptor C.WGPURenderPipelineDescriptor
-	cDescriptorlabelStr := C.CString(descriptor.Label)
-	defer C.free(unsafe.Pointer(cDescriptorlabelStr))
-	cDescriptor.label.data = cDescriptorlabelStr
+	cDescriptor.label.data = C.CString(descriptor.Label)
 	cDescriptor.label.length = C.size_t(len(descriptor.Label))
+	defer C.free(unsafe.Pointer(cDescriptor.label.data))
+
 	cDescriptor.layout = C.WGPUPipelineLayout(unsafe.Pointer(descriptor.Layout.ref))
 	cDescriptor.vertex.module = C.WGPUShaderModule(unsafe.Pointer(descriptor.Vertex.Module.ref))
-	cDescriptorvertexentryPointStr := C.CString(descriptor.Vertex.EntryPoint)
-	defer C.free(unsafe.Pointer(cDescriptorvertexentryPointStr))
-	cDescriptor.vertex.entryPoint.data = cDescriptorvertexentryPointStr
-	cDescriptor.vertex.entryPoint.length = C.size_t(len(descriptor.Vertex.EntryPoint))
-	cDescriptor.vertex.constantCount = C.size_t(descriptor.Vertex.ConstantCount)
-	cDescriptorvertexconstantskeyStr := C.CString(descriptor.Vertex.Constants.Key)
-	defer C.free(unsafe.Pointer(cDescriptorvertexconstantskeyStr))
-	cDescriptor.vertex.constants.key.data = cDescriptorvertexconstantskeyStr
-	cDescriptor.vertex.constants.key.length = C.size_t(len(descriptor.Vertex.Constants.Key))
-	cDescriptor.vertex.constants.value = C.double(descriptor.Vertex.Constants.Value)
-	cDescriptor.vertex.bufferCount = C.size_t(descriptor.Vertex.BufferCount)
-	cDescriptor.vertex.buffers.stepMode = C.WGPUVertexStepMode(descriptor.Vertex.Buffers.StepMode)
-	cDescriptor.vertex.buffers.arrayStride = C.uint64_t(descriptor.Vertex.Buffers.ArrayStride)
-	cDescriptor.vertex.buffers.attributeCount = C.size_t(descriptor.Vertex.Buffers.AttributeCount)
-	cDescriptor.vertex.buffers.attributes.format = C.WGPUVertexFormat(descriptor.Vertex.Buffers.Attributes.Format)
-	cDescriptor.vertex.buffers.attributes.offset = C.uint64_t(descriptor.Vertex.Buffers.Attributes.Offset)
-	cDescriptor.vertex.buffers.attributes.shaderLocation = C.uint32_t(descriptor.Vertex.Buffers.Attributes.ShaderLocation)
+
+	if descriptor.Vertex.EntryPoint != "" {
+		cDescriptor.vertex.entryPoint.data = C.CString(descriptor.Vertex.EntryPoint)
+		cDescriptor.vertex.entryPoint.length = C.size_t(len(descriptor.Vertex.EntryPoint))
+		defer C.free(unsafe.Pointer(cDescriptor.vertex.entryPoint.data))
+	}
+
+	constansCount := len(descriptor.Vertex.Constants)
+	if constansCount > 0 {
+		constants := C.malloc(C.size_t(constansCount) * C.size_t(unsafe.Sizeof(C.WGPUConstantEntry{})))
+		slice := unsafe.Slice((*C.WGPUConstantEntry)(constants), constansCount)
+		defer C.free(unsafe.Pointer(constants))
+
+		for i, c := range descriptor.Vertex.Constants {
+			slice[i].value = C.double(c.Value)
+			slice[i].key = C.WGPUStringView{
+				data:   C.CString(c.Key),
+				length: C.size_t(len(c.Key)),
+			}
+			defer C.free(unsafe.Pointer(slice[i].key.data))
+		}
+
+		cDescriptor.vertex.constants = (*C.WGPUConstantEntry)(constants)
+		cDescriptor.vertex.constantCount = C.size_t(constansCount)
+	}
+
+	buffersCount := len(descriptor.Vertex.Buffers)
+	if buffersCount > 0 {
+		buffers := C.malloc(C.size_t(buffersCount) * C.size_t(unsafe.Sizeof(C.WGPUVertexBufferLayout{})))
+		slice := unsafe.Slice((*C.WGPUVertexBufferLayout)(buffers), constansCount)
+
+		for i, buffer := range descriptor.Vertex.Buffers {
+			slice[i].stepMode = C.WGPUVertexStepMode(buffer.StepMode)
+			slice[i].arrayStride = C.uint64_t(buffer.ArrayStride)
+
+			attributesCount := len(buffer.Attributes)
+			if attributesCount > 0 {
+				attributes := C.malloc(C.size_t(attributesCount) * C.size_t(unsafe.Sizeof(C.WGPUVertexAttribute{})))
+				attributesSlice := unsafe.Slice((*C.WGPUVertexAttribute)(attributes), attributesCount)
+
+				for j, attribute := range buffer.Attributes {
+					attributesSlice[j].format = C.WGPUVertexFormat(attribute.Format)
+					attributesSlice[j].offset = C.uint64_t(attribute.Offset)
+					attributesSlice[j].shaderLocation = C.uint32_t(attribute.ShaderLocation)
+				}
+
+				slice[i].attributes = (*C.WGPUVertexAttribute)(attributes)
+				slice[i].attributeCount = C.size_t(attributesCount)
+			}
+		}
+
+		cDescriptor.vertex.buffers = (*C.WGPUVertexBufferLayout)(buffers)
+		cDescriptor.vertex.bufferCount = C.size_t(buffersCount)
+	}
+
 	cDescriptor.primitive.topology = C.WGPUPrimitiveTopology(descriptor.Primitive.Topology)
 	cDescriptor.primitive.stripIndexFormat = C.WGPUIndexFormat(descriptor.Primitive.StripIndexFormat)
 	cDescriptor.primitive.frontFace = C.WGPUFrontFace(descriptor.Primitive.FrontFace)
@@ -856,23 +1054,54 @@ func (d *Device) CreateRenderPipelineAsync(descriptor RenderPipelineDescriptor, 
 		defer C.free(unsafe.Pointer(cDescriptorfragmententryPointStr))
 		cDescriptor.fragment.entryPoint.data = cDescriptorfragmententryPointStr
 		cDescriptor.fragment.entryPoint.length = C.size_t(len(descriptor.Fragment.EntryPoint))
-		cDescriptor.fragment.constantCount = C.size_t(descriptor.Fragment.ConstantCount)
-		cDescriptorfragmentconstantskeyStr := C.CString(descriptor.Fragment.Constants.Key)
-		defer C.free(unsafe.Pointer(cDescriptorfragmentconstantskeyStr))
-		cDescriptor.fragment.constants.key.data = cDescriptorfragmentconstantskeyStr
-		cDescriptor.fragment.constants.key.length = C.size_t(len(descriptor.Fragment.Constants.Key))
-		cDescriptor.fragment.constants.value = C.double(descriptor.Fragment.Constants.Value)
-		cDescriptor.fragment.targetCount = C.size_t(descriptor.Fragment.TargetCount)
-		cDescriptor.fragment.targets.format = C.WGPUTextureFormat(descriptor.Fragment.Targets.Format)
-		if descriptor.Fragment.Targets.Blend != nil {
-			cDescriptor.fragment.targets.blend.color.operation = C.WGPUBlendOperation(descriptor.Fragment.Targets.Blend.Color.Operation)
-			cDescriptor.fragment.targets.blend.color.srcFactor = C.WGPUBlendFactor(descriptor.Fragment.Targets.Blend.Color.SrcFactor)
-			cDescriptor.fragment.targets.blend.color.dstFactor = C.WGPUBlendFactor(descriptor.Fragment.Targets.Blend.Color.DstFactor)
-			cDescriptor.fragment.targets.blend.alpha.operation = C.WGPUBlendOperation(descriptor.Fragment.Targets.Blend.Alpha.Operation)
-			cDescriptor.fragment.targets.blend.alpha.srcFactor = C.WGPUBlendFactor(descriptor.Fragment.Targets.Blend.Alpha.SrcFactor)
-			cDescriptor.fragment.targets.blend.alpha.dstFactor = C.WGPUBlendFactor(descriptor.Fragment.Targets.Blend.Alpha.DstFactor)
+
+		constansCount := len(descriptor.Fragment.Constants)
+		if constansCount > 0 {
+			constants := C.malloc(C.size_t(constansCount) * C.size_t(unsafe.Sizeof(C.WGPUConstantEntry{})))
+			slice := unsafe.Slice((*C.WGPUConstantEntry)(constants), constansCount)
+			defer C.free(unsafe.Pointer(constants))
+
+			for i, c := range descriptor.Fragment.Constants {
+				slice[i].value = C.double(c.Value)
+				slice[i].key = C.WGPUStringView{
+					data:   C.CString(c.Key),
+					length: C.size_t(len(c.Key)),
+				}
+				defer C.free(unsafe.Pointer(slice[i].key.data))
+			}
+
+			cDescriptor.fragment.constants = (*C.WGPUConstantEntry)(constants)
+			cDescriptor.fragment.constantCount = C.size_t(constansCount)
 		}
-		cDescriptor.fragment.targets.writeMask = C.WGPUColorWriteMask(descriptor.Fragment.Targets.WriteMask)
+
+		targetsCount := len(descriptor.Fragment.Targets)
+		if targetsCount > 0 {
+			targets := C.malloc(C.size_t(targetsCount) * C.size_t(unsafe.Sizeof(C.WGPUColorTargetState{})))
+			slice := unsafe.Slice((*C.WGPUColorTargetState)(targets), targetsCount)
+			defer C.free(unsafe.Pointer(targets))
+
+			for i, t := range descriptor.Fragment.Targets {
+				slice[i].format = C.WGPUTextureFormat(t.Format)
+				slice[i].writeMask = C.WGPUColorWriteMask(t.WriteMask)
+				if t.Blend != nil {
+					slice[i].blend = &C.WGPUBlendState{
+						color: C.WGPUBlendComponent{
+							operation: C.WGPUBlendOperation(t.Blend.Color.Operation),
+							srcFactor: C.WGPUBlendFactor(t.Blend.Color.SrcFactor),
+							dstFactor: C.WGPUBlendFactor(t.Blend.Color.DstFactor),
+						},
+						alpha: C.WGPUBlendComponent{
+							operation: C.WGPUBlendOperation(t.Blend.Alpha.Operation),
+							srcFactor: C.WGPUBlendFactor(t.Blend.Alpha.SrcFactor),
+							dstFactor: C.WGPUBlendFactor(t.Blend.Alpha.DstFactor),
+						},
+					}
+				}
+			}
+
+			cDescriptor.fragment.targets = (*C.WGPUColorTargetState)(targets)
+			cDescriptor.fragment.targetCount = C.size_t(targetsCount)
+		}
 	}
 
 	handle := cgo.NewHandle(callback)
@@ -881,7 +1110,7 @@ func (d *Device) CreateRenderPipelineAsync(descriptor RenderPipelineDescriptor, 
 	cCallbackInfo.mode = C.WGPUCallbackMode(callbackModeAllowProcessEvents)
 	cCallbackInfo.callback = C.WGPUCreateRenderPipelineAsyncCallback(C.cgo_callback_CreateRenderPipelineAsyncCallback)
 	cCallbackInfo.userdata1 = unsafe.Pointer(handle)
-	cCallbackInfo.userdata2 = nil
+	cCallbackInfo.userdata2 = unsafe.Pointer(cDevice)
 
 	C.wgpuDeviceCreateRenderPipelineAsync(cDevice, &cDescriptor, cCallbackInfo)
 }
@@ -914,38 +1143,84 @@ func (d *Device) CreateRenderBundleEncoder(descriptor RenderBundleEncoderDescrip
 	return RenderBundleEncoder{ref: uintptr(unsafe.Pointer(C.wgpuDeviceCreateRenderBundleEncoder(cDevice, &cDescriptor)))}
 }
 
-func (d *Device) CreateRenderPipeline(descriptor RenderPipelineDescriptor) RenderPipeline {
+func (d *Device) CreateRenderPipeline(descriptor RenderPipelineDescriptor) *RenderPipeline {
+	renderPipeline, err := d.TryCreateRenderPipeline(descriptor)
+	if err != nil {
+		panic(err)
+	}
+	return renderPipeline
+}
+
+func (d *Device) TryCreateRenderPipeline(descriptor RenderPipelineDescriptor) (*RenderPipeline, error) {
 	cDevice := C.WGPUDevice(unsafe.Pointer(d.ref))
 
 	var cDescriptor C.WGPURenderPipelineDescriptor
-	cDescriptorlabelStr := C.CString(descriptor.Label)
-	defer C.free(unsafe.Pointer(cDescriptorlabelStr))
-	cDescriptor.label.data = cDescriptorlabelStr
+	cDescriptor.label.data = C.CString(descriptor.Label)
 	cDescriptor.label.length = C.size_t(len(descriptor.Label))
+	defer C.free(unsafe.Pointer(cDescriptor.label.data))
+
 	cDescriptor.layout = C.WGPUPipelineLayout(unsafe.Pointer(descriptor.Layout.ref))
 	cDescriptor.vertex.module = C.WGPUShaderModule(unsafe.Pointer(descriptor.Vertex.Module.ref))
-	cDescriptorvertexentryPointStr := C.CString(descriptor.Vertex.EntryPoint)
-	defer C.free(unsafe.Pointer(cDescriptorvertexentryPointStr))
-	cDescriptor.vertex.entryPoint.data = cDescriptorvertexentryPointStr
-	cDescriptor.vertex.entryPoint.length = C.size_t(len(descriptor.Vertex.EntryPoint))
-	cDescriptor.vertex.constantCount = C.size_t(descriptor.Vertex.ConstantCount)
-	cDescriptorvertexconstantskeyStr := C.CString(descriptor.Vertex.Constants.Key)
-	defer C.free(unsafe.Pointer(cDescriptorvertexconstantskeyStr))
-	cDescriptor.vertex.constants.key.data = cDescriptorvertexconstantskeyStr
-	cDescriptor.vertex.constants.key.length = C.size_t(len(descriptor.Vertex.Constants.Key))
-	cDescriptor.vertex.constants.value = C.double(descriptor.Vertex.Constants.Value)
-	cDescriptor.vertex.bufferCount = C.size_t(descriptor.Vertex.BufferCount)
-	cDescriptor.vertex.buffers.stepMode = C.WGPUVertexStepMode(descriptor.Vertex.Buffers.StepMode)
-	cDescriptor.vertex.buffers.arrayStride = C.uint64_t(descriptor.Vertex.Buffers.ArrayStride)
-	cDescriptor.vertex.buffers.attributeCount = C.size_t(descriptor.Vertex.Buffers.AttributeCount)
-	cDescriptor.vertex.buffers.attributes.format = C.WGPUVertexFormat(descriptor.Vertex.Buffers.Attributes.Format)
-	cDescriptor.vertex.buffers.attributes.offset = C.uint64_t(descriptor.Vertex.Buffers.Attributes.Offset)
-	cDescriptor.vertex.buffers.attributes.shaderLocation = C.uint32_t(descriptor.Vertex.Buffers.Attributes.ShaderLocation)
+
+	if descriptor.Vertex.EntryPoint != "" {
+		cDescriptor.vertex.entryPoint.data = C.CString(descriptor.Vertex.EntryPoint)
+		cDescriptor.vertex.entryPoint.length = C.size_t(len(descriptor.Vertex.EntryPoint))
+		defer C.free(unsafe.Pointer(cDescriptor.vertex.entryPoint.data))
+	}
+
+	constansCount := len(descriptor.Vertex.Constants)
+	if constansCount > 0 {
+		constants := C.malloc(C.size_t(constansCount) * C.size_t(unsafe.Sizeof(C.WGPUConstantEntry{})))
+		slice := unsafe.Slice((*C.WGPUConstantEntry)(constants), constansCount)
+
+		for i, c := range descriptor.Vertex.Constants {
+			slice[i].value = C.double(c.Value)
+			slice[i].key = C.WGPUStringView{
+				data:   C.CString(c.Key),
+				length: C.size_t(len(c.Key)),
+			}
+			defer C.free(unsafe.Pointer(slice[i].key.data))
+		}
+
+		cDescriptor.vertex.constants = (*C.WGPUConstantEntry)(constants)
+		cDescriptor.vertex.constantCount = C.size_t(constansCount)
+	}
+
+	buffersCount := len(descriptor.Vertex.Buffers)
+	if buffersCount > 0 {
+		buffers := C.malloc(C.size_t(buffersCount) * C.size_t(unsafe.Sizeof(C.WGPUVertexBufferLayout{})))
+		slice := unsafe.Slice((*C.WGPUVertexBufferLayout)(buffers), constansCount)
+
+		for i, buffer := range descriptor.Vertex.Buffers {
+			slice[i].stepMode = C.WGPUVertexStepMode(buffer.StepMode)
+			slice[i].arrayStride = C.uint64_t(buffer.ArrayStride)
+
+			attributesCount := len(buffer.Attributes)
+			if attributesCount > 0 {
+				attributes := C.malloc(C.size_t(attributesCount) * C.size_t(unsafe.Sizeof(C.WGPUVertexAttribute{})))
+				attributesSlice := unsafe.Slice((*C.WGPUVertexAttribute)(attributes), attributesCount)
+
+				for j, attribute := range buffer.Attributes {
+					attributesSlice[j].format = C.WGPUVertexFormat(attribute.Format)
+					attributesSlice[j].offset = C.uint64_t(attribute.Offset)
+					attributesSlice[j].shaderLocation = C.uint32_t(attribute.ShaderLocation)
+				}
+
+				slice[i].attributes = (*C.WGPUVertexAttribute)(attributes)
+				slice[i].attributeCount = C.size_t(attributesCount)
+			}
+		}
+
+		cDescriptor.vertex.buffers = (*C.WGPUVertexBufferLayout)(buffers)
+		cDescriptor.vertex.bufferCount = C.size_t(buffersCount)
+	}
+
 	cDescriptor.primitive.topology = C.WGPUPrimitiveTopology(descriptor.Primitive.Topology)
 	cDescriptor.primitive.stripIndexFormat = C.WGPUIndexFormat(descriptor.Primitive.StripIndexFormat)
 	cDescriptor.primitive.frontFace = C.WGPUFrontFace(descriptor.Primitive.FrontFace)
 	cDescriptor.primitive.cullMode = C.WGPUCullMode(descriptor.Primitive.CullMode)
 	cDescriptor.primitive.unclippedDepth = boolToWGPUBool(descriptor.Primitive.UnclippedDepth)
+
 	if descriptor.DepthStencil != nil {
 		cDescriptor.depthStencil.format = C.WGPUTextureFormat(descriptor.DepthStencil.Format)
 		cDescriptor.depthStencil.depthWriteEnabled = C.WGPUOptionalBool(descriptor.DepthStencil.DepthWriteEnabled)
@@ -964,46 +1239,96 @@ func (d *Device) CreateRenderPipeline(descriptor RenderPipelineDescriptor) Rende
 		cDescriptor.depthStencil.depthBiasSlopeScale = C.float(descriptor.DepthStencil.DepthBiasSlopeScale)
 		cDescriptor.depthStencil.depthBiasClamp = C.float(descriptor.DepthStencil.DepthBiasClamp)
 	}
+
 	cDescriptor.multisample.count = C.uint32_t(descriptor.Multisample.Count)
 	cDescriptor.multisample.mask = C.uint32_t(descriptor.Multisample.Mask)
 	cDescriptor.multisample.alphaToCoverageEnabled = boolToWGPUBool(descriptor.Multisample.AlphaToCoverageEnabled)
+
 	if descriptor.Fragment != nil {
 		cDescriptor.fragment.module = C.WGPUShaderModule(unsafe.Pointer(descriptor.Fragment.Module.ref))
 		cDescriptorfragmententryPointStr := C.CString(descriptor.Fragment.EntryPoint)
 		defer C.free(unsafe.Pointer(cDescriptorfragmententryPointStr))
 		cDescriptor.fragment.entryPoint.data = cDescriptorfragmententryPointStr
 		cDescriptor.fragment.entryPoint.length = C.size_t(len(descriptor.Fragment.EntryPoint))
-		cDescriptor.fragment.constantCount = C.size_t(descriptor.Fragment.ConstantCount)
-		cDescriptorfragmentconstantskeyStr := C.CString(descriptor.Fragment.Constants.Key)
-		defer C.free(unsafe.Pointer(cDescriptorfragmentconstantskeyStr))
-		cDescriptor.fragment.constants.key.data = cDescriptorfragmentconstantskeyStr
-		cDescriptor.fragment.constants.key.length = C.size_t(len(descriptor.Fragment.Constants.Key))
-		cDescriptor.fragment.constants.value = C.double(descriptor.Fragment.Constants.Value)
-		cDescriptor.fragment.targetCount = C.size_t(descriptor.Fragment.TargetCount)
-		cDescriptor.fragment.targets.format = C.WGPUTextureFormat(descriptor.Fragment.Targets.Format)
-		if descriptor.Fragment.Targets.Blend != nil {
-			cDescriptor.fragment.targets.blend.color.operation = C.WGPUBlendOperation(descriptor.Fragment.Targets.Blend.Color.Operation)
-			cDescriptor.fragment.targets.blend.color.srcFactor = C.WGPUBlendFactor(descriptor.Fragment.Targets.Blend.Color.SrcFactor)
-			cDescriptor.fragment.targets.blend.color.dstFactor = C.WGPUBlendFactor(descriptor.Fragment.Targets.Blend.Color.DstFactor)
-			cDescriptor.fragment.targets.blend.alpha.operation = C.WGPUBlendOperation(descriptor.Fragment.Targets.Blend.Alpha.Operation)
-			cDescriptor.fragment.targets.blend.alpha.srcFactor = C.WGPUBlendFactor(descriptor.Fragment.Targets.Blend.Alpha.SrcFactor)
-			cDescriptor.fragment.targets.blend.alpha.dstFactor = C.WGPUBlendFactor(descriptor.Fragment.Targets.Blend.Alpha.DstFactor)
+
+		constansCount := len(descriptor.Fragment.Constants)
+		if constansCount > 0 {
+			constants := C.malloc(C.size_t(constansCount) * C.size_t(unsafe.Sizeof(C.WGPUConstantEntry{})))
+			slice := unsafe.Slice((*C.WGPUConstantEntry)(constants), constansCount)
+			defer C.free(unsafe.Pointer(constants))
+
+			for i, c := range descriptor.Fragment.Constants {
+				slice[i].value = C.double(c.Value)
+				slice[i].key = C.WGPUStringView{
+					data:   C.CString(c.Key),
+					length: C.size_t(len(c.Key)),
+				}
+				defer C.free(unsafe.Pointer(slice[i].key.data))
+			}
+
+			cDescriptor.fragment.constants = (*C.WGPUConstantEntry)(constants)
+			cDescriptor.fragment.constantCount = C.size_t(constansCount)
 		}
-		cDescriptor.fragment.targets.writeMask = C.WGPUColorWriteMask(descriptor.Fragment.Targets.WriteMask)
+
+		targetsCount := len(descriptor.Fragment.Targets)
+		if targetsCount > 0 {
+			targets := C.malloc(C.size_t(targetsCount) * C.size_t(unsafe.Sizeof(C.WGPUColorTargetState{})))
+			slice := unsafe.Slice((*C.WGPUColorTargetState)(targets), targetsCount)
+			defer C.free(unsafe.Pointer(targets))
+
+			for i, t := range descriptor.Fragment.Targets {
+				slice[i].format = C.WGPUTextureFormat(t.Format)
+				slice[i].writeMask = C.WGPUColorWriteMask(t.WriteMask)
+				if t.Blend != nil {
+					slice[i].blend = &C.WGPUBlendState{
+						color: C.WGPUBlendComponent{
+							operation: C.WGPUBlendOperation(t.Blend.Color.Operation),
+							srcFactor: C.WGPUBlendFactor(t.Blend.Color.SrcFactor),
+							dstFactor: C.WGPUBlendFactor(t.Blend.Color.DstFactor),
+						},
+						alpha: C.WGPUBlendComponent{
+							operation: C.WGPUBlendOperation(t.Blend.Alpha.Operation),
+							srcFactor: C.WGPUBlendFactor(t.Blend.Alpha.SrcFactor),
+							dstFactor: C.WGPUBlendFactor(t.Blend.Alpha.DstFactor),
+						},
+					}
+				}
+			}
+
+			cDescriptor.fragment.targets = (*C.WGPUColorTargetState)(targets)
+			cDescriptor.fragment.targetCount = C.size_t(targetsCount)
+		}
 	}
-	// Call and return
-	return RenderPipeline{ref: uintptr(unsafe.Pointer(C.wgpuDeviceCreateRenderPipeline(cDevice, &cDescriptor)))}
+
+	ptr := unsafe.Pointer(C.wgpuDeviceCreateRenderPipeline(cDevice, &cDescriptor))
+
+	if ptr == nil {
+		var err error
+		cCallbackInfo := makeErrorCallback(&err)
+		C.wgpuDevicePopErrorScope(cDevice, cCallbackInfo)
+		return nil, fmt.Errorf("error creating pipeline: %v", err)
+	}
+
+	return &RenderPipeline{ref: uintptr(ptr), devRef: d.ref}, nil
 }
 
-func (d *Device) CreateSampler(descriptor *SamplerDescriptor) Sampler {
+func (d *Device) CreateSampler(descriptor *SamplerDescriptor) *Sampler {
+	sampler, err := d.TryCreateSampler(descriptor)
+	if err != nil {
+		panic(err)
+	}
+	return sampler
+}
+
+func (d *Device) TryCreateSampler(descriptor *SamplerDescriptor) (*Sampler, error) {
 	cDevice := C.WGPUDevice(unsafe.Pointer(d.ref))
 
 	var pDescriptor C.WGPUSamplerDescriptor
 	if descriptor != nil {
-		pDescriptorlabelStr := C.CString(descriptor.Label)
-		defer C.free(unsafe.Pointer(pDescriptorlabelStr))
-		pDescriptor.label.data = pDescriptorlabelStr
+		pDescriptor.label.data = C.CString(descriptor.Label)
 		pDescriptor.label.length = C.size_t(len(descriptor.Label))
+		defer C.free(unsafe.Pointer(pDescriptor.label.data))
+
 		pDescriptor.addressModeU = C.WGPUAddressMode(descriptor.AddressModeU)
 		pDescriptor.addressModeV = C.WGPUAddressMode(descriptor.AddressModeV)
 		pDescriptor.addressModeW = C.WGPUAddressMode(descriptor.AddressModeW)
@@ -1015,20 +1340,72 @@ func (d *Device) CreateSampler(descriptor *SamplerDescriptor) Sampler {
 		pDescriptor.compare = C.WGPUCompareFunction(descriptor.Compare)
 		pDescriptor.maxAnisotropy = C.uint16_t(descriptor.MaxAnisotropy)
 	}
-	// Call and return
-	return Sampler{ref: uintptr(unsafe.Pointer(C.wgpuDeviceCreateSampler(cDevice, &pDescriptor)))}
+
+	ptr := unsafe.Pointer(C.wgpuDeviceCreateSampler(cDevice, &pDescriptor))
+
+	if ptr == nil {
+		var err error
+		cCallbackInfo := makeErrorCallback(&err)
+		C.wgpuDevicePopErrorScope(cDevice, cCallbackInfo)
+		return nil, fmt.Errorf("error creating sampler: %v", err)
+	}
+
+	return &Sampler{ref: uintptr(ptr)}, nil
 }
 
-func (d *Device) CreateShaderModule(descriptor ShaderModuleDescriptor) ShaderModule {
+func (d *Device) CreateShaderModule(descriptor ShaderModuleDescriptor) *ShaderModule {
+	shaderModule, err := d.TryCreateShaderModule(descriptor)
+	if err != nil {
+		panic(err)
+	}
+	return shaderModule
+}
+
+func (d *Device) TryCreateShaderModule(descriptor ShaderModuleDescriptor) (*ShaderModule, error) {
 	cDevice := C.WGPUDevice(unsafe.Pointer(d.ref))
 
 	var cDescriptor C.WGPUShaderModuleDescriptor
-	cDescriptorlabelStr := C.CString(descriptor.Label)
-	defer C.free(unsafe.Pointer(cDescriptorlabelStr))
-	cDescriptor.label.data = cDescriptorlabelStr
+	cDescriptor.label.data = C.CString(descriptor.Label)
 	cDescriptor.label.length = C.size_t(len(descriptor.Label))
-	// Call and return
-	return ShaderModule{ref: uintptr(unsafe.Pointer(C.wgpuDeviceCreateShaderModule(cDevice, &cDescriptor)))}
+	defer C.free(unsafe.Pointer(cDescriptor.label.data))
+
+	if descriptor.WGSLSource != nil {
+		var cWGSLSource C.WGPUShaderSourceWGSL
+		cWGSLSource.chain.next = nil
+		cWGSLSource.chain.sType = C.WGPUSType_ShaderSourceWGSL
+		cWGSLSource.code.data = C.CString(descriptor.WGSLSource.Code)
+		cWGSLSource.code.length = C.size_t(len(descriptor.WGSLSource.Code))
+		defer C.free(unsafe.Pointer(cWGSLSource.code.data))
+		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(&cWGSLSource))
+	}
+
+	if descriptor.SPIRVSource != nil {
+		var cSPIRVSoruce C.WGPUShaderSourceSPIRV
+		cSPIRVSoruce.chain.next = nil
+		cSPIRVSoruce.chain.sType = C.WGPUSType_ShaderSourceSPIRV
+		codeSize := len(descriptor.SPIRVSource.Code)
+		if codeSize > 0 {
+			code := C.malloc(C.size_t(len(descriptor.SPIRVSource.Code)) * C.size_t(unsafe.Sizeof(uint32(0))))
+			slice := unsafe.Slice((*uint32)(code), codeSize)
+
+			copy(slice, descriptor.SPIRVSource.Code)
+			defer C.free(code)
+
+			cSPIRVSoruce.code = (*C.uint32_t)(code)
+			cSPIRVSoruce.codeSize = C.uint32_t(codeSize)
+		}
+	}
+
+	ptr := unsafe.Pointer(C.wgpuDeviceCreateShaderModule(cDevice, &cDescriptor))
+
+	if ptr == nil {
+		var err error
+		cCallbackInfo := makeErrorCallback(&err)
+		C.wgpuDevicePopErrorScope(cDevice, cCallbackInfo)
+		return nil, fmt.Errorf("error creating shader module: %v", err)
+	}
+
+	return &ShaderModule{ref: uintptr(ptr)}, nil
 }
 
 func (d *Device) CreateTexture(descriptor TextureDescriptor) Texture {
@@ -1061,6 +1438,11 @@ func (d *Device) CreateTexture(descriptor TextureDescriptor) Texture {
 	}
 
 	return Texture{ref: uintptr(unsafe.Pointer(C.wgpuDeviceCreateTexture(cDevice, &cDescriptor)))}
+}
+
+func (d *Device) Release() {
+	cDevice := C.WGPUDevice(unsafe.Pointer(d.ref))
+	C.wgpuDeviceRelease(cDevice)
 }
 
 func (d *Device) Destroy() {
@@ -1161,11 +1543,12 @@ func (d *Device) GetAdapterInfo(adapterInfo AdapterInfo) statusCode {
 	return statusCode(C.wgpuDeviceGetAdapterInfo(cDevice, &cAdapterInfo))
 }
 
-func (d *Device) GetQueue() Queue {
+func (d *Device) GetQueue() *Queue {
 	cDevice := C.WGPUDevice(unsafe.Pointer(d.ref))
-
-	// Call and return
-	return Queue{ref: uintptr(unsafe.Pointer(C.wgpuDeviceGetQueue(cDevice)))}
+	return &Queue{
+		ref:    uintptr(unsafe.Pointer(C.wgpuDeviceGetQueue(cDevice))),
+		devRef: d.ref,
+	}
 }
 
 func (d *Device) PushErrorScope(filter ErrorFilter) {
@@ -1185,29 +1568,17 @@ func goPopErrorScopeCallbackHandler(status C.WGPUPopErrorScopeStatus, typ C.WGPU
 
 	handle := cgo.Handle(handleID)
 	defer handle.Delete()
-	fn := handle.Value().(PopErrorScopeCallback)
+	fn := handle.Value().(popErrorScopeCallback)
 
 	var msg string
 	if message.data != nil && message.length > 0 {
 		msg = C.GoStringN(message.data, C.int(message.length))
 	}
 	fn(
-		PopErrorScopeStatus(status),
+		popErrorScopeStatus(status),
 		ErrorType(typ),
 		msg,
 	)
-}
-func (d *Device) PopErrorScope(callback PopErrorScopeCallback) {
-	cDevice := C.WGPUDevice(unsafe.Pointer(d.ref))
-
-	handle := cgo.NewHandle(callback)
-	var cCallbackInfo C.WGPUPopErrorScopeCallbackInfo
-	cCallbackInfo.mode = C.WGPUCallbackMode(callbackModeAllowProcessEvents)
-	cCallbackInfo.callback = C.WGPUPopErrorScopeCallback(C.cgo_callback_PopErrorScopeCallback)
-	cCallbackInfo.userdata1 = unsafe.Pointer(handle)
-	cCallbackInfo.userdata2 = nil
-
-	C.wgpuDevicePopErrorScope(cDevice, cCallbackInfo)
 }
 
 func (d *Device) SetLabel(label string) {
@@ -1242,16 +1613,29 @@ type Instance struct {
 	ref uintptr
 }
 
-func (i *Instance) CreateSurface(descriptor SurfaceDescriptor) Surface {
+func (i *Instance) CreateSurface(descriptor SurfaceDescriptor) *Surface {
 	cInstance := C.WGPUInstance(unsafe.Pointer(i.ref))
 
 	var cDescriptor C.WGPUSurfaceDescriptor
+
 	cDescriptorlabelStr := C.CString(descriptor.Label)
 	defer C.free(unsafe.Pointer(cDescriptorlabelStr))
 	cDescriptor.label.data = cDescriptorlabelStr
 	cDescriptor.label.length = C.size_t(len(descriptor.Label))
-	// Call and return
-	return Surface{ref: uintptr(unsafe.Pointer(C.wgpuInstanceCreateSurface(cInstance, &cDescriptor)))}
+
+	if descriptor.MetalLayer != nil {
+		metalSource := C.WGPUSurfaceSourceMetalLayer{
+			chain: C.WGPUChainedStruct{
+				next:  nil,
+				sType: C.WGPUSType_SurfaceSourceMetalLayer,
+			},
+			layer: descriptor.MetalLayer.Layer,
+		}
+
+		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(&metalSource))
+	}
+
+	return &Surface{ref: uintptr(unsafe.Pointer(C.wgpuInstanceCreateSurface(cInstance, &cDescriptor)))}
 }
 
 func (i *Instance) ProcessEvents() {
@@ -1362,6 +1746,11 @@ func (i *Instance) GetWGSLLanguageFeatures(features SupportedWGSLLanguageFeature
 	C.wgpuInstanceGetWGSLLanguageFeatures(cInstance, &cFeatures)
 }
 
+func (i *Instance) Release() {
+	cInstance := C.WGPUInstance(unsafe.Pointer(i.ref))
+	C.wgpuInstanceRelease(cInstance)
+}
+
 type PipelineLayout struct {
 	ref uintptr
 }
@@ -1416,16 +1805,23 @@ func (q *QuerySet) Destroy() {
 }
 
 type Queue struct {
-	ref uintptr
+	ref    uintptr
+	devRef uintptr
 }
 
-func (q *Queue) Submit(commandCount int, commands *CommandBuffer) {
+func (q *Queue) Submit(commands []*CommandBuffer) {
 	cQueue := C.WGPUQueue(unsafe.Pointer(q.ref))
 
-	cCommandCount := C.size_t(commandCount)
-	pCommands := C.WGPUCommandBuffer(unsafe.Pointer(commands.ref))
-	// Call and return
-	C.wgpuQueueSubmit(cQueue, cCommandCount, &pCommands)
+	commandsCount := len(commands)
+
+	cCommandsCount := C.size_t(commandsCount)
+	cCommands := make([]C.WGPUCommandBuffer, commandsCount)
+
+	for i, c := range commands {
+		cCommands[i] = C.WGPUCommandBuffer(unsafe.Pointer(c.ref))
+	}
+
+	C.wgpuQueueSubmit(cQueue, cCommandsCount, &cCommands[0])
 }
 
 //export goQueueWorkDoneCallbackHandler
@@ -1463,21 +1859,43 @@ func (q *Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
 	C.wgpuQueueOnSubmittedWorkDone(cQueue, cCallbackInfo)
 }
 
-func (q *Queue) WriteBuffer(buffer *Buffer, bufferOffset uint64, data []byte, size int) {
-	cQueue := C.WGPUQueue(unsafe.Pointer(q.ref))
+func (q *Queue) WriteBuffer(buffer *Buffer, offset uint64, data []byte) {
+	err := q.TryWriteBuffer(buffer, offset, data)
+	if err != nil {
+		panic(err)
+	}
+}
 
+func (q *Queue) TryWriteBuffer(buffer *Buffer, offset uint64, data []byte) error {
+	cQueue := C.WGPUQueue(unsafe.Pointer(q.ref))
+	cDevice := C.WGPUDevice(unsafe.Pointer(q.devRef))
 	pBuffer := C.WGPUBuffer(unsafe.Pointer(buffer.ref))
-	cBufferOffset := C.uint64_t(bufferOffset)
+
+	cBufferOffset := C.uint64_t(offset)
 	var cData unsafe.Pointer
-	if len(data) > 0 {
+
+	size := len(data)
+	if size > 0 {
 		cData = unsafe.Pointer(&data[0])
 	}
 	cSize := C.size_t(size)
 
 	C.wgpuQueueWriteBuffer(cQueue, pBuffer, cBufferOffset, cData, cSize)
+
+	var err error
+	cCallbackInfo := makeErrorCallback(&err)
+	C.wgpuDevicePopErrorScope(cDevice, cCallbackInfo)
+	return err
 }
 
-func (q *Queue) WriteTexture(destination TexelCopyTextureInfo, data []byte, dataSize int, dataLayout TexelCopyBufferLayout, writeSize Extent3D) {
+func (q *Queue) WriteTexture(destination TexelCopyTextureInfo, data []byte, dataLayout TexelCopyBufferLayout, writeSize Extent3D) {
+	err := q.TryWriteTexture(destination, data, dataLayout, writeSize)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (q *Queue) TryWriteTexture(destination TexelCopyTextureInfo, data []byte, dataLayout TexelCopyBufferLayout, writeSize Extent3D) error {
 	cQueue := C.WGPUQueue(unsafe.Pointer(q.ref))
 
 	var cDestination C.WGPUTexelCopyTextureInfo
@@ -1488,10 +1906,12 @@ func (q *Queue) WriteTexture(destination TexelCopyTextureInfo, data []byte, data
 	cDestination.origin.z = C.uint32_t(destination.Origin.Z)
 	cDestination.aspect = C.WGPUTextureAspect(destination.Aspect)
 	var cData unsafe.Pointer
-	if len(data) > 0 {
+
+	size := len(data)
+	if size > 0 {
 		cData = unsafe.Pointer(&data[0])
 	}
-	cDataSize := C.size_t(dataSize)
+	cDataSize := C.size_t(size)
 	var cDataLayout C.WGPUTexelCopyBufferLayout
 	cDataLayout.offset = C.uint64_t(dataLayout.Offset)
 	cDataLayout.bytesPerRow = C.uint32_t(dataLayout.BytesPerRow)
@@ -1500,8 +1920,8 @@ func (q *Queue) WriteTexture(destination TexelCopyTextureInfo, data []byte, data
 	cWriteSize.width = C.uint32_t(writeSize.Width)
 	cWriteSize.height = C.uint32_t(writeSize.Height)
 	cWriteSize.depthOrArrayLayers = C.uint32_t(writeSize.DepthOrArrayLayers)
-	// Call and return
 	C.wgpuQueueWriteTexture(cQueue, &cDestination, cData, cDataSize, &cDataLayout, &cWriteSize)
+	return nil
 }
 
 func (q *Queue) SetLabel(label string) {
@@ -1514,6 +1934,11 @@ func (q *Queue) SetLabel(label string) {
 	cLabel.length = C.size_t(len(label))
 	// Call and return
 	C.wgpuQueueSetLabel(cQueue, cLabel)
+}
+
+func (q *Queue) Release() {
+	cQueue := C.WGPUQueue(unsafe.Pointer(q.ref))
+	C.wgpuQueueRelease(cQueue)
 }
 
 type RenderBundle struct {
@@ -1687,15 +2112,27 @@ func (r *RenderPassEncoder) SetPipeline(pipeline *RenderPipeline) {
 	C.wgpuRenderPassEncoderSetPipeline(cRenderPassEncoder, pPipeline)
 }
 
-func (r *RenderPassEncoder) SetBindGroup(groupIndex uint32, group *BindGroup, dynamicOffsetCount int, dynamicOffsets uint32) {
+func (r *RenderPassEncoder) SetBindGroup(groupIndex uint32, group *BindGroup, dynamicOffsets []uint32) {
 	cRenderPassEncoder := C.WGPURenderPassEncoder(unsafe.Pointer(r.ref))
-
 	cGroupIndex := C.uint32_t(groupIndex)
+
 	pGroup := C.WGPUBindGroup(unsafe.Pointer(group.ref))
-	cDynamicOffsetCount := C.size_t(dynamicOffsetCount)
-	cDynamicOffsets := C.uint32_t(dynamicOffsets)
-	// Call and return
-	C.wgpuRenderPassEncoderSetBindGroup(cRenderPassEncoder, cGroupIndex, pGroup, cDynamicOffsetCount, &cDynamicOffsets)
+
+	var cDynamicOffsetCount C.size_t
+	var cDynamicOffsets *C.uint32_t
+
+	dynamicOffsetsCount := len(dynamicOffsets)
+	if dynamicOffsetsCount > 0 {
+		offsets := C.malloc(C.size_t(dynamicOffsetsCount) * C.size_t(unsafe.Sizeof(C.uint32_t(0))))
+		slice := unsafe.Slice((*uint32)(offsets), dynamicOffsetsCount)
+		defer C.free(offsets)
+		copy(slice, dynamicOffsets)
+
+		cDynamicOffsets = (*C.uint32_t)(offsets)
+		cDynamicOffsetCount = C.size_t(dynamicOffsetsCount)
+	}
+
+	C.wgpuRenderPassEncoderSetBindGroup(cRenderPassEncoder, cGroupIndex, pGroup, cDynamicOffsetCount, cDynamicOffsets)
 }
 
 func (r *RenderPassEncoder) Draw(vertexCount uint32, instanceCount uint32, firstVertex uint32, firstInstance uint32) {
@@ -1880,15 +2317,35 @@ func (r *RenderPassEncoder) SetLabel(label string) {
 }
 
 type RenderPipeline struct {
-	ref uintptr
+	ref    uintptr
+	devRef uintptr
 }
 
-func (r *RenderPipeline) GetBindGroupLayout(groupIndex uint32) BindGroupLayout {
+func (r *RenderPipeline) GetBindGroupLayout(groupIndex uint32) *BindGroupLayout {
+	bindGroupLayout, err := r.TryGetBindGroupLayout(groupIndex)
+	if err != nil {
+		panic(err)
+	}
+	return bindGroupLayout
+}
+
+func (r *RenderPipeline) TryGetBindGroupLayout(groupIndex uint32) (*BindGroupLayout, error) {
 	cRenderPipeline := C.WGPURenderPipeline(unsafe.Pointer(r.ref))
 
 	cGroupIndex := C.uint32_t(groupIndex)
-	// Call and return
-	return BindGroupLayout{ref: uintptr(unsafe.Pointer(C.wgpuRenderPipelineGetBindGroupLayout(cRenderPipeline, cGroupIndex)))}
+
+	ptr := unsafe.Pointer(C.wgpuRenderPipelineGetBindGroupLayout(cRenderPipeline, cGroupIndex))
+	if ptr == nil {
+		var err error
+
+		cDevice := C.WGPUDevice(unsafe.Pointer(r.devRef))
+		cCallbackInfo := makeErrorCallback(&err)
+
+		C.wgpuDevicePopErrorScope(cDevice, cCallbackInfo)
+		return nil, fmt.Errorf("error gettting bind group layout: %v", err)
+	}
+
+	return &BindGroupLayout{ref: uintptr(ptr)}, nil
 }
 
 func (r *RenderPipeline) SetLabel(label string) {
@@ -1901,6 +2358,11 @@ func (r *RenderPipeline) SetLabel(label string) {
 	cLabel.length = C.size_t(len(label))
 	// Call and return
 	C.wgpuRenderPipelineSetLabel(cRenderPipeline, cLabel)
+}
+
+func (r *RenderPipeline) Release() {
+	cRenderPipeline := C.WGPURenderPipeline(unsafe.Pointer(r.ref))
+	C.wgpuRenderPipelineRelease(cRenderPipeline)
 }
 
 type Sampler struct {
@@ -1991,6 +2453,11 @@ func (s *ShaderModule) SetLabel(label string) {
 	C.wgpuShaderModuleSetLabel(cShaderModule, cLabel)
 }
 
+func (s *ShaderModule) Release() {
+	cShaderModule := C.WGPUShaderModule(unsafe.Pointer(s.ref))
+	C.wgpuShaderModuleRelease(cShaderModule)
+}
+
 type Surface struct {
 	ref uintptr
 }
@@ -2050,14 +2517,51 @@ func (s *Surface) TryGetCapabilities(adapter *Adapter) (SurfaceCapabilities, err
 	return capabilities, nil
 }
 
-func (s *Surface) GetCurrentTexture(surfaceTexture SurfaceTexture) {
+func (s *Surface) GetCurrentTexture() *SurfaceTexture {
+	surfaceTexture, err := s.TryGetCurrentTexture()
+	if err != nil {
+		panic(err)
+	}
+	return surfaceTexture
+}
+
+func (s *Surface) TryGetCurrentTexture() (*SurfaceTexture, error) {
 	cSurface := C.WGPUSurface(unsafe.Pointer(s.ref))
 
 	var cSurfaceTexture C.WGPUSurfaceTexture
-	cSurfaceTexture.texture = C.WGPUTexture(unsafe.Pointer(surfaceTexture.Texture.ref))
-	cSurfaceTexture.status = C.WGPUSurfaceGetCurrentTextureStatus(surfaceTexture.Status)
-	// Call and return
 	C.wgpuSurfaceGetCurrentTexture(cSurface, &cSurfaceTexture)
+
+	status := SurfaceGetCurrentTextureStatus(cSurfaceTexture.status)
+	if status != SurfaceGetCurrentTextureStatusSuccessOptimal && status != SurfaceGetCurrentTextureStatusSuccessSuboptimal {
+		return nil, fmt.Errorf("error getting current texture")
+	}
+
+	surfaceTexture := &SurfaceTexture{
+		Texture: &Texture{
+			ref: uintptr(unsafe.Pointer(cSurfaceTexture.texture)),
+		},
+		Status: status,
+	}
+
+	return surfaceTexture, nil
+}
+
+func (s *Surface) Release() {
+	cSurface := C.WGPUSurface(unsafe.Pointer(s.ref))
+	C.wgpuSurfaceRelease(cSurface)
+}
+
+type SurfaceTexture struct {
+	Texture *Texture
+	Status  SurfaceGetCurrentTextureStatus
+}
+
+func (s *SurfaceTexture) CreateView(descriptor *TextureViewDescriptor) *TextureView {
+	return s.CreateView(descriptor)
+}
+
+func (s *SurfaceTexture) TryCreateView(descriptor *TextureViewDescriptor) (*TextureView, error) {
+	return s.Texture.TryCreateView(descriptor)
 }
 
 func (s *Surface) Present() {
@@ -2101,7 +2605,24 @@ type Texture struct {
 	ref uintptr
 }
 
-func (t *Texture) CreateView(descriptor *TextureViewDescriptor) TextureView {
+func (t *Texture) AsImageCopy() TexelCopyTextureInfo {
+	return TexelCopyTextureInfo{
+		Texture:  t,
+		MipLevel: 0,
+		Origin:   Origin3D{},
+		Aspect:   TextureAspectAll,
+	}
+}
+
+func (t *Texture) CreateView(descriptor *TextureViewDescriptor) *TextureView {
+	textureView, err := t.TryCreateView(descriptor)
+	if err != nil {
+		panic(err)
+	}
+	return textureView
+}
+
+func (t *Texture) TryCreateView(descriptor *TextureViewDescriptor) (*TextureView, error) {
 	cTexture := C.WGPUTexture(unsafe.Pointer(t.ref))
 
 	var pDescriptor C.WGPUTextureViewDescriptor
@@ -2119,8 +2640,13 @@ func (t *Texture) CreateView(descriptor *TextureViewDescriptor) TextureView {
 		pDescriptor.aspect = C.WGPUTextureAspect(descriptor.Aspect)
 		pDescriptor.usage = C.WGPUTextureUsage(descriptor.Usage)
 	}
-	// Call and return
-	return TextureView{ref: uintptr(unsafe.Pointer(C.wgpuTextureCreateView(cTexture, &pDescriptor)))}
+
+	ptr := unsafe.Pointer(C.wgpuTextureCreateView(cTexture, &pDescriptor))
+	if ptr == nil {
+		return nil, fmt.Errorf("error creating view")
+	}
+
+	return &TextureView{ref: uintptr(ptr)}, nil
 }
 
 func (t *Texture) SetLabel(label string) {
@@ -2219,6 +2745,11 @@ func (t *TextureView) SetLabel(label string) {
 	cLabel.length = C.size_t(len(label))
 	// Call and return
 	C.wgpuTextureViewSetLabel(cTextureView, cLabel)
+}
+
+func (t *TextureView) Release() {
+	cTextureView := C.WGPUTextureView(unsafe.Pointer(t.ref))
+	C.wgpuTextureViewRelease(cTextureView)
 }
 
 func CreateInstance(descriptor *InstanceDescriptor) Instance {

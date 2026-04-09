@@ -422,12 +422,12 @@ const (
 	OptionalBoolUndefined              = 2
 )
 
-type PopErrorScopeStatus int
+type popErrorScopeStatus int
 
 const (
-	PopErrorScopeStatusSuccess           PopErrorScopeStatus = 1
-	PopErrorScopeStatusCallbackCancelled                     = 2
-	PopErrorScopeStatusError                                 = 3
+	popErrorScopeStatusSuccess           popErrorScopeStatus = 1
+	popErrorScopeStatusCallbackCancelled                     = 2
+	popErrorScopeStatusError                                 = 3
 )
 
 type PowerPreference int
@@ -911,4 +911,14 @@ const (
 	WaitStatusSuccess  WaitStatus = 1
 	WaitStatusTimedOut            = 2
 	WaitStatusError               = 3
+)
+
+const (
+	ArrayLayerCountUndefined        = 0xffffffff
+	CopyStrideUndefined             = 0xffffffff
+	LimitU32Undefined        uint32 = 0xffffffff
+	LimitU64Undefined        uint64 = 0xffffffffffffffff
+	MipLevelCountUndefined          = 0xffffffff
+	WholeMapSize                    = ^uint(0)
+	WholeSize                       = 0xffffffffffffffff
 )
