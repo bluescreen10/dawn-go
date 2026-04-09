@@ -21,8 +21,8 @@ func boolToWGPUBool(value bool) C.WGPUBool {
 }
 
 func makeErrorCallback(err *error) C.WGPUPopErrorScopeCallbackInfo {
-	callback := popErrorScopeCallback(func(status popErrorScopeStatus, typ ErrorType, message string) {
-		if status != popErrorScopeStatusSuccess {
+	callback := popErrorScopeCallback(func(_ popErrorScopeStatus, typ ErrorType, message string) {
+		if typ != ErrorTypeNoError {
 			*err = fmt.Errorf("error: %s", message)
 		}
 	})

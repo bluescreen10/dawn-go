@@ -6,39 +6,63 @@ package wgpu
 type WGSLLanguageFeatureName int
 
 const (
-	WGSLLanguageFeatureNameReadonlyAndReadwriteStorageTextures  WGSLLanguageFeatureName = 1
-	WGSLLanguageFeatureNamePacked4x8IntegerDotProduct                                   = 2
-	WGSLLanguageFeatureNameUnrestrictedPointerParameters                                = 3
-	WGSLLanguageFeatureNamePointerCompositeAccess                                       = 4
-	WGSLLanguageFeatureNameUniformBufferStandardLayout                                  = 5
-	WGSLLanguageFeatureNameSubgroupId                                                   = 6
-	WGSLLanguageFeatureNameTextureAndSamplerLet                                         = 7
-	WGSLLanguageFeatureNameSubgroupUniformity                                           = 8
-	WGSLLanguageFeatureNameTextureFormatsTier1                                          = 9
-	WGSLLanguageFeatureNameChromiumTestingUnimplemented                                 = 0
-	WGSLLanguageFeatureNameChromiumTestingUnsafeExperimental                            = 1
-	WGSLLanguageFeatureNameChromiumTestingExperimental                                  = 2
-	WGSLLanguageFeatureNameChromiumTestingShippedWithKillswitch                         = 3
-	WGSLLanguageFeatureNameChromiumTestingShipped                                       = 4
-	WGSLLanguageFeatureNameSizedBindingArray                                            = 5
-	WGSLLanguageFeatureNameTexelBuffers                                                 = 6
-	WGSLLanguageFeatureNameChromiumPrint                                                = 7
-	WGSLLanguageFeatureNameFragmentDepth                                                = 8
-	WGSLLanguageFeatureNameImmediateAddressSpace                                        = 9
-	WGSLLanguageFeatureNameBufferView                                                   = 11
-	WGSLLanguageFeatureNameFilteringParameters                                          = 12
-	WGSLLanguageFeatureNameSwizzleAssignment                                            = 13
-	WGSLLanguageFeatureNameLinearIndexing                                               = 14
+	WGSLLanguageFeatureNameReadonlyAndReadwriteStorageTextures WGSLLanguageFeatureName = 1
+	WGSLLanguageFeatureNamePacked4x8IntegerDotProduct          WGSLLanguageFeatureName = 2
+	WGSLLanguageFeatureNameUnrestrictedPointerParameters       WGSLLanguageFeatureName = 3
+	WGSLLanguageFeatureNamePointerCompositeAccess              WGSLLanguageFeatureName = 4
+	WGSLLanguageFeatureNameUniformBufferStandardLayout         WGSLLanguageFeatureName = 5
+	WGSLLanguageFeatureNameSubgroupId                          WGSLLanguageFeatureName = 6
+	WGSLLanguageFeatureNameTextureAndSamplerLet                WGSLLanguageFeatureName = 7
+	WGSLLanguageFeatureNameSubgroupUniformity                  WGSLLanguageFeatureName = 8
+	WGSLLanguageFeatureNameTextureFormatsTier1                 WGSLLanguageFeatureName = 9
 )
+
+func (f WGSLLanguageFeatureName) String() string {
+	switch f {
+	case WGSLLanguageFeatureNameReadonlyAndReadwriteStorageTextures:
+		return "Readonly And Readwrite Storage Textures"
+	case WGSLLanguageFeatureNamePacked4x8IntegerDotProduct:
+		return "Packed4x8 Integer Dot Product"
+	case WGSLLanguageFeatureNameUnrestrictedPointerParameters:
+		return "Unrestricted Pointer Parameters"
+	case WGSLLanguageFeatureNamePointerCompositeAccess:
+		return "Pointer Composite Access"
+	case WGSLLanguageFeatureNameUniformBufferStandardLayout:
+		return "Uniform Buffer Standard Layout"
+	case WGSLLanguageFeatureNameSubgroupId:
+		return "Subgroup Id"
+	case WGSLLanguageFeatureNameTextureAndSamplerLet:
+		return "Texture And Sampler Let"
+	case WGSLLanguageFeatureNameSubgroupUniformity:
+		return "Subgroup Uniformity"
+	case WGSLLanguageFeatureNameTextureFormatsTier1:
+		return "TextureFormatsTier1"
+	default:
+		return "Unknown"
+	}
+}
 
 type AdapterType int
 
 const (
 	AdapterTypeDiscreteGPU   AdapterType = 1
-	AdapterTypeIntegratedGPU             = 2
-	AdapterTypeCPU                       = 3
-	AdapterTypeUnknown                   = 4
+	AdapterTypeIntegratedGPU AdapterType = 2
+	AdapterTypeCPU           AdapterType = 3
+	AdapterTypeUnknown       AdapterType = 4
 )
+
+func (a AdapterType) String() string {
+	switch a {
+	case AdapterTypeDiscreteGPU:
+		return "Discrete GPU"
+	case AdapterTypeIntegratedGPU:
+		return "Integrated GPU"
+	case AdapterTypeCPU:
+		return "CPU"
+	default:
+		return "Unknown"
+	}
+}
 
 type AddressMode int
 
@@ -53,15 +77,38 @@ type BackendType int
 
 const (
 	BackendTypeUndefined BackendType = 0
-	BackendTypeNull                  = 1
-	BackendTypeWebGPU                = 2
-	BackendTypeD3D11                 = 3
-	BackendTypeD3D12                 = 4
-	BackendTypeMetal                 = 5
-	BackendTypeVulkan                = 6
-	BackendTypeOpenGL                = 7
-	BackendTypeOpenGLES              = 8
+	BackendTypeNull      BackendType = 1
+	BackendTypeWebGPU    BackendType = 2
+	BackendTypeD3D11     BackendType = 3
+	BackendTypeD3D12     BackendType = 4
+	BackendTypeMetal     BackendType = 5
+	BackendTypeVulkan    BackendType = 6
+	BackendTypeOpenGL    BackendType = 7
+	BackendTypeOpenGLES  BackendType = 8
 )
+
+func (b BackendType) String() string {
+	switch b {
+	case BackendTypeNull:
+		return "null"
+	case BackendTypeWebGPU:
+		return "Webgpu"
+	case BackendTypeD3D11:
+		return "D3D11"
+	case BackendTypeD3D12:
+		return "D3D12"
+	case BackendTypeMetal:
+		return "Metal"
+	case BackendTypeVulkan:
+		return "Vulkan"
+	case BackendTypeOpenGL:
+		return "OpenGL"
+	case BackendTypeOpenGLES:
+		return "OpenGLES"
+	default:
+		return "undefined"
+	}
+}
 
 type BlendFactor int
 
@@ -233,19 +280,47 @@ type ErrorFilter int
 
 const (
 	ErrorFilterValidation  ErrorFilter = 1
-	ErrorFilterOutOfMemory             = 2
-	ErrorFilterInternal                = 3
+	ErrorFilterOutOfMemory ErrorFilter = 2
+	ErrorFilterInternal    ErrorFilter = 3
 )
+
+func (e ErrorFilter) String() string {
+	switch e {
+	case ErrorFilterValidation:
+		return "validation error"
+	case ErrorFilterOutOfMemory:
+		return "out of memory error"
+	case ErrorFilterInternal:
+		return "internal error"
+	default:
+		return ""
+	}
+}
 
 type ErrorType int
 
 const (
 	ErrorTypeNoError     ErrorType = 1
-	ErrorTypeValidation            = 2
-	ErrorTypeOutOfMemory           = 3
-	ErrorTypeInternal              = 4
-	ErrorTypeUnknown               = 5
+	ErrorTypeValidation  ErrorType = 2
+	ErrorTypeOutOfMemory ErrorType = 3
+	ErrorTypeInternal    ErrorType = 4
+	ErrorTypeUnknown     ErrorType = 5
 )
+
+func (e ErrorType) String() string {
+	switch e {
+	case ErrorTypeValidation:
+		return "validation"
+	case ErrorTypeOutOfMemory:
+		return "out of memory"
+	case ErrorTypeInternal:
+		return "internal"
+	case ErrorTypeUnknown:
+		return "unknown"
+	default:
+		return "no error"
+	}
+}
 
 type FeatureLevel int
 
@@ -451,11 +526,26 @@ type PresentMode int
 
 const (
 	PresentModeUndefined   PresentMode = 0
-	PresentModeFifo                    = 1
-	PresentModeFifoRelaxed             = 2
-	PresentModeImmediate               = 3
-	PresentModeMailbox                 = 4
+	PresentModeFifo        PresentMode = 1
+	PresentModeFifoRelaxed PresentMode = 2
+	PresentModeImmediate   PresentMode = 3
+	PresentModeMailbox     PresentMode = 4
 )
+
+func (p PresentMode) String() string {
+	switch p {
+	case PresentModeFifo:
+		return "Fifo"
+	case PresentModeFifoRelaxed:
+		return "Fifo Relaxed"
+	case PresentModeImmediate:
+		return "Immediate"
+	case PresentModeMailbox:
+		return "Mailbox"
+	default:
+		return "Undefined"
+	}
+}
 
 type PrimitiveTopology int
 
@@ -695,117 +785,318 @@ const (
 type TextureFormat int
 
 const (
-	TextureFormatUndefined                   TextureFormat = 0
-	TextureFormatR8Unorm                                   = 1
-	TextureFormatR8Snorm                                   = 2
-	TextureFormatR8Uint                                    = 3
-	TextureFormatR8Sint                                    = 4
-	TextureFormatR16Unorm                                  = 5
-	TextureFormatR16Snorm                                  = 6
-	TextureFormatR16Uint                                   = 7
-	TextureFormatR16Sint                                   = 8
-	TextureFormatR16Float                                  = 9
-	TextureFormatRG8Unorm                                  = 10
-	TextureFormatRG8Snorm                                  = 11
-	TextureFormatRG8Uint                                   = 12
-	TextureFormatRG8Sint                                   = 13
-	TextureFormatR32Float                                  = 14
-	TextureFormatR32Uint                                   = 15
-	TextureFormatR32Sint                                   = 16
-	TextureFormatRG16Unorm                                 = 17
-	TextureFormatRG16Snorm                                 = 18
-	TextureFormatRG16Uint                                  = 19
-	TextureFormatRG16Sint                                  = 20
-	TextureFormatRG16Float                                 = 21
-	TextureFormatRGBA8Unorm                                = 22
-	TextureFormatRGBA8UnormSrgb                            = 23
-	TextureFormatRGBA8Snorm                                = 24
-	TextureFormatRGBA8Uint                                 = 25
-	TextureFormatRGBA8Sint                                 = 26
-	TextureFormatBGRA8Unorm                                = 27
-	TextureFormatBGRA8UnormSrgb                            = 28
-	TextureFormatRGB10A2Uint                               = 29
-	TextureFormatRGB10A2Unorm                              = 30
-	TextureFormatRG11B10Ufloat                             = 31
-	TextureFormatRGB9E5Ufloat                              = 32
-	TextureFormatRG32Float                                 = 33
-	TextureFormatRG32Uint                                  = 34
-	TextureFormatRG32Sint                                  = 35
-	TextureFormatRGBA16Unorm                               = 36
-	TextureFormatRGBA16Snorm                               = 37
-	TextureFormatRGBA16Uint                                = 38
-	TextureFormatRGBA16Sint                                = 39
-	TextureFormatRGBA16Float                               = 40
-	TextureFormatRGBA32Float                               = 41
-	TextureFormatRGBA32Uint                                = 42
-	TextureFormatRGBA32Sint                                = 43
-	TextureFormatStencil8                                  = 44
-	TextureFormatDepth16Unorm                              = 45
-	TextureFormatDepth24Plus                               = 46
-	TextureFormatDepth24PlusStencil8                       = 47
-	TextureFormatDepth32Float                              = 48
-	TextureFormatDepth32FloatStencil8                      = 49
-	TextureFormatBC1RGBAUnorm                              = 50
-	TextureFormatBC1RGBAUnormSrgb                          = 51
-	TextureFormatBC2RGBAUnorm                              = 52
-	TextureFormatBC2RGBAUnormSrgb                          = 53
-	TextureFormatBC3RGBAUnorm                              = 54
-	TextureFormatBC3RGBAUnormSrgb                          = 55
-	TextureFormatBC4RUnorm                                 = 56
-	TextureFormatBC4RSnorm                                 = 57
-	TextureFormatBC5RGUnorm                                = 58
-	TextureFormatBC5RGSnorm                                = 59
-	TextureFormatBC6HRGBUfloat                             = 60
-	TextureFormatBC6HRGBFloat                              = 61
-	TextureFormatBC7RGBAUnorm                              = 62
-	TextureFormatBC7RGBAUnormSrgb                          = 63
-	TextureFormatETC2RGB8Unorm                             = 64
-	TextureFormatETC2RGB8UnormSrgb                         = 65
-	TextureFormatETC2RGB8A1Unorm                           = 66
-	TextureFormatETC2RGB8A1UnormSrgb                       = 67
-	TextureFormatETC2RGBA8Unorm                            = 68
-	TextureFormatETC2RGBA8UnormSrgb                        = 69
-	TextureFormatEACR11Unorm                               = 70
-	TextureFormatEACR11Snorm                               = 71
-	TextureFormatEACRG11Unorm                              = 72
-	TextureFormatEACRG11Snorm                              = 73
-	TextureFormatASTC4x4Unorm                              = 74
-	TextureFormatASTC4x4UnormSrgb                          = 75
-	TextureFormatASTC5x4Unorm                              = 76
-	TextureFormatASTC5x4UnormSrgb                          = 77
-	TextureFormatASTC5x5Unorm                              = 78
-	TextureFormatASTC5x5UnormSrgb                          = 79
-	TextureFormatASTC6x5Unorm                              = 80
-	TextureFormatASTC6x5UnormSrgb                          = 81
-	TextureFormatASTC6x6Unorm                              = 82
-	TextureFormatASTC6x6UnormSrgb                          = 83
-	TextureFormatASTC8x5Unorm                              = 84
-	TextureFormatASTC8x5UnormSrgb                          = 85
-	TextureFormatASTC8x6Unorm                              = 86
-	TextureFormatASTC8x6UnormSrgb                          = 87
-	TextureFormatASTC8x8Unorm                              = 88
-	TextureFormatASTC8x8UnormSrgb                          = 89
-	TextureFormatASTC10x5Unorm                             = 90
-	TextureFormatASTC10x5UnormSrgb                         = 91
-	TextureFormatASTC10x6Unorm                             = 92
-	TextureFormatASTC10x6UnormSrgb                         = 93
-	TextureFormatASTC10x8Unorm                             = 94
-	TextureFormatASTC10x8UnormSrgb                         = 95
-	TextureFormatASTC10x10Unorm                            = 96
-	TextureFormatASTC10x10UnormSrgb                        = 97
-	TextureFormatASTC12x10Unorm                            = 98
-	TextureFormatASTC12x10UnormSrgb                        = 99
-	TextureFormatASTC12x12Unorm                            = 100
-	TextureFormatASTC12x12UnormSrgb                        = 101
-	TextureFormatR8BG8Biplanar420Unorm                     = 0
-	TextureFormatR10X6BG10X6Biplanar420Unorm               = 1
-	TextureFormatR8BG8A8Triplanar420Unorm                  = 2
-	TextureFormatR8BG8Biplanar422Unorm                     = 3
-	TextureFormatR8BG8Biplanar444Unorm                     = 4
-	TextureFormatR10X6BG10X6Biplanar422Unorm               = 5
-	TextureFormatR10X6BG10X6Biplanar444Unorm               = 6
-	TextureFormatOpaqueYCbCrAndroid                        = 7
+	TextureFormatUndefined            TextureFormat = 0
+	TextureFormatR8Unorm              TextureFormat = 1
+	TextureFormatR8Snorm              TextureFormat = 2
+	TextureFormatR8Uint               TextureFormat = 3
+	TextureFormatR8Sint               TextureFormat = 4
+	TextureFormatR16Unorm             TextureFormat = 5
+	TextureFormatR16Snorm             TextureFormat = 6
+	TextureFormatR16Uint              TextureFormat = 7
+	TextureFormatR16Sint              TextureFormat = 8
+	TextureFormatR16Float             TextureFormat = 9
+	TextureFormatRG8Unorm             TextureFormat = 10
+	TextureFormatRG8Snorm             TextureFormat = 11
+	TextureFormatRG8Uint              TextureFormat = 12
+	TextureFormatRG8Sint              TextureFormat = 13
+	TextureFormatR32Float             TextureFormat = 14
+	TextureFormatR32Uint              TextureFormat = 15
+	TextureFormatR32Sint              TextureFormat = 16
+	TextureFormatRG16Unorm            TextureFormat = 17
+	TextureFormatRG16Snorm            TextureFormat = 18
+	TextureFormatRG16Uint             TextureFormat = 19
+	TextureFormatRG16Sint             TextureFormat = 20
+	TextureFormatRG16Float            TextureFormat = 21
+	TextureFormatRGBA8Unorm           TextureFormat = 22
+	TextureFormatRGBA8UnormSRGB       TextureFormat = 23
+	TextureFormatRGBA8Snorm           TextureFormat = 24
+	TextureFormatRGBA8Uint            TextureFormat = 25
+	TextureFormatRGBA8Sint            TextureFormat = 26
+	TextureFormatBGRA8Unorm           TextureFormat = 27
+	TextureFormatBGRA8UnormSRGB       TextureFormat = 28
+	TextureFormatRGB10A2Uint          TextureFormat = 29
+	TextureFormatRGB10A2Unorm         TextureFormat = 30
+	TextureFormatRG11B10Ufloat        TextureFormat = 31
+	TextureFormatRGB9E5Ufloat         TextureFormat = 32
+	TextureFormatRG32Float            TextureFormat = 33
+	TextureFormatRG32Uint             TextureFormat = 34
+	TextureFormatRG32Sint             TextureFormat = 35
+	TextureFormatRGBA16Unorm          TextureFormat = 36
+	TextureFormatRGBA16Snorm          TextureFormat = 37
+	TextureFormatRGBA16Uint           TextureFormat = 38
+	TextureFormatRGBA16Sint           TextureFormat = 39
+	TextureFormatRGBA16Float          TextureFormat = 40
+	TextureFormatRGBA32Float          TextureFormat = 41
+	TextureFormatRGBA32Uint           TextureFormat = 42
+	TextureFormatRGBA32Sint           TextureFormat = 43
+	TextureFormatStencil8             TextureFormat = 44
+	TextureFormatDepth16Unorm         TextureFormat = 45
+	TextureFormatDepth24Plus          TextureFormat = 46
+	TextureFormatDepth24PlusStencil8  TextureFormat = 47
+	TextureFormatDepth32Float         TextureFormat = 48
+	TextureFormatDepth32FloatStencil8 TextureFormat = 49
+	TextureFormatBC1RGBAUnorm         TextureFormat = 50
+	TextureFormatBC1RGBAUnormSRGB     TextureFormat = 51
+	TextureFormatBC2RGBAUnorm         TextureFormat = 52
+	TextureFormatBC2RGBAUnormSRGB     TextureFormat = 53
+	TextureFormatBC3RGBAUnorm         TextureFormat = 54
+	TextureFormatBC3RGBAUnormSRGB     TextureFormat = 55
+	TextureFormatBC4RUnorm            TextureFormat = 56
+	TextureFormatBC4RSnorm            TextureFormat = 57
+	TextureFormatBC5RGUnorm           TextureFormat = 58
+	TextureFormatBC5RGSnorm           TextureFormat = 59
+	TextureFormatBC6HRGBUfloat        TextureFormat = 60
+	TextureFormatBC6HRGBFloat         TextureFormat = 61
+	TextureFormatBC7RGBAUnorm         TextureFormat = 62
+	TextureFormatBC7RGBAUnormSRGB     TextureFormat = 63
+	TextureFormatETC2RGB8Unorm        TextureFormat = 64
+	TextureFormatETC2RGB8UnormSRGB    TextureFormat = 65
+	TextureFormatETC2RGB8A1Unorm      TextureFormat = 66
+	TextureFormatETC2RGB8A1UnormSRGB  TextureFormat = 67
+	TextureFormatETC2RGBA8Unorm       TextureFormat = 68
+	TextureFormatETC2RGBA8UnormSRGB   TextureFormat = 69
+	TextureFormatEACR11Unorm          TextureFormat = 70
+	TextureFormatEACR11Snorm          TextureFormat = 71
+	TextureFormatEACRG11Unorm         TextureFormat = 72
+	TextureFormatEACRG11Snorm         TextureFormat = 73
+	TextureFormatASTC4x4Unorm         TextureFormat = 74
+	TextureFormatASTC4x4UnormSRGB     TextureFormat = 75
+	TextureFormatASTC5x4Unorm         TextureFormat = 76
+	TextureFormatASTC5x4UnormSRGB     TextureFormat = 77
+	TextureFormatASTC5x5Unorm         TextureFormat = 78
+	TextureFormatASTC5x5UnormSRGB     TextureFormat = 79
+	TextureFormatASTC6x5Unorm         TextureFormat = 80
+	TextureFormatASTC6x5UnormSRGB     TextureFormat = 81
+	TextureFormatASTC6x6Unorm         TextureFormat = 82
+	TextureFormatASTC6x6UnormSRGB     TextureFormat = 83
+	TextureFormatASTC8x5Unorm         TextureFormat = 84
+	TextureFormatASTC8x5UnormSRGB     TextureFormat = 85
+	TextureFormatASTC8x6Unorm         TextureFormat = 86
+	TextureFormatASTC8x6UnormSRGB     TextureFormat = 87
+	TextureFormatASTC8x8Unorm         TextureFormat = 88
+	TextureFormatASTC8x8UnormSRGB     TextureFormat = 89
+	TextureFormatASTC10x5Unorm        TextureFormat = 90
+	TextureFormatASTC10x5UnormSRGB    TextureFormat = 91
+	TextureFormatASTC10x6Unorm        TextureFormat = 92
+	TextureFormatASTC10x6UnormSRGB    TextureFormat = 93
+	TextureFormatASTC10x8Unorm        TextureFormat = 94
+	TextureFormatASTC10x8UnormSRGB    TextureFormat = 95
+	TextureFormatASTC10x10Unorm       TextureFormat = 96
+	TextureFormatASTC10x10UnormSRGB   TextureFormat = 97
+	TextureFormatASTC12x10Unorm       TextureFormat = 98
+	TextureFormatASTC12x10UnormSRGB   TextureFormat = 99
+	TextureFormatASTC12x12Unorm       TextureFormat = 100
+	TextureFormatASTC12x12UnormSRGB   TextureFormat = 101
 )
+
+func (t TextureFormat) String() string {
+	switch t {
+	case TextureFormatR8Unorm:
+		return "R8Unorm"
+	case TextureFormatR8Snorm:
+		return "R8Snorm"
+	case TextureFormatR8Uint:
+		return "R8Uint"
+	case TextureFormatR8Sint:
+		return "R8Sint"
+	case TextureFormatR16Unorm:
+		return "R16Unorm"
+	case TextureFormatR16Snorm:
+		return "R16Snorm"
+	case TextureFormatR16Uint:
+		return "R16Uint"
+	case TextureFormatR16Sint:
+		return "R16Sint"
+	case TextureFormatR16Float:
+		return "R16Float"
+	case TextureFormatRG8Unorm:
+		return "RG8Unorm"
+	case TextureFormatRG8Snorm:
+		return "RG8Snorm"
+	case TextureFormatRG8Uint:
+		return "RG8Uint"
+	case TextureFormatRG8Sint:
+		return "RG8Sint"
+	case TextureFormatR32Float:
+		return "R32Float"
+	case TextureFormatR32Uint:
+		return "R32Uint"
+	case TextureFormatR32Sint:
+		return "R32Sint"
+	case TextureFormatRG16Unorm:
+		return "RG16Unorm"
+	case TextureFormatRG16Snorm:
+		return "RG16Snorm"
+	case TextureFormatRG16Uint:
+		return "RG16Uint"
+	case TextureFormatRG16Sint:
+		return "RG16Sint"
+	case TextureFormatRG16Float:
+		return "RG16Float"
+	case TextureFormatRGBA8Unorm:
+		return "RGBA8Unorm"
+	case TextureFormatRGBA8UnormSRGB:
+		return "RGBA8UnormSRGB"
+	case TextureFormatRGBA8Snorm:
+		return "RGBA8Snorm"
+	case TextureFormatRGBA8Uint:
+		return "RGBA8Uint"
+	case TextureFormatRGBA8Sint:
+		return "RGBA8Sint"
+	case TextureFormatBGRA8Unorm:
+		return "BGRA8Unorm"
+	case TextureFormatBGRA8UnormSRGB:
+		return "BGRA8UnormSRGB"
+	case TextureFormatRGB10A2Uint:
+		return "RGB10A2Uint"
+	case TextureFormatRGB10A2Unorm:
+		return "RGB10A2Unorm"
+	case TextureFormatRG11B10Ufloat:
+		return "RG11B10Ufloat"
+	case TextureFormatRGB9E5Ufloat:
+		return "RGB9E5Ufloat"
+	case TextureFormatRG32Float:
+		return "RG32Float"
+	case TextureFormatRG32Uint:
+		return "RG32Uint"
+	case TextureFormatRG32Sint:
+		return "RG32Sint"
+	case TextureFormatRGBA16Unorm:
+		return "RGBA16Unorm"
+	case TextureFormatRGBA16Snorm:
+		return "RGBA16Snorm"
+	case TextureFormatRGBA16Uint:
+		return "RGBA16Uint"
+	case TextureFormatRGBA16Sint:
+		return "RGBA16Sint"
+	case TextureFormatRGBA16Float:
+		return "RGBA16Float"
+	case TextureFormatRGBA32Float:
+		return "RGBA32Float"
+	case TextureFormatRGBA32Uint:
+		return "RGBA32Uint"
+	case TextureFormatRGBA32Sint:
+		return "RGBA32Sint"
+	case TextureFormatStencil8:
+		return "Stencil8"
+	case TextureFormatDepth16Unorm:
+		return "Depth16Unorm"
+	case TextureFormatDepth24Plus:
+		return "Depth24Plus"
+	case TextureFormatDepth24PlusStencil8:
+		return "Depth24PlusStencil8"
+	case TextureFormatDepth32Float:
+		return "Depth32Float"
+	case TextureFormatDepth32FloatStencil8:
+		return "Depth32FloatStencil8"
+	case TextureFormatBC1RGBAUnorm:
+		return "BC1RGBAUnorm"
+	case TextureFormatBC1RGBAUnormSRGB:
+		return "BC1RGBAUnormSRGB"
+	case TextureFormatBC2RGBAUnorm:
+		return "BC2RGBAUnorm"
+	case TextureFormatBC2RGBAUnormSRGB:
+		return "BC2RGBAUnormSRGB"
+	case TextureFormatBC3RGBAUnorm:
+		return "BC3RGBAUnorm"
+	case TextureFormatBC3RGBAUnormSRGB:
+		return "BC3RGBAUnormSRGB"
+	case TextureFormatBC4RUnorm:
+		return "BC4RUnorm"
+	case TextureFormatBC4RSnorm:
+		return "BC4RSnorm"
+	case TextureFormatBC5RGUnorm:
+		return "BC5RGUnorm"
+	case TextureFormatBC5RGSnorm:
+		return "BC5RGSnorm"
+	case TextureFormatBC6HRGBUfloat:
+		return "BC6HRGBUfloat"
+	case TextureFormatBC6HRGBFloat:
+		return "BC6HRGBFloat"
+	case TextureFormatBC7RGBAUnorm:
+		return "BC7RGBAUnorm"
+	case TextureFormatBC7RGBAUnormSRGB:
+		return "BC7RGBAUnormSRGB"
+	case TextureFormatETC2RGB8Unorm:
+		return "ETC2RGB8Unorm"
+	case TextureFormatETC2RGB8UnormSRGB:
+		return "ETC2RGB8UnormSRGB"
+	case TextureFormatETC2RGB8A1Unorm:
+		return "ETC2RGB8A1Unorm"
+	case TextureFormatETC2RGB8A1UnormSRGB:
+		return "ETC2RGB8A1UnormSRGB"
+	case TextureFormatETC2RGBA8Unorm:
+		return "ETC2RGBA8Unorm"
+	case TextureFormatETC2RGBA8UnormSRGB:
+		return "ETC2RGBA8UnormSRGB"
+	case TextureFormatEACR11Unorm:
+		return "EACR11Unorm"
+	case TextureFormatEACR11Snorm:
+		return "EACR11Snorm"
+	case TextureFormatEACRG11Unorm:
+		return "EACRG11Unorm"
+	case TextureFormatEACRG11Snorm:
+		return "EACRG11Snorm"
+	case TextureFormatASTC4x4Unorm:
+		return "ASTC4x4Unorm"
+	case TextureFormatASTC4x4UnormSRGB:
+		return "ASTC4x4UnormSRGB"
+	case TextureFormatASTC5x4Unorm:
+		return "ASTC5x4Unorm"
+	case TextureFormatASTC5x4UnormSRGB:
+		return "ASTC5x4UnormSRGB"
+	case TextureFormatASTC5x5Unorm:
+		return "ASTC5x5Unorm"
+	case TextureFormatASTC5x5UnormSRGB:
+		return "ASTC5x5UnormSRGB"
+	case TextureFormatASTC6x5Unorm:
+		return "ASTC6x5Unorm"
+	case TextureFormatASTC6x5UnormSRGB:
+		return "ASTC6x5UnormSRGB"
+	case TextureFormatASTC6x6Unorm:
+		return "ASTC6x6Unorm"
+	case TextureFormatASTC6x6UnormSRGB:
+		return "ASTC6x6UnormSRGB"
+	case TextureFormatASTC8x5Unorm:
+		return "ASTC8x5Unorm"
+	case TextureFormatASTC8x5UnormSRGB:
+		return "ASTC8x5UnormSRGB"
+	case TextureFormatASTC8x6Unorm:
+		return "ASTC8x6Unorm"
+	case TextureFormatASTC8x6UnormSRGB:
+		return "ASTC8x6UnormSRGB"
+	case TextureFormatASTC8x8Unorm:
+		return "ASTC8x8Unorm"
+	case TextureFormatASTC8x8UnormSRGB:
+		return "ASTC8x8UnormSRGB"
+	case TextureFormatASTC10x5Unorm:
+		return "ASTC10x5Unorm"
+	case TextureFormatASTC10x5UnormSRGB:
+		return "ASTC10x5UnormSRGB"
+	case TextureFormatASTC10x6Unorm:
+		return "ASTC10x6Unorm"
+	case TextureFormatASTC10x6UnormSRGB:
+		return "ASTC10x6UnormSRGB"
+	case TextureFormatASTC10x8Unorm:
+		return "ASTC10x8Unorm"
+	case TextureFormatASTC10x8UnormSRGB:
+		return "ASTC10x8UnormSRGB"
+	case TextureFormatASTC10x10Unorm:
+		return "ASTC10x10Unorm"
+	case TextureFormatASTC10x10UnormSRGB:
+		return "ASTC10x10UnormSRGB"
+	case TextureFormatASTC12x10Unorm:
+		return "ASTC12x10Unorm"
+	case TextureFormatASTC12x10UnormSRGB:
+		return "ASTC12x10UnormSRGB"
+	case TextureFormatASTC12x12Unorm:
+		return "ASTC12x12Unorm"
+	case TextureFormatASTC12x12UnormSRGB:
+		return "ASTC12x12UnormSRGB"
+	default:
+		return "Undefined"
+	}
+}
 
 type TextureSampleType int
 

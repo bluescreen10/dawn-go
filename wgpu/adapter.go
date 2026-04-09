@@ -197,7 +197,6 @@ func goUncapturedErrorCallbackHandler(device C.WGPUDevice, typ C.WGPUErrorType, 
 	}
 
 	handle := cgo.Handle(handleID)
-	defer handle.Delete()
 	fn := handle.Value().(UncapturedErrorCallback)
 
 	var msg string
@@ -224,12 +223,15 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 	cAdapter := C.WGPUAdapter(unsafe.Pointer(a.ref))
 
 	var pDescriptor C.WGPUDeviceDescriptor
+	var handles []cgo.Handle
 
 	if descriptor != nil {
-		pDescriptorlabelStr := C.CString(descriptor.Label)
-		defer C.free(unsafe.Pointer(pDescriptorlabelStr))
-		pDescriptor.label.data = pDescriptorlabelStr
-		pDescriptor.label.length = C.size_t(len(descriptor.Label))
+
+		if descriptor.Label != "" {
+			pDescriptor.label.length = C.size_t(len(descriptor.Label))
+			pDescriptor.label.data = C.CString(descriptor.Label)
+			defer C.free(unsafe.Pointer(pDescriptor.label.data))
+		}
 
 		featuresCount := len(descriptor.RequiredFeatures)
 		if featuresCount > 0 {
@@ -243,41 +245,43 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 			pDescriptor.requiredFeatureCount = C.size_t(featuresCount)
 		}
 
-		pDescriptor.requiredLimits = (*C.WGPULimits)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPULimits{}))))
-		defer C.free(unsafe.Pointer(pDescriptor.requiredLimits))
+		if descriptor.RequiredLimits != nil {
+			pDescriptor.requiredLimits = (*C.WGPULimits)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPULimits{}))))
+			defer C.free(unsafe.Pointer(pDescriptor.requiredLimits))
 
-		pDescriptor.requiredLimits.maxTextureDimension1D = C.uint32_t(descriptor.RequiredLimits.MaxTextureDimension1D)
-		pDescriptor.requiredLimits.maxTextureDimension2D = C.uint32_t(descriptor.RequiredLimits.MaxTextureDimension2D)
-		pDescriptor.requiredLimits.maxTextureDimension3D = C.uint32_t(descriptor.RequiredLimits.MaxTextureDimension3D)
-		pDescriptor.requiredLimits.maxTextureArrayLayers = C.uint32_t(descriptor.RequiredLimits.MaxTextureArrayLayers)
-		pDescriptor.requiredLimits.maxBindGroups = C.uint32_t(descriptor.RequiredLimits.MaxBindGroups)
-		pDescriptor.requiredLimits.maxBindGroupsPlusVertexBuffers = C.uint32_t(descriptor.RequiredLimits.MaxBindGroupsPlusVertexBuffers)
-		pDescriptor.requiredLimits.maxBindingsPerBindGroup = C.uint32_t(descriptor.RequiredLimits.MaxBindingsPerBindGroup)
-		pDescriptor.requiredLimits.maxDynamicUniformBuffersPerPipelineLayout = C.uint32_t(descriptor.RequiredLimits.MaxDynamicUniformBuffersPerPipelineLayout)
-		pDescriptor.requiredLimits.maxDynamicStorageBuffersPerPipelineLayout = C.uint32_t(descriptor.RequiredLimits.MaxDynamicStorageBuffersPerPipelineLayout)
-		pDescriptor.requiredLimits.maxSampledTexturesPerShaderStage = C.uint32_t(descriptor.RequiredLimits.MaxSampledTexturesPerShaderStage)
-		pDescriptor.requiredLimits.maxSamplersPerShaderStage = C.uint32_t(descriptor.RequiredLimits.MaxSamplersPerShaderStage)
-		pDescriptor.requiredLimits.maxStorageBuffersPerShaderStage = C.uint32_t(descriptor.RequiredLimits.MaxStorageBuffersPerShaderStage)
-		pDescriptor.requiredLimits.maxStorageTexturesPerShaderStage = C.uint32_t(descriptor.RequiredLimits.MaxStorageTexturesPerShaderStage)
-		pDescriptor.requiredLimits.maxUniformBuffersPerShaderStage = C.uint32_t(descriptor.RequiredLimits.MaxUniformBuffersPerShaderStage)
-		pDescriptor.requiredLimits.maxUniformBufferBindingSize = C.uint64_t(descriptor.RequiredLimits.MaxUniformBufferBindingSize)
-		pDescriptor.requiredLimits.maxStorageBufferBindingSize = C.uint64_t(descriptor.RequiredLimits.MaxStorageBufferBindingSize)
-		pDescriptor.requiredLimits.minUniformBufferOffsetAlignment = C.uint32_t(descriptor.RequiredLimits.MinUniformBufferOffsetAlignment)
-		pDescriptor.requiredLimits.minStorageBufferOffsetAlignment = C.uint32_t(descriptor.RequiredLimits.MinStorageBufferOffsetAlignment)
-		pDescriptor.requiredLimits.maxVertexBuffers = C.uint32_t(descriptor.RequiredLimits.MaxVertexBuffers)
-		pDescriptor.requiredLimits.maxBufferSize = C.uint64_t(descriptor.RequiredLimits.MaxBufferSize)
-		pDescriptor.requiredLimits.maxVertexAttributes = C.uint32_t(descriptor.RequiredLimits.MaxVertexAttributes)
-		pDescriptor.requiredLimits.maxVertexBufferArrayStride = C.uint32_t(descriptor.RequiredLimits.MaxVertexBufferArrayStride)
-		pDescriptor.requiredLimits.maxInterStageShaderVariables = C.uint32_t(descriptor.RequiredLimits.MaxInterStageShaderVariables)
-		pDescriptor.requiredLimits.maxColorAttachments = C.uint32_t(descriptor.RequiredLimits.MaxColorAttachments)
-		pDescriptor.requiredLimits.maxColorAttachmentBytesPerSample = C.uint32_t(descriptor.RequiredLimits.MaxColorAttachmentBytesPerSample)
-		pDescriptor.requiredLimits.maxComputeWorkgroupStorageSize = C.uint32_t(descriptor.RequiredLimits.MaxComputeWorkgroupStorageSize)
-		pDescriptor.requiredLimits.maxComputeInvocationsPerWorkgroup = C.uint32_t(descriptor.RequiredLimits.MaxComputeInvocationsPerWorkgroup)
-		pDescriptor.requiredLimits.maxComputeWorkgroupSizeX = C.uint32_t(descriptor.RequiredLimits.MaxComputeWorkgroupSizeX)
-		pDescriptor.requiredLimits.maxComputeWorkgroupSizeY = C.uint32_t(descriptor.RequiredLimits.MaxComputeWorkgroupSizeY)
-		pDescriptor.requiredLimits.maxComputeWorkgroupSizeZ = C.uint32_t(descriptor.RequiredLimits.MaxComputeWorkgroupSizeZ)
-		pDescriptor.requiredLimits.maxComputeWorkgroupsPerDimension = C.uint32_t(descriptor.RequiredLimits.MaxComputeWorkgroupsPerDimension)
-		pDescriptor.requiredLimits.maxImmediateSize = C.uint32_t(descriptor.RequiredLimits.MaxImmediateSize)
+			pDescriptor.requiredLimits.maxTextureDimension1D = C.uint32_t(descriptor.RequiredLimits.MaxTextureDimension1D)
+			pDescriptor.requiredLimits.maxTextureDimension2D = C.uint32_t(descriptor.RequiredLimits.MaxTextureDimension2D)
+			pDescriptor.requiredLimits.maxTextureDimension3D = C.uint32_t(descriptor.RequiredLimits.MaxTextureDimension3D)
+			pDescriptor.requiredLimits.maxTextureArrayLayers = C.uint32_t(descriptor.RequiredLimits.MaxTextureArrayLayers)
+			pDescriptor.requiredLimits.maxBindGroups = C.uint32_t(descriptor.RequiredLimits.MaxBindGroups)
+			pDescriptor.requiredLimits.maxBindGroupsPlusVertexBuffers = C.uint32_t(descriptor.RequiredLimits.MaxBindGroupsPlusVertexBuffers)
+			pDescriptor.requiredLimits.maxBindingsPerBindGroup = C.uint32_t(descriptor.RequiredLimits.MaxBindingsPerBindGroup)
+			pDescriptor.requiredLimits.maxDynamicUniformBuffersPerPipelineLayout = C.uint32_t(descriptor.RequiredLimits.MaxDynamicUniformBuffersPerPipelineLayout)
+			pDescriptor.requiredLimits.maxDynamicStorageBuffersPerPipelineLayout = C.uint32_t(descriptor.RequiredLimits.MaxDynamicStorageBuffersPerPipelineLayout)
+			pDescriptor.requiredLimits.maxSampledTexturesPerShaderStage = C.uint32_t(descriptor.RequiredLimits.MaxSampledTexturesPerShaderStage)
+			pDescriptor.requiredLimits.maxSamplersPerShaderStage = C.uint32_t(descriptor.RequiredLimits.MaxSamplersPerShaderStage)
+			pDescriptor.requiredLimits.maxStorageBuffersPerShaderStage = C.uint32_t(descriptor.RequiredLimits.MaxStorageBuffersPerShaderStage)
+			pDescriptor.requiredLimits.maxStorageTexturesPerShaderStage = C.uint32_t(descriptor.RequiredLimits.MaxStorageTexturesPerShaderStage)
+			pDescriptor.requiredLimits.maxUniformBuffersPerShaderStage = C.uint32_t(descriptor.RequiredLimits.MaxUniformBuffersPerShaderStage)
+			pDescriptor.requiredLimits.maxUniformBufferBindingSize = C.uint64_t(descriptor.RequiredLimits.MaxUniformBufferBindingSize)
+			pDescriptor.requiredLimits.maxStorageBufferBindingSize = C.uint64_t(descriptor.RequiredLimits.MaxStorageBufferBindingSize)
+			pDescriptor.requiredLimits.minUniformBufferOffsetAlignment = C.uint32_t(descriptor.RequiredLimits.MinUniformBufferOffsetAlignment)
+			pDescriptor.requiredLimits.minStorageBufferOffsetAlignment = C.uint32_t(descriptor.RequiredLimits.MinStorageBufferOffsetAlignment)
+			pDescriptor.requiredLimits.maxVertexBuffers = C.uint32_t(descriptor.RequiredLimits.MaxVertexBuffers)
+			pDescriptor.requiredLimits.maxBufferSize = C.uint64_t(descriptor.RequiredLimits.MaxBufferSize)
+			pDescriptor.requiredLimits.maxVertexAttributes = C.uint32_t(descriptor.RequiredLimits.MaxVertexAttributes)
+			pDescriptor.requiredLimits.maxVertexBufferArrayStride = C.uint32_t(descriptor.RequiredLimits.MaxVertexBufferArrayStride)
+			pDescriptor.requiredLimits.maxInterStageShaderVariables = C.uint32_t(descriptor.RequiredLimits.MaxInterStageShaderVariables)
+			pDescriptor.requiredLimits.maxColorAttachments = C.uint32_t(descriptor.RequiredLimits.MaxColorAttachments)
+			pDescriptor.requiredLimits.maxColorAttachmentBytesPerSample = C.uint32_t(descriptor.RequiredLimits.MaxColorAttachmentBytesPerSample)
+			pDescriptor.requiredLimits.maxComputeWorkgroupStorageSize = C.uint32_t(descriptor.RequiredLimits.MaxComputeWorkgroupStorageSize)
+			pDescriptor.requiredLimits.maxComputeInvocationsPerWorkgroup = C.uint32_t(descriptor.RequiredLimits.MaxComputeInvocationsPerWorkgroup)
+			pDescriptor.requiredLimits.maxComputeWorkgroupSizeX = C.uint32_t(descriptor.RequiredLimits.MaxComputeWorkgroupSizeX)
+			pDescriptor.requiredLimits.maxComputeWorkgroupSizeY = C.uint32_t(descriptor.RequiredLimits.MaxComputeWorkgroupSizeY)
+			pDescriptor.requiredLimits.maxComputeWorkgroupSizeZ = C.uint32_t(descriptor.RequiredLimits.MaxComputeWorkgroupSizeZ)
+			pDescriptor.requiredLimits.maxComputeWorkgroupsPerDimension = C.uint32_t(descriptor.RequiredLimits.MaxComputeWorkgroupsPerDimension)
+			pDescriptor.requiredLimits.maxImmediateSize = C.uint32_t(descriptor.RequiredLimits.MaxImmediateSize)
+		}
 
 		pDescriptordefaultQueuelabelStr := C.CString(descriptor.DefaultQueue.Label)
 		defer C.free(unsafe.Pointer(pDescriptordefaultQueuelabelStr))
@@ -286,6 +290,7 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 
 		if descriptor.DeviceLostCallback != nil {
 			handle := cgo.NewHandle(descriptor.DeviceLostCallback)
+			handles = append(handles, handle)
 			pDescriptor.deviceLostCallbackInfo.mode = C.WGPUCallbackMode(callbackModeAllowProcessEvents)
 			pDescriptor.deviceLostCallbackInfo.callback = C.WGPUDeviceLostCallback(C.cgo_callback_DeviceLostCallback)
 			pDescriptor.deviceLostCallbackInfo.userdata1 = unsafe.Pointer(handle)
@@ -294,6 +299,7 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 
 		if descriptor.UncapturedErrorCallback != nil {
 			handle := cgo.NewHandle(descriptor.UncapturedErrorCallback)
+			handles = append(handles, handle)
 			pDescriptor.uncapturedErrorCallbackInfo.callback = C.WGPUUncapturedErrorCallback(C.cgo_callback_UncapturedErrorCallback)
 			pDescriptor.uncapturedErrorCallbackInfo.userdata1 = unsafe.Pointer(handle)
 			pDescriptor.uncapturedErrorCallbackInfo.userdata2 = nil
@@ -323,6 +329,8 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 	if status != requestDeviceStatusSuccess {
 		return nil, fmt.Errorf("error requesting adapter: %s", message)
 	}
+
+	device.handles = handles
 
 	return device, nil
 }

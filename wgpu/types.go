@@ -174,7 +174,7 @@ type DepthStencilState struct {
 type DeviceDescriptor struct {
 	Label                   string
 	RequiredFeatures        []FeatureName
-	RequiredLimits          Limits
+	RequiredLimits          *Limits
 	DefaultQueue            QueueDescriptor
 	DeviceLostCallback      DeviceLostCallback
 	UncapturedErrorCallback UncapturedErrorCallback
@@ -435,11 +435,6 @@ type StorageTextureBindingLayout struct {
 	ViewDimension TextureViewDimension
 }
 
-type SupportedWGSLLanguageFeatures struct {
-	FeatureCount int
-	Features     WGSLLanguageFeatureName
-}
-
 type SurfaceCapabilities struct {
 	Usages       TextureUsage
 	Formats      []TextureFormat
@@ -569,3 +564,4 @@ type compilationInfoCallback func(status compilationInfoRequestStatus, compilati
 type popErrorScopeCallback func(status popErrorScopeStatus, typ ErrorType, message string)
 type requestAdapterCallback func(status requestAdapterStatus, adapter *Adapter, message string)
 type requestDeviceCallback func(status requestDeviceStatus, device *Device, message string)
+type errorCallback func(typ ErrorType, message string)
