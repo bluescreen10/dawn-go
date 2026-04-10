@@ -45,7 +45,7 @@ import (
 )
 
 type BindGroup struct {
-	ref uintptr
+	ref C.WGPUBindGroup
 }
 
 func (b *BindGroup) SetLabel(label string) {
@@ -66,7 +66,7 @@ func (b *BindGroup) Release() {
 }
 
 type BindGroupLayout struct {
-	ref uintptr
+	ref C.WGPUBindGroupLayout
 }
 
 func (b *BindGroupLayout) SetLabel(label string) {
@@ -87,7 +87,7 @@ func (b *BindGroupLayout) Release() {
 }
 
 type Buffer struct {
-	ref uintptr
+	ref C.WGPUBuffer
 }
 
 //export goBufferMapCallbackHandler
@@ -239,7 +239,7 @@ func (c *CommandBuffer) Release() {
 }
 
 type CommandEncoder struct {
-	ref uintptr
+	ref C.WGPUCommandEncoder
 }
 
 func (c *CommandEncoder) Finish(descriptor *CommandBufferDescriptor) *CommandBuffer {
@@ -342,11 +342,11 @@ func (c *CommandEncoder) TryBeginRenderPass(descriptor RenderPassDescriptor) (*R
 		cDescriptor.depthStencilAttachment.depthLoadOp = C.WGPULoadOp(descriptor.DepthStencilAttachment.DepthLoadOp)
 		cDescriptor.depthStencilAttachment.depthStoreOp = C.WGPUStoreOp(descriptor.DepthStencilAttachment.DepthStoreOp)
 		cDescriptor.depthStencilAttachment.depthClearValue = C.float(descriptor.DepthStencilAttachment.DepthClearValue)
-		cDescriptor.depthStencilAttachment.depthReadOnly = boolToWGPUBool(descriptor.DepthStencilAttachment.DepthReadOnly)
+		cDescriptor.depthStencilAttachment.depthReadOnly = toCBool(descriptor.DepthStencilAttachment.DepthReadOnly)
 		cDescriptor.depthStencilAttachment.stencilLoadOp = C.WGPULoadOp(descriptor.DepthStencilAttachment.StencilLoadOp)
 		cDescriptor.depthStencilAttachment.stencilStoreOp = C.WGPUStoreOp(descriptor.DepthStencilAttachment.StencilStoreOp)
 		cDescriptor.depthStencilAttachment.stencilClearValue = C.uint32_t(descriptor.DepthStencilAttachment.StencilClearValue)
-		cDescriptor.depthStencilAttachment.stencilReadOnly = boolToWGPUBool(descriptor.DepthStencilAttachment.StencilReadOnly)
+		cDescriptor.depthStencilAttachment.stencilReadOnly = toCBool(descriptor.DepthStencilAttachment.StencilReadOnly)
 	}
 
 	if descriptor.OcclusionQuerySet != nil {
@@ -622,31 +622,21 @@ func (c *ComputePassEncoder) SetLabel(label string) {
 }
 
 type ComputePipeline struct {
-	ref uintptr
+	ref C.WGPUComputePipeline
 }
 
 func (c *ComputePipeline) GetBindGroupLayout(groupIndex uint32) BindGroupLayout {
-	cComputePipeline := C.WGPUComputePipeline(unsafe.Pointer(c.ref))
-
 	cGroupIndex := C.uint32_t(groupIndex)
-	// Call and return
-	return BindGroupLayout{ref: uintptr(unsafe.Pointer(C.wgpuComputePipelineGetBindGroupLayout(cComputePipeline, cGroupIndex)))}
+	return BindGroupLayout{ref: C.wgpuComputePipelineGetBindGroupLayout(c.ref, cGroupIndex)}
 }
 
 func (c *ComputePipeline) SetLabel(label string) {
-	cComputePipeline := C.WGPUComputePipeline(unsafe.Pointer(c.ref))
-
-	cLabelStr := C.CString(label)
-	defer C.free(unsafe.Pointer(cLabelStr))
-	var cLabel C.WGPUStringView
-	cLabel.data = cLabelStr
-	cLabel.length = C.size_t(len(label))
-	// Call and return
-	C.wgpuComputePipelineSetLabel(cComputePipeline, cLabel)
+	cLabel := toCStr(label)
+	C.wgpuComputePipelineSetLabel(c.ref, cLabel)
 }
 
 type ExternalTexture struct {
-	ref uintptr
+	ref C.WGPUExternalTexture
 }
 
 func (e *ExternalTexture) SetLabel(label string) {
@@ -662,7 +652,7 @@ func (e *ExternalTexture) SetLabel(label string) {
 }
 
 type Instance struct {
-	ref uintptr
+	ref C.WGPUInstance
 }
 
 func (i *Instance) CreateSurface(descriptor SurfaceDescriptor) *Surface {
@@ -704,7 +694,7 @@ func (i *Instance) ProcessEvents() {
 // 	if futures != nil {
 // 		var pFutures C.WGPUFutureWaitInfo
 // 		pFutures.future.id = C.uint64_t(futures.Future.Id)
-// 		pFutures.completed = boolToWGPUBool(futures.Completed)
+// 		pFutures.completed = toCBool(futures.Completed)
 // 	}
 // 	cTimeoutNS := C.uint64_t(timeoutNS)
 // 	// Call and return
@@ -728,7 +718,7 @@ func goRequestAdapterCallbackHandler(status C.WGPURequestAdapterStatus, adapter 
 	}
 	fn(
 		requestAdapterStatus(status),
-		&Adapter{ref: uintptr(unsafe.Pointer(adapter))},
+		&Adapter{ref: adapter},
 		msg,
 	)
 }
@@ -742,14 +732,13 @@ func (i *Instance) RequestAdapter(options *RequestAdapterOptions) *Adapter {
 }
 
 func (i *Instance) TryRequestAdapter(options *RequestAdapterOptions) (*Adapter, error) {
-	cInstance := C.WGPUInstance(unsafe.Pointer(i.ref))
 
 	var cOptions *C.WGPURequestAdapterOptions
 	if options != nil {
 		cOptions = &C.WGPURequestAdapterOptions{
 			featureLevel:         C.WGPUFeatureLevel(options.FeatureLevel),
 			powerPreference:      C.WGPUPowerPreference(options.PowerPreference),
-			forceFallbackAdapter: boolToWGPUBool(options.ForceFallbackAdapter),
+			forceFallbackAdapter: toCBool(options.ForceFallbackAdapter),
 			backendType:          C.WGPUBackendType(options.BackendType),
 			compatibleSurface:    C.WGPUSurface(unsafe.Pointer(options.CompatibleSurface.ref)),
 		}
@@ -767,13 +756,13 @@ func (i *Instance) TryRequestAdapter(options *RequestAdapterOptions) (*Adapter, 
 
 	handle := cgo.NewHandle(callback)
 
-	var cCallbackInfo C.WGPURequestAdapterCallbackInfo
-	cCallbackInfo.mode = C.WGPUCallbackMode(callbackModeAllowSpontaneous)
-	cCallbackInfo.callback = C.WGPURequestAdapterCallback(C.cgo_callback_RequestAdapterCallback)
-	cCallbackInfo.userdata1 = unsafe.Pointer(handle)
-	cCallbackInfo.userdata2 = nil
+	cCallbackInfo := C.WGPURequestAdapterCallbackInfo{
+		mode:      C.WGPUCallbackMode(callbackModeAllowSpontaneous),
+		callback:  C.WGPURequestAdapterCallback(C.cgo_callback_RequestAdapterCallback),
+		userdata1: unsafe.Pointer(handle),
+	}
 
-	C.wgpuInstanceRequestAdapter(cInstance, cOptions, cCallbackInfo)
+	C.wgpuInstanceRequestAdapter(i.ref, cOptions, cCallbackInfo)
 
 	if status != requestAdapterStatusSuccess {
 		return nil, fmt.Errorf("error request adapter: %s", message)
@@ -783,16 +772,14 @@ func (i *Instance) TryRequestAdapter(options *RequestAdapterOptions) (*Adapter, 
 }
 
 func (i *Instance) HasWGSLLanguageFeature(feature WGSLLanguageFeatureName) bool {
-	cInstance := C.WGPUInstance(unsafe.Pointer(i.ref))
 	cFeature := C.WGPUWGSLLanguageFeatureName(feature)
-	return bool(C.wgpuInstanceHasWGSLLanguageFeature(cInstance, cFeature) != 0)
+	return bool(C.wgpuInstanceHasWGSLLanguageFeature(i.ref, cFeature) != 0)
 }
 
 func (i *Instance) GetWGSLLanguageFeatures() []WGSLLanguageFeatureName {
-	cInstance := C.WGPUInstance(unsafe.Pointer(i.ref))
-
 	var cFeatures C.WGPUSupportedWGSLLanguageFeatures
-	C.wgpuInstanceGetWGSLLanguageFeatures(cInstance, &cFeatures)
+	C.wgpuInstanceGetWGSLLanguageFeatures(i.ref, &cFeatures)
+	defer C.wgpuSupportedWGSLLanguageFeaturesFreeMembers(cFeatures)
 
 	count := cFeatures.featureCount
 	if count == 0 {
@@ -810,70 +797,42 @@ func (i *Instance) GetWGSLLanguageFeatures() []WGSLLanguageFeatureName {
 }
 
 func (i *Instance) Release() {
-	cInstance := C.WGPUInstance(unsafe.Pointer(i.ref))
-	C.wgpuInstanceRelease(cInstance)
+	C.wgpuInstanceRelease(i.ref)
 }
 
 type PipelineLayout struct {
-	ref uintptr
+	ref C.WGPUPipelineLayout
 }
 
 func (p *PipelineLayout) SetLabel(label string) {
-	cPipelineLayout := C.WGPUPipelineLayout(unsafe.Pointer(p.ref))
-
-	cLabelStr := C.CString(label)
-	defer C.free(unsafe.Pointer(cLabelStr))
-	var cLabel C.WGPUStringView
-	cLabel.data = cLabelStr
-	cLabel.length = C.size_t(len(label))
-	// Call and return
-	C.wgpuPipelineLayoutSetLabel(cPipelineLayout, cLabel)
+	C.wgpuPipelineLayoutSetLabel(p.ref, toCStr(label))
 }
 
 type QuerySet struct {
-	ref uintptr
+	ref C.WGPUQuerySet
 }
 
 func (q *QuerySet) SetLabel(label string) {
-	cQuerySet := C.WGPUQuerySet(unsafe.Pointer(q.ref))
-
-	cLabelStr := C.CString(label)
-	defer C.free(unsafe.Pointer(cLabelStr))
-	var cLabel C.WGPUStringView
-	cLabel.data = cLabelStr
-	cLabel.length = C.size_t(len(label))
-	// Call and return
-	C.wgpuQuerySetSetLabel(cQuerySet, cLabel)
+	C.wgpuQuerySetSetLabel(q.ref, toCStr(label))
 }
 
 func (q *QuerySet) GetType() QueryType {
-	cQuerySet := C.WGPUQuerySet(unsafe.Pointer(q.ref))
-
-	// Call and return
-	return QueryType(C.wgpuQuerySetGetType(cQuerySet))
+	return QueryType(C.wgpuQuerySetGetType(q.ref))
 }
 
 func (q *QuerySet) GetCount() uint32 {
-	cQuerySet := C.WGPUQuerySet(unsafe.Pointer(q.ref))
-
-	// Call and return
-	return uint32(C.wgpuQuerySetGetCount(cQuerySet))
+	return uint32(C.wgpuQuerySetGetCount(q.ref))
 }
 
 func (q *QuerySet) Destroy() {
-	cQuerySet := C.WGPUQuerySet(unsafe.Pointer(q.ref))
-
-	// Call and return
-	C.wgpuQuerySetDestroy(cQuerySet)
+	C.wgpuQuerySetDestroy(q.ref)
 }
 
 type Queue struct {
-	ref uintptr
+	ref C.WGPUQueue
 }
 
 func (q *Queue) Submit(commands ...*CommandBuffer) {
-	cQueue := C.WGPUQueue(unsafe.Pointer(q.ref))
-
 	commandsCount := len(commands)
 
 	cCommandsCount := C.size_t(commandsCount)
@@ -883,7 +842,7 @@ func (q *Queue) Submit(commands ...*CommandBuffer) {
 		cCommands[i] = C.WGPUCommandBuffer(unsafe.Pointer(c.ref))
 	}
 
-	C.wgpuQueueSubmit(cQueue, cCommandsCount, &cCommands[0])
+	C.wgpuQueueSubmit(q.ref, cCommandsCount, &cCommands[0])
 }
 
 //export goQueueWorkDoneCallbackHandler
@@ -908,38 +867,31 @@ func goQueueWorkDoneCallbackHandler(status C.WGPUQueueWorkDoneStatus, message C.
 	)
 }
 func (q *Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
-	cQueue := C.WGPUQueue(unsafe.Pointer(q.ref))
-
 	handle := cgo.NewHandle(callback)
 
 	cCallbackInfo := C.WGPUQueueWorkDoneCallbackInfo{
 		mode:      C.WGPUCallbackMode(callbackModeAllowProcessEvents),
 		callback:  C.WGPUQueueWorkDoneCallback(C.cgo_callback_QueueWorkDoneCallback),
 		userdata1: unsafe.Pointer(handle),
-		userdata2: nil,
 	}
 
-	C.wgpuQueueOnSubmittedWorkDone(cQueue, cCallbackInfo)
+	C.wgpuQueueOnSubmittedWorkDone(q.ref, cCallbackInfo)
 }
 
 func (q *Queue) WriteBuffer(buffer *Buffer, offset uint64, data []byte) {
-	cQueue := C.WGPUQueue(unsafe.Pointer(q.ref))
-	cBuffer := C.WGPUBuffer(unsafe.Pointer(buffer.ref))
 
 	cBufferOffset := C.uint64_t(offset)
-	var cData unsafe.Pointer
+	cSize := C.size_t(len(data))
 
-	size := len(data)
-	if size > 0 {
+	var cData unsafe.Pointer
+	if cSize > 0 {
 		cData = unsafe.Pointer(&data[0])
 	}
-	cSize := C.size_t(size)
-	C.wgpuQueueWriteBuffer(cQueue, cBuffer, cBufferOffset, cData, cSize)
+
+	C.wgpuQueueWriteBuffer(q.ref, buffer.ref, cBufferOffset, cData, cSize)
 }
 
 func (q *Queue) WriteTexture(destination TexelCopyTextureInfo, data []byte, dataLayout TexelCopyBufferLayout, writeSize Extent3D) {
-	cQueue := C.WGPUQueue(unsafe.Pointer(q.ref))
-
 	cDestination := C.WGPUTexelCopyTextureInfo{
 		texture:  C.WGPUTexture(unsafe.Pointer(destination.Texture.ref)),
 		mipLevel: C.uint32_t(destination.MipLevel),
@@ -952,12 +904,11 @@ func (q *Queue) WriteTexture(destination TexelCopyTextureInfo, data []byte, data
 	}
 
 	var cData unsafe.Pointer
+	cDataSize := C.size_t(len(data))
 
-	size := len(data)
-	if size > 0 {
+	if cDataSize > 0 {
 		cData = unsafe.Pointer(&data[0])
 	}
-	cDataSize := C.size_t(size)
 
 	cDataLayout := C.WGPUTexelCopyBufferLayout{
 		offset:       C.uint64_t(dataLayout.Offset),
@@ -971,18 +922,12 @@ func (q *Queue) WriteTexture(destination TexelCopyTextureInfo, data []byte, data
 		depthOrArrayLayers: C.uint32_t(writeSize.DepthOrArrayLayers),
 	}
 
-	C.wgpuQueueWriteTexture(cQueue, &cDestination, cData, cDataSize, &cDataLayout, &cWriteSize)
+	C.wgpuQueueWriteTexture(q.ref, &cDestination, cData, cDataSize, &cDataLayout, &cWriteSize)
 }
 
 func (q *Queue) SetLabel(label string) {
 	cQueue := C.WGPUQueue(unsafe.Pointer(q.ref))
-
-	cLabel := C.WGPUStringView{
-		data:   C.CString(label),
-		length: C.size_t(len(label)),
-	}
-	defer C.free(unsafe.Pointer(cLabel.data))
-
+	cLabel := toCStr(label)
 	C.wgpuQueueSetLabel(cQueue, cLabel)
 }
 
@@ -997,69 +942,54 @@ type RenderBundle struct {
 
 func (r *RenderBundle) SetLabel(label string) {
 	cRenderBundle := C.WGPURenderBundle(unsafe.Pointer(r.ref))
-
-	cLabelStr := C.CString(label)
-	defer C.free(unsafe.Pointer(cLabelStr))
-	var cLabel C.WGPUStringView
-	cLabel.data = cLabelStr
-	cLabel.length = C.size_t(len(label))
-	// Call and return
+	cLabel := toCStr(label)
 	C.wgpuRenderBundleSetLabel(cRenderBundle, cLabel)
 }
 
 type RenderBundleEncoder struct {
-	ref uintptr
+	ref C.WGPURenderBundleEncoder
 }
 
 func (r *RenderBundleEncoder) SetPipeline(pipeline *RenderPipeline) {
-	cRenderBundleEncoder := C.WGPURenderBundleEncoder(unsafe.Pointer(r.ref))
-
-	pPipeline := C.WGPURenderPipeline(unsafe.Pointer(pipeline.ref))
-	// Call and return
-	C.wgpuRenderBundleEncoderSetPipeline(cRenderBundleEncoder, pPipeline)
+	cPipeline := C.WGPURenderPipeline(unsafe.Pointer(pipeline.ref))
+	C.wgpuRenderBundleEncoderSetPipeline(r.ref, cPipeline)
 }
 
 func (r *RenderBundleEncoder) SetBindGroup(groupIndex uint32, group *BindGroup, dynamicOffsetCount int, dynamicOffsets uint32) {
-	cRenderBundleEncoder := C.WGPURenderBundleEncoder(unsafe.Pointer(r.ref))
 
 	cGroupIndex := C.uint32_t(groupIndex)
-	pGroup := C.WGPUBindGroup(unsafe.Pointer(group.ref))
+	cGroup := C.WGPUBindGroup(unsafe.Pointer(group.ref))
 	cDynamicOffsetCount := C.size_t(dynamicOffsetCount)
 	cDynamicOffsets := C.uint32_t(dynamicOffsets)
-	// Call and return
-	C.wgpuRenderBundleEncoderSetBindGroup(cRenderBundleEncoder, cGroupIndex, pGroup, cDynamicOffsetCount, &cDynamicOffsets)
+
+	C.wgpuRenderBundleEncoderSetBindGroup(r.ref, cGroupIndex, cGroup, cDynamicOffsetCount, &cDynamicOffsets)
 }
 
 func (r *RenderBundleEncoder) Draw(vertexCount uint32, instanceCount uint32, firstVertex uint32, firstInstance uint32) {
-	cRenderBundleEncoder := C.WGPURenderBundleEncoder(unsafe.Pointer(r.ref))
-
 	cVertexCount := C.uint32_t(vertexCount)
 	cInstanceCount := C.uint32_t(instanceCount)
 	cFirstVertex := C.uint32_t(firstVertex)
 	cFirstInstance := C.uint32_t(firstInstance)
-	// Call and return
-	C.wgpuRenderBundleEncoderDraw(cRenderBundleEncoder, cVertexCount, cInstanceCount, cFirstVertex, cFirstInstance)
+
+	C.wgpuRenderBundleEncoderDraw(r.ref, cVertexCount, cInstanceCount, cFirstVertex, cFirstInstance)
 }
 
 func (r *RenderBundleEncoder) DrawIndexed(indexCount uint32, instanceCount uint32, firstIndex uint32, baseVertex int32, firstInstance uint32) {
-	cRenderBundleEncoder := C.WGPURenderBundleEncoder(unsafe.Pointer(r.ref))
-
 	cIndexCount := C.uint32_t(indexCount)
 	cInstanceCount := C.uint32_t(instanceCount)
 	cFirstIndex := C.uint32_t(firstIndex)
 	cBaseVertex := C.int32_t(baseVertex)
 	cFirstInstance := C.uint32_t(firstInstance)
-	// Call and return
-	C.wgpuRenderBundleEncoderDrawIndexed(cRenderBundleEncoder, cIndexCount, cInstanceCount, cFirstIndex, cBaseVertex, cFirstInstance)
+
+	C.wgpuRenderBundleEncoderDrawIndexed(r.ref, cIndexCount, cInstanceCount, cFirstIndex, cBaseVertex, cFirstInstance)
 }
 
 func (r *RenderBundleEncoder) DrawIndirect(indirectBuffer *Buffer, indirectOffset uint64) {
 	cRenderBundleEncoder := C.WGPURenderBundleEncoder(unsafe.Pointer(r.ref))
-
-	pIndirectBuffer := C.WGPUBuffer(unsafe.Pointer(indirectBuffer.ref))
 	cIndirectOffset := C.uint64_t(indirectOffset)
-	// Call and return
-	C.wgpuRenderBundleEncoderDrawIndirect(cRenderBundleEncoder, pIndirectBuffer, cIndirectOffset)
+	cIndirectBuffer := C.WGPUBuffer(unsafe.Pointer(indirectBuffer.ref))
+
+	C.wgpuRenderBundleEncoderDrawIndirect(cRenderBundleEncoder, cIndirectBuffer, cIndirectOffset)
 }
 
 func (r *RenderBundleEncoder) DrawIndexedIndirect(indirectBuffer *Buffer, indirectOffset uint64) {
@@ -1367,28 +1297,17 @@ func (r *RenderPassEncoder) SetLabel(label string) {
 }
 
 type RenderPipeline struct {
-	ref    uintptr
-	devRef uintptr
+	ref C.WGPURenderPipeline
 }
 
 func (r *RenderPipeline) GetBindGroupLayout(groupIndex uint32) *BindGroupLayout {
-	cRenderPipeline := C.WGPURenderPipeline(unsafe.Pointer(r.ref))
 	cGroupIndex := C.uint32_t(groupIndex)
-
-	ptr := unsafe.Pointer(C.wgpuRenderPipelineGetBindGroupLayout(cRenderPipeline, cGroupIndex))
-	return &BindGroupLayout{ref: uintptr(ptr)}
+	return &BindGroupLayout{ref: C.wgpuRenderPipelineGetBindGroupLayout(r.ref, cGroupIndex)}
 }
 
 func (r *RenderPipeline) SetLabel(label string) {
-	cRenderPipeline := C.WGPURenderPipeline(unsafe.Pointer(r.ref))
-
-	cLabelStr := C.CString(label)
-	defer C.free(unsafe.Pointer(cLabelStr))
-	var cLabel C.WGPUStringView
-	cLabel.data = cLabelStr
-	cLabel.length = C.size_t(len(label))
-	// Call and return
-	C.wgpuRenderPipelineSetLabel(cRenderPipeline, cLabel)
+	cLabel := toCStr(label)
+	C.wgpuRenderPipelineSetLabel(r.ref, cLabel)
 }
 
 func (r *RenderPipeline) Release() {
@@ -1397,7 +1316,7 @@ func (r *RenderPipeline) Release() {
 }
 
 type Sampler struct {
-	ref uintptr
+	ref C.WGPUSampler
 }
 
 func (s *Sampler) SetLabel(label string) {
@@ -1413,7 +1332,7 @@ func (s *Sampler) SetLabel(label string) {
 }
 
 type ShaderModule struct {
-	ref uintptr
+	ref C.WGPUShaderModule
 }
 
 //export goCompilationInfoCallbackHandler
@@ -1583,10 +1502,8 @@ func (s *Surface) TryGetCurrentTexture() (*SurfaceTexture, error) {
 	}
 
 	surfaceTexture := &SurfaceTexture{
-		Texture: &Texture{
-			ref: uintptr(unsafe.Pointer(cSurfaceTexture.texture)),
-		},
-		Status: status,
+		Texture: &Texture{ref: cSurfaceTexture.texture},
+		Status:  status,
 	}
 
 	return surfaceTexture, nil
@@ -1648,8 +1565,7 @@ func (s *Surface) SetLabel(label string) {
 }
 
 type Texture struct {
-	ref    uintptr
-	devRef uintptr
+	ref C.WGPUTexture
 }
 
 func (t *Texture) AsImageCopy() TexelCopyTextureInfo {
@@ -1824,7 +1740,7 @@ func CreateInstance(descriptor *InstanceDescriptor) Instance {
 		}
 	}
 
-	return Instance{ref: uintptr(unsafe.Pointer(C.wgpuCreateInstance(&pDescriptor)))}
+	return Instance{ref: C.wgpuCreateInstance(&pDescriptor)}
 }
 
 func GetInstanceFeatures() []InstanceFeatureName {

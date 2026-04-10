@@ -1,9 +1,11 @@
-// CODE GENERATED. DO NOT EDIT
-//
-//go:generate go run ./cmd/wrapper/.
 package wgpu
 
-type WGSLLanguageFeatureName int
+/*
+#include "webgpu.h"
+*/
+import "C"
+
+type WGSLLanguageFeatureName C.WGPUWGSLLanguageFeatureName
 
 const (
 	WGSLLanguageFeatureNameReadonlyAndReadwriteStorageTextures WGSLLanguageFeatureName = 1
@@ -42,7 +44,7 @@ func (f WGSLLanguageFeatureName) String() string {
 	}
 }
 
-type AdapterType int
+type AdapterType C.WGPUAdapterType
 
 const (
 	AdapterTypeDiscreteGPU   AdapterType = 1
@@ -64,16 +66,16 @@ func (a AdapterType) String() string {
 	}
 }
 
-type AddressMode int
+type AddressMode C.WGPUAddressMode
 
 const (
 	AddressModeUndefined    AddressMode = 0
-	AddressModeClampToEdge              = 1
-	AddressModeRepeat                   = 2
-	AddressModeMirrorRepeat             = 3
+	AddressModeClampToEdge  AddressMode = 1
+	AddressModeRepeat       AddressMode = 2
+	AddressModeMirrorRepeat AddressMode = 3
 )
 
-type BackendType int
+type BackendType C.WGPUBackendType
 
 const (
 	BackendTypeUndefined BackendType = 0
@@ -110,173 +112,173 @@ func (b BackendType) String() string {
 	}
 }
 
-type BlendFactor int
+type BlendFactor C.WGPUBlendFactor
 
 const (
 	BlendFactorUndefined         BlendFactor = 0
-	BlendFactorZero                          = 1
-	BlendFactorOne                           = 2
-	BlendFactorSrc                           = 3
-	BlendFactorOneMinusSrc                   = 4
-	BlendFactorSrcAlpha                      = 5
-	BlendFactorOneMinusSrcAlpha              = 6
-	BlendFactorDst                           = 7
-	BlendFactorOneMinusDst                   = 8
-	BlendFactorDstAlpha                      = 9
-	BlendFactorOneMinusDstAlpha              = 10
-	BlendFactorSrcAlphaSaturated             = 11
-	BlendFactorConstant                      = 12
-	BlendFactorOneMinusConstant              = 13
-	BlendFactorSrc1                          = 14
-	BlendFactorOneMinusSrc1                  = 15
-	BlendFactorSrc1Alpha                     = 16
-	BlendFactorOneMinusSrc1Alpha             = 17
+	BlendFactorZero              BlendFactor = 1
+	BlendFactorOne               BlendFactor = 2
+	BlendFactorSrc               BlendFactor = 3
+	BlendFactorOneMinusSrc       BlendFactor = 4
+	BlendFactorSrcAlpha          BlendFactor = 5
+	BlendFactorOneMinusSrcAlpha  BlendFactor = 6
+	BlendFactorDst               BlendFactor = 7
+	BlendFactorOneMinusDst       BlendFactor = 8
+	BlendFactorDstAlpha          BlendFactor = 9
+	BlendFactorOneMinusDstAlpha  BlendFactor = 10
+	BlendFactorSrcAlphaSaturated BlendFactor = 11
+	BlendFactorConstant          BlendFactor = 12
+	BlendFactorOneMinusConstant  BlendFactor = 13
+	BlendFactorSrc1              BlendFactor = 14
+	BlendFactorOneMinusSrc1      BlendFactor = 15
+	BlendFactorSrc1Alpha         BlendFactor = 16
+	BlendFactorOneMinusSrc1Alpha BlendFactor = 17
 )
 
-type BlendOperation int
+type BlendOperation C.WGPUBlendOperation
 
 const (
 	BlendOperationUndefined       BlendOperation = 0
-	BlendOperationAdd                            = 1
-	BlendOperationSubtract                       = 2
-	BlendOperationReverseSubtract                = 3
-	BlendOperationMin                            = 4
-	BlendOperationMax                            = 5
+	BlendOperationAdd             BlendOperation = 1
+	BlendOperationSubtract        BlendOperation = 2
+	BlendOperationReverseSubtract BlendOperation = 3
+	BlendOperationMin             BlendOperation = 4
+	BlendOperationMax             BlendOperation = 5
 )
 
-type BufferBindingType int
+type BufferBindingType C.WGPUBufferBindingType
 
 const (
 	BufferBindingTypeBindingNotUsed  BufferBindingType = 0
-	BufferBindingTypeUndefined                         = 1
-	BufferBindingTypeUniform                           = 2
-	BufferBindingTypeStorage                           = 3
-	BufferBindingTypeReadOnlyStorage                   = 4
+	BufferBindingTypeUndefined       BufferBindingType = 1
+	BufferBindingTypeUniform         BufferBindingType = 2
+	BufferBindingTypeStorage         BufferBindingType = 3
+	BufferBindingTypeReadOnlyStorage BufferBindingType = 4
 )
 
-type BufferMapState int
+type BufferMapState C.WGPUBufferMapState
 
 const (
 	BufferMapStateUnmapped BufferMapState = 1
-	BufferMapStatePending                 = 2
-	BufferMapStateMapped                  = 3
+	BufferMapStatePending  BufferMapState = 2
+	BufferMapStateMapped   BufferMapState = 3
 )
 
-type BufferUsage int
+type BufferUsage C.WGPUBufferUsage
 
 const (
 	BufferUsageNone         BufferUsage = 0
-	BufferUsageMapRead                  = 1
-	BufferUsageMapWrite                 = 2
-	BufferUsageCopySrc                  = 4
-	BufferUsageCopyDst                  = 8
-	BufferUsageIndex                    = 16
-	BufferUsageVertex                   = 32
-	BufferUsageUniform                  = 64
-	BufferUsageStorage                  = 128
-	BufferUsageIndirect                 = 256
-	BufferUsageQueryResolve             = 512
-	BufferUsageTexelBuffer              = 1024
+	BufferUsageMapRead      BufferUsage = 1
+	BufferUsageMapWrite     BufferUsage = 2
+	BufferUsageCopySrc      BufferUsage = 4
+	BufferUsageCopyDst      BufferUsage = 8
+	BufferUsageIndex        BufferUsage = 16
+	BufferUsageVertex       BufferUsage = 32
+	BufferUsageUniform      BufferUsage = 64
+	BufferUsageStorage      BufferUsage = 128
+	BufferUsageIndirect     BufferUsage = 256
+	BufferUsageQueryResolve BufferUsage = 512
+	BufferUsageTexelBuffer  BufferUsage = 1024
 )
 
-type callbackMode int
+type callbackMode C.WGPUCallbackMode
 
 const (
 	callbackModeWaitAnyOnly        callbackMode = 1
-	callbackModeAllowProcessEvents              = 2
-	callbackModeAllowSpontaneous                = 3
+	callbackModeAllowProcessEvents callbackMode = 2
+	callbackModeAllowSpontaneous   callbackMode = 3
 )
 
-type ColorWriteMask int
+type ColorWriteMask C.WGPUColorWriteMask
 
 const (
 	ColorWriteMaskNone  ColorWriteMask = 0
-	ColorWriteMaskRed                  = 1
-	ColorWriteMaskGreen                = 2
-	ColorWriteMaskBlue                 = 4
-	ColorWriteMaskAlpha                = 8
-	ColorWriteMaskAll                  = 15
+	ColorWriteMaskRed   ColorWriteMask = 1
+	ColorWriteMaskGreen ColorWriteMask = 2
+	ColorWriteMaskBlue  ColorWriteMask = 4
+	ColorWriteMaskAlpha ColorWriteMask = 8
+	ColorWriteMaskAll   ColorWriteMask = 15
 )
 
-type CompareFunction int
+type CompareFunction C.WGPUCompareFunction
 
 const (
 	CompareFunctionUndefined    CompareFunction = 0
-	CompareFunctionNever                        = 1
-	CompareFunctionLess                         = 2
-	CompareFunctionEqual                        = 3
-	CompareFunctionLessEqual                    = 4
-	CompareFunctionGreater                      = 5
-	CompareFunctionNotEqual                     = 6
-	CompareFunctionGreaterEqual                 = 7
-	CompareFunctionAlways                       = 8
+	CompareFunctionNever        CompareFunction = 1
+	CompareFunctionLess         CompareFunction = 2
+	CompareFunctionEqual        CompareFunction = 3
+	CompareFunctionLessEqual    CompareFunction = 4
+	CompareFunctionGreater      CompareFunction = 5
+	CompareFunctionNotEqual     CompareFunction = 6
+	CompareFunctionGreaterEqual CompareFunction = 7
+	CompareFunctionAlways       CompareFunction = 8
 )
 
-type compilationInfoRequestStatus int
+type compilationInfoRequestStatus C.WGPUCompilationInfoRequestStatus
 
 const (
 	compilationInfoRequestStatusSuccess           compilationInfoRequestStatus = 1
-	compilationInfoRequestStatusCallbackCancelled                              = 2
+	compilationInfoRequestStatusCallbackCancelled compilationInfoRequestStatus = 2
 )
 
-type CompilationMessageType int
+type CompilationMessageType C.WGPUCompilationMessageType
 
 const (
 	CompilationMessageTypeError   CompilationMessageType = 1
-	CompilationMessageTypeWarning                        = 2
-	CompilationMessageTypeInfo                           = 3
+	CompilationMessageTypeWarning CompilationMessageType = 2
+	CompilationMessageTypeInfo    CompilationMessageType = 3
 )
 
-type ComponentSwizzle int
+type ComponentSwizzle C.WGPUComponentSwizzle
 
 const (
 	ComponentSwizzleUndefined ComponentSwizzle = 0
-	ComponentSwizzleZero                       = 1
-	ComponentSwizzleOne                        = 2
-	ComponentSwizzleR                          = 3
-	ComponentSwizzleG                          = 4
-	ComponentSwizzleB                          = 5
-	ComponentSwizzleA                          = 6
+	ComponentSwizzleZero      ComponentSwizzle = 1
+	ComponentSwizzleOne       ComponentSwizzle = 2
+	ComponentSwizzleR         ComponentSwizzle = 3
+	ComponentSwizzleG         ComponentSwizzle = 4
+	ComponentSwizzleB         ComponentSwizzle = 5
+	ComponentSwizzleA         ComponentSwizzle = 6
 )
 
-type CompositeAlphaMode int
+type CompositeAlphaMode C.WGPUCompositeAlphaMode
 
 const (
 	CompositeAlphaModeAuto            CompositeAlphaMode = 0
-	CompositeAlphaModeOpaque                             = 1
-	CompositeAlphaModePremultiplied                      = 2
-	CompositeAlphaModeUnpremultiplied                    = 3
-	CompositeAlphaModeInherit                            = 4
+	CompositeAlphaModeOpaque          CompositeAlphaMode = 1
+	CompositeAlphaModePremultiplied   CompositeAlphaMode = 2
+	CompositeAlphaModeUnpremultiplied CompositeAlphaMode = 3
+	CompositeAlphaModeInherit         CompositeAlphaMode = 4
 )
 
-type CreatePipelineAsyncStatus int
+type CreatePipelineAsyncStatus C.WGPUCreatePipelineAsyncStatus
 
 const (
 	CreatePipelineAsyncStatusSuccess           CreatePipelineAsyncStatus = 1
-	CreatePipelineAsyncStatusCallbackCancelled                           = 2
-	CreatePipelineAsyncStatusValidationError                             = 3
-	CreatePipelineAsyncStatusInternalError                               = 4
+	CreatePipelineAsyncStatusCallbackCancelled CreatePipelineAsyncStatus = 2
+	CreatePipelineAsyncStatusValidationError   CreatePipelineAsyncStatus = 3
+	CreatePipelineAsyncStatusInternalError     CreatePipelineAsyncStatus = 4
 )
 
-type CullMode int
+type CullMode C.WGPUCullMode
 
 const (
 	CullModeUndefined CullMode = 0
-	CullModeNone               = 1
-	CullModeFront              = 2
-	CullModeBack               = 3
+	CullModeNone      CullMode = 1
+	CullModeFront     CullMode = 2
+	CullModeBack      CullMode = 3
 )
 
-type DeviceLostReason int
+type DeviceLostReason C.WGPUDeviceLostReason
 
 const (
 	DeviceLostReasonUnknown           DeviceLostReason = 1
-	DeviceLostReasonDestroyed                          = 2
-	DeviceLostReasonCallbackCancelled                  = 3
-	DeviceLostReasonFailedCreation                     = 4
+	DeviceLostReasonDestroyed         DeviceLostReason = 2
+	DeviceLostReasonCallbackCancelled DeviceLostReason = 3
+	DeviceLostReasonFailedCreation    DeviceLostReason = 4
 )
 
-type ErrorFilter int
+type ErrorFilter C.WGPUErrorType
 
 const (
 	ErrorFilterValidation  ErrorFilter = 1
@@ -297,7 +299,7 @@ func (e ErrorFilter) String() string {
 	}
 }
 
-type ErrorType int
+type ErrorType C.WGPUErrorType
 
 const (
 	ErrorTypeNoError     ErrorType = 1
@@ -322,207 +324,141 @@ func (e ErrorType) String() string {
 	}
 }
 
-type FeatureLevel int
+type FeatureLevel C.WGPUFeatureLevel
 
 const (
 	FeatureLevelUndefined     FeatureLevel = 0
-	FeatureLevelCompatibility              = 1
-	FeatureLevelCore                       = 2
+	FeatureLevelCompatibility FeatureLevel = 1
+	FeatureLevelCore          FeatureLevel = 2
 )
 
-type FeatureName int
+type FeatureName C.WGPUFeatureName
 
 const (
-	FeatureNameCoreFeaturesAndLimits                                FeatureName = 1
-	FeatureNameDepthClipControl                                                 = 2
-	FeatureNameDepth32FloatStencil8                                             = 3
-	FeatureNameTextureCompressionBC                                             = 4
-	FeatureNameTextureCompressionBCSliced3D                                     = 5
-	FeatureNameTextureCompressionETC2                                           = 6
-	FeatureNameTextureCompressionASTC                                           = 7
-	FeatureNameTextureCompressionASTCSliced3D                                   = 8
-	FeatureNameTimestampQuery                                                   = 9
-	FeatureNameIndirectFirstInstance                                            = 10
-	FeatureNameShaderF16                                                        = 11
-	FeatureNameRG11B10UfloatRenderable                                          = 12
-	FeatureNameBGRA8UnormStorage                                                = 13
-	FeatureNameFloat32Filterable                                                = 14
-	FeatureNameFloat32Blendable                                                 = 15
-	FeatureNameClipDistances                                                    = 16
-	FeatureNameDualSourceBlending                                               = 17
-	FeatureNameSubgroups                                                        = 18
-	FeatureNameTextureFormatsTier1                                              = 19
-	FeatureNameTextureFormatsTier2                                              = 20
-	FeatureNamePrimitiveIndex                                                   = 21
-	FeatureNameTextureComponentSwizzle                                          = 22
-	FeatureNameDawnInternalUsages                                               = 0
-	FeatureNameDawnMultiPlanarFormats                                           = 1
-	FeatureNameDawnNative                                                       = 2
-	FeatureNameChromiumExperimentalTimestampQueryInsidePasses                   = 3
-	FeatureNameImplicitDeviceSynchronization                                    = 4
-	FeatureNameTransientAttachments                                             = 6
-	FeatureNameMSAARenderToSingleSampled                                        = 7
-	FeatureNameD3D11MultithreadProtected                                        = 8
-	FeatureNameANGLETextureSharing                                              = 9
-	FeatureNamePixelLocalStorageCoherent                                        = 10
-	FeatureNamePixelLocalStorageNonCoherent                                     = 11
-	FeatureNameUnorm16TextureFormats                                            = 12
-	FeatureNameMultiPlanarFormatExtendedUsages                                  = 13
-	FeatureNameMultiPlanarFormatP010                                            = 14
-	FeatureNameHostMappedPointer                                                = 15
-	FeatureNameMultiPlanarRenderTargets                                         = 16
-	FeatureNameMultiPlanarFormatNv12a                                           = 17
-	FeatureNameFramebufferFetch                                                 = 18
-	FeatureNameBufferMapExtendedUsages                                          = 19
-	FeatureNameAdapterPropertiesMemoryHeaps                                     = 20
-	FeatureNameAdapterPropertiesD3D                                             = 21
-	FeatureNameAdapterPropertiesVk                                              = 22
-	FeatureNameDawnFormatCapabilities                                           = 23
-	FeatureNameDawnDrmFormatCapabilities                                        = 24
-	FeatureNameMultiPlanarFormatNv16                                            = 25
-	FeatureNameMultiPlanarFormatNv24                                            = 26
-	FeatureNameMultiPlanarFormatP210                                            = 27
-	FeatureNameMultiPlanarFormatP410                                            = 28
-	FeatureNameSharedTextureMemoryVkDedicatedAllocation                         = 29
-	FeatureNameSharedTextureMemoryAHardwareBuffer                               = 30
-	FeatureNameSharedTextureMemoryDmaBuf                                        = 31
-	FeatureNameSharedTextureMemoryOpaqueFD                                      = 32
-	FeatureNameSharedTextureMemoryZirconHandle                                  = 33
-	FeatureNameSharedTextureMemoryDXGISharedHandle                              = 34
-	FeatureNameSharedTextureMemoryD3D11Texture2D                                = 35
-	FeatureNameSharedTextureMemoryIOSurface                                     = 36
-	FeatureNameSharedTextureMemoryEGLImage                                      = 37
-	FeatureNameSharedFenceVkSemaphoreOpaqueFD                                   = 38
-	FeatureNameSharedFenceSyncFD                                                = 39
-	FeatureNameSharedFenceVkSemaphoreZirconHandle                               = 40
-	FeatureNameSharedFenceDXGISharedHandle                                      = 41
-	FeatureNameSharedFenceMTLSharedEvent                                        = 42
-	FeatureNameSharedBufferMemoryD3D12Resource                                  = 43
-	FeatureNameStaticSamplers                                                   = 44
-	FeatureNameYCbCrVulkanSamplers                                              = 45
-	FeatureNameShaderModuleCompilationOptions                                   = 46
-	FeatureNameDawnLoadResolveTexture                                           = 47
-	FeatureNameDawnPartialLoadResolveTexture                                    = 48
-	FeatureNameMultiDrawIndirect                                                = 49
-	FeatureNameDawnTexelCopyBufferRowAlignment                                  = 50
-	FeatureNameFlexibleTextureViews                                             = 51
-	FeatureNameChromiumExperimentalSubgroupMatrix                               = 52
-	FeatureNameSharedFenceEGLSync                                               = 53
-	FeatureNameDawnDeviceAllocatorControl                                       = 54
-	FeatureNameAdapterPropertiesWGPU                                            = 55
-	FeatureNameSharedBufferMemoryD3D12SharedMemoryFileMappingHandle             = 56
-	FeatureNameSharedTextureMemoryD3D12Resource                                 = 57
-	FeatureNameChromiumExperimentalSamplingResourceTable                        = 58
-	FeatureNameChromiumExperimentalSubgroupSizeControl                          = 59
-	FeatureNameAtomicVec2uMinMax                                                = 60
-	FeatureNameUnorm16FormatsForExternalTexture                                 = 61
-	FeatureNameOpaqueYCbCrAndroidForExternalTexture                             = 62
-	FeatureNameUnorm16Filterable                                                = 63
-	FeatureNameRenderPassRenderArea                                             = 64
-	FeatureNameDawnNativeSpontaneousQueueEvents                                 = 65
-	FeatureNameAdapterPropertiesDrm                                             = 66
+	FeatureNameCoreFeaturesAndLimits          FeatureName = 1
+	FeatureNameDepthClipControl               FeatureName = 2
+	FeatureNameDepth32FloatStencil8           FeatureName = 3
+	FeatureNameTextureCompressionBC           FeatureName = 4
+	FeatureNameTextureCompressionBCSliced3D   FeatureName = 5
+	FeatureNameTextureCompressionETC2         FeatureName = 6
+	FeatureNameTextureCompressionASTC         FeatureName = 7
+	FeatureNameTextureCompressionASTCSliced3D FeatureName = 8
+	FeatureNameTimestampQuery                 FeatureName = 9
+	FeatureNameIndirectFirstInstance          FeatureName = 10
+	FeatureNameShaderF16                      FeatureName = 11
+	FeatureNameRG11B10UfloatRenderable        FeatureName = 12
+	FeatureNameBGRA8UnormStorage              FeatureName = 13
+	FeatureNameFloat32Filterable              FeatureName = 14
+	FeatureNameFloat32Blendable               FeatureName = 15
+	FeatureNameClipDistances                  FeatureName = 16
+	FeatureNameDualSourceBlending             FeatureName = 17
+	FeatureNameSubgroups                      FeatureName = 18
+	FeatureNameTextureFormatsTier1            FeatureName = 19
+	FeatureNameTextureFormatsTier2            FeatureName = 20
+	FeatureNamePrimitiveIndex                 FeatureName = 21
+	FeatureNameTextureComponentSwizzle        FeatureName = 22
 )
 
-type FilterMode int
+type FilterMode C.WGPUFilterMode
 
 const (
 	FilterModeUndefined FilterMode = 0
-	FilterModeNearest              = 1
-	FilterModeLinear               = 2
+	FilterModeNearest   FilterMode = 1
+	FilterModeLinear    FilterMode = 2
 )
 
-type FrontFace int
+type FrontFace C.WGPUFrontFace
 
 const (
 	FrontFaceUndefined FrontFace = 0
-	FrontFaceCCW                 = 1
-	FrontFaceCW                  = 2
+	FrontFaceCCW       FrontFace = 1
+	FrontFaceCW        FrontFace = 2
 )
 
-type IndexFormat int
+type IndexFormat C.WGPUIndexFormat
 
 const (
 	IndexFormatUndefined IndexFormat = 0
-	IndexFormatUint16                = 1
-	IndexFormatUint32                = 2
+	IndexFormatUint16    IndexFormat = 1
+	IndexFormatUint32    IndexFormat = 2
 )
 
-type InstanceFeatureName int
+type InstanceFeatureName C.WGPUInstanceFeatureName
 
 const (
 	InstanceFeatureNameTimedWaitAny              InstanceFeatureName = 1
-	InstanceFeatureNameShaderSourceSPIRV                             = 2
-	InstanceFeatureNameMultipleDevicesPerAdapter                     = 3
+	InstanceFeatureNameShaderSourceSPIRV         InstanceFeatureName = 2
+	InstanceFeatureNameMultipleDevicesPerAdapter InstanceFeatureName = 3
 )
 
-type LoadOp int
+type LoadOp C.WGPULoadOp
 
 const (
 	LoadOpUndefined            LoadOp = 0
-	LoadOpLoad                        = 1
-	LoadOpClear                       = 2
-	LoadOpExpandResolveTexture        = 3
+	LoadOpLoad                 LoadOp = 1
+	LoadOpClear                LoadOp = 2
+	LoadOpExpandResolveTexture LoadOp = 3
 )
 
-type MapAsyncStatus int
+type MapAsyncStatus C.WGPUMapAsyncStatus
 
 const (
 	MapAsyncStatusSuccess           MapAsyncStatus = 1
-	MapAsyncStatusCallbackCancelled                = 2
-	MapAsyncStatusError                            = 3
-	MapAsyncStatusAborted                          = 4
+	MapAsyncStatusCallbackCancelled MapAsyncStatus = 2
+	MapAsyncStatusError             MapAsyncStatus = 3
+	MapAsyncStatusAborted           MapAsyncStatus = 4
 )
 
-type MapMode int
+type MapMode C.WGPUMapMode
 
 const (
 	MapModeNone  MapMode = 0
-	MapModeRead          = 1
-	MapModeWrite         = 2
+	MapModeRead  MapMode = 1
+	MapModeWrite MapMode = 2
 )
 
-type MipmapFilterMode int
+type MipmapFilterMode C.WGPUMipmapFilterMode
 
 const (
 	MipmapFilterModeUndefined MipmapFilterMode = 0
-	MipmapFilterModeNearest                    = 1
-	MipmapFilterModeLinear                     = 2
+	MipmapFilterModeNearest   MipmapFilterMode = 1
+	MipmapFilterModeLinear    MipmapFilterMode = 2
 )
 
-type OptionalBool int
+type OptionalBool C.WGPUOptionalBool
 
 const (
 	OptionalBoolFalse     OptionalBool = 0
-	OptionalBoolTrue                   = 1
-	OptionalBoolUndefined              = 2
+	OptionalBoolTrue      OptionalBool = 1
+	OptionalBoolUndefined OptionalBool = 2
 )
 
-type popErrorScopeStatus int
+type popErrorScopeStatus C.WGPUPopErrorScopeStatus
 
 const (
 	popErrorScopeStatusSuccess           popErrorScopeStatus = 1
-	popErrorScopeStatusCallbackCancelled                     = 2
-	popErrorScopeStatusError                                 = 3
+	popErrorScopeStatusCallbackCancelled popErrorScopeStatus = 2
+	popErrorScopeStatusError             popErrorScopeStatus = 3
 )
 
-type PowerPreference int
+type PowerPreference C.WGPUPowerPreference
 
 const (
 	PowerPreferenceUndefined       PowerPreference = 0
-	PowerPreferenceLowPower                        = 1
-	PowerPreferenceHighPerformance                 = 2
+	PowerPreferenceLowPower        PowerPreference = 1
+	PowerPreferenceHighPerformance PowerPreference = 2
 )
 
-type PredefinedColorSpace int
+type PredefinedColorSpace C.WGPUPredefinedColorSpace
 
 const (
 	PredefinedColorSpaceSRGB            PredefinedColorSpace = 1
-	PredefinedColorSpaceDisplayP3                            = 2
-	PredefinedColorSpaceSRGBLinear                           = 3
-	PredefinedColorSpaceDisplayP3Linear                      = 4
+	PredefinedColorSpaceDisplayP3       PredefinedColorSpace = 2
+	PredefinedColorSpaceSRGBLinear      PredefinedColorSpace = 3
+	PredefinedColorSpaceDisplayP3Linear PredefinedColorSpace = 4
 )
 
-type PresentMode int
+type PresentMode C.WGPUPresentMode
 
 const (
 	PresentModeUndefined   PresentMode = 0
@@ -547,242 +483,161 @@ func (p PresentMode) String() string {
 	}
 }
 
-type PrimitiveTopology int
+type PrimitiveTopology C.WGPUPrimitiveTopology
 
 const (
 	PrimitiveTopologyUndefined     PrimitiveTopology = 0
-	PrimitiveTopologyPointList                       = 1
-	PrimitiveTopologyLineList                        = 2
-	PrimitiveTopologyLineStrip                       = 3
-	PrimitiveTopologyTriangleList                    = 4
-	PrimitiveTopologyTriangleStrip                   = 5
+	PrimitiveTopologyPointList     PrimitiveTopology = 1
+	PrimitiveTopologyLineList      PrimitiveTopology = 2
+	PrimitiveTopologyLineStrip     PrimitiveTopology = 3
+	PrimitiveTopologyTriangleList  PrimitiveTopology = 4
+	PrimitiveTopologyTriangleStrip PrimitiveTopology = 5
 )
 
-type QueryType int
+type QueryType C.WGPUQueryType
 
 const (
 	QueryTypeOcclusion QueryType = 1
-	QueryTypeTimestamp           = 2
+	QueryTypeTimestamp QueryType = 2
 )
 
-type QueueWorkDoneStatus int
+type QueueWorkDoneStatus C.WGPUQueueWorkDoneStatus
 
 const (
 	QueueWorkDoneStatusSuccess           QueueWorkDoneStatus = 1
-	QueueWorkDoneStatusCallbackCancelled                     = 2
-	QueueWorkDoneStatusError                                 = 3
+	QueueWorkDoneStatusCallbackCancelled QueueWorkDoneStatus = 2
+	QueueWorkDoneStatusError             QueueWorkDoneStatus = 3
 )
 
-type requestAdapterStatus int
+type requestAdapterStatus C.WGPURequestAdapterStatus
 
 const (
 	requestAdapterStatusSuccess           requestAdapterStatus = 1
-	requestAdapterStatusCallbackCancelled                      = 2
-	requestAdapterStatusUnavailable                            = 3
-	requestAdapterStatusError                                  = 4
+	requestAdapterStatusCallbackCancelled requestAdapterStatus = 2
+	requestAdapterStatusUnavailable       requestAdapterStatus = 3
+	requestAdapterStatusError             requestAdapterStatus = 4
 )
 
-type requestDeviceStatus int
+type requestDeviceStatus C.WGPURequestDeviceStatus
 
 const (
 	requestDeviceStatusSuccess           requestDeviceStatus = 1
-	requestDeviceStatusCallbackCancelled                     = 2
-	requestDeviceStatusError                                 = 3
+	requestDeviceStatusCallbackCancelled requestDeviceStatus = 2
+	requestDeviceStatusError             requestDeviceStatus = 3
 )
 
-type SType int
+type SType C.WGPUSType
 
 const (
-	STypeShaderSourceSPIRV                                              SType = 1
-	STypeShaderSourceWGSL                                                     = 2
-	STypeRenderPassMaxDrawCount                                               = 3
-	STypeSurfaceSourceMetalLayer                                              = 4
-	STypeSurfaceSourceWindowsHWND                                             = 5
-	STypeSurfaceSourceXlibWindow                                              = 6
-	STypeSurfaceSourceWaylandSurface                                          = 7
-	STypeSurfaceSourceAndroidNativeWindow                                     = 8
-	STypeSurfaceSourceXCBWindow                                               = 9
-	STypeSurfaceColorManagement                                               = 10
-	STypeRequestAdapterWebXROptions                                           = 11
-	STypeTextureComponentSwizzleDescriptor                                    = 12
-	STypeExternalTextureBindingLayout                                         = 13
-	STypeExternalTextureBindingEntry                                          = 14
-	STypeCompatibilityModeLimits                                              = 15
-	STypeTextureBindingViewDimension                                          = 16
-	STypeEmscriptenSurfaceSourceCanvasHTMLSelector                            = 0
-	STypeSurfaceDescriptorFromWindowsCoreWindow                               = 0
-	STypeSurfaceDescriptorFromWindowsUWPSwapChainPanel                        = 3
-	STypeDawnTextureInternalUsageDescriptor                                   = 4
-	STypeDawnEncoderInternalUsageDescriptor                                   = 5
-	STypeDawnInstanceDescriptor                                               = 6
-	STypeDawnCacheDeviceDescriptor                                            = 7
-	STypeDawnAdapterPropertiesPowerPreference                                 = 8
-	STypeDawnBufferDescriptorErrorInfoFromWireClient                          = 9
-	STypeDawnTogglesDescriptor                                                = 10
-	STypeDawnShaderModuleSPIRVOptionsDescriptor                               = 11
-	STypeRequestAdapterOptionsLUID                                            = 12
-	STypeRequestAdapterOptionsGetGLProc                                       = 13
-	STypeRequestAdapterOptionsD3D11Device                                     = 14
-	STypeDawnRenderPassSampleCount                                            = 15
-	STypeRenderPassPixelLocalStorage                                          = 16
-	STypePipelineLayoutPixelLocalStorage                                      = 17
-	STypeBufferHostMappedPointer                                              = 18
-	STypeAdapterPropertiesMemoryHeaps                                         = 19
-	STypeAdapterPropertiesD3D                                                 = 20
-	STypeAdapterPropertiesVk                                                  = 21
-	STypeDawnWireWGSLControl                                                  = 22
-	STypeDawnWGSLBlocklist                                                    = 23
-	STypeDawnDrmFormatCapabilities                                            = 24
-	STypeShaderModuleCompilationOptions                                       = 25
-	STypeColorTargetStateExpandResolveTextureDawn                             = 26
-	STypeRenderPassRenderAreaRect                                             = 27
-	STypeSharedTextureMemoryVkDedicatedAllocationDescriptor                   = 28
-	STypeSharedTextureMemoryAHardwareBufferDescriptor                         = 29
-	STypeSharedTextureMemoryDmaBufDescriptor                                  = 30
-	STypeSharedTextureMemoryOpaqueFDDescriptor                                = 31
-	STypeSharedTextureMemoryZirconHandleDescriptor                            = 32
-	STypeSharedTextureMemoryDXGISharedHandleDescriptor                        = 33
-	STypeSharedTextureMemoryD3D11Texture2DDescriptor                          = 34
-	STypeSharedTextureMemoryIOSurfaceDescriptor                               = 35
-	STypeSharedTextureMemoryEGLImageDescriptor                                = 36
-	STypeSharedTextureMemoryInitializedBeginState                             = 37
-	STypeSharedTextureMemoryInitializedEndState                               = 38
-	STypeSharedTextureMemoryVkImageLayoutBeginState                           = 39
-	STypeSharedTextureMemoryVkImageLayoutEndState                             = 40
-	STypeSharedTextureMemoryD3DSwapchainBeginState                            = 41
-	STypeSharedFenceVkSemaphoreOpaqueFDDescriptor                             = 42
-	STypeSharedFenceVkSemaphoreOpaqueFDExportInfo                             = 43
-	STypeSharedFenceSyncFDDescriptor                                          = 44
-	STypeSharedFenceSyncFDExportInfo                                          = 45
-	STypeSharedFenceVkSemaphoreZirconHandleDescriptor                         = 46
-	STypeSharedFenceVkSemaphoreZirconHandleExportInfo                         = 47
-	STypeSharedFenceDXGISharedHandleDescriptor                                = 48
-	STypeSharedFenceDXGISharedHandleExportInfo                                = 49
-	STypeSharedFenceMTLSharedEventDescriptor                                  = 50
-	STypeSharedFenceMTLSharedEventExportInfo                                  = 51
-	STypeSharedBufferMemoryD3D12ResourceDescriptor                            = 52
-	STypeStaticSamplerBindingLayout                                           = 53
-	STypeYCbCrVkDescriptor                                                    = 54
-	STypeSharedTextureMemoryAHardwareBufferProperties                         = 55
-	STypeAHardwareBufferProperties                                            = 56
-	STypeDawnTexelCopyBufferRowAlignmentLimits                                = 58
-	STypeAdapterPropertiesSubgroupMatrixConfigs                               = 59
-	STypeSharedFenceEGLSyncDescriptor                                         = 60
-	STypeSharedFenceEGLSyncExportInfo                                         = 61
-	STypeDawnInjectedInvalidSType                                             = 62
-	STypeDawnCompilationMessageUtf16                                          = 63
-	STypeDawnFakeBufferOOMForTesting                                          = 64
-	STypeSurfaceDescriptorFromWindowsWinUISwapChainPanel                      = 65
-	STypeDawnDeviceAllocatorControl                                           = 66
-	STypeDawnHostMappedPointerLimits                                          = 67
-	STypeRenderPassDescriptorResolveRect                                      = 68
-	STypeRequestAdapterWebGPUBackendOptions                                   = 69
-	STypeDawnFakeDeviceInitializeErrorForTesting                              = 70
-	STypeSharedTextureMemoryD3D11BeginState                                   = 71
-	STypeDawnConsumeAdapterDescriptor                                         = 72
-	STypeTexelBufferBindingEntry                                              = 73
-	STypeTexelBufferBindingLayout                                             = 74
-	STypeSharedTextureMemoryMetalEndAccessState                               = 75
-	STypeAdapterPropertiesWGPU                                                = 76
-	STypeSharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor       = 77
-	STypeSharedTextureMemoryD3D12ResourceDescriptor                           = 78
-	STypeRequestAdapterOptionsAngleVirtualizationGroup                        = 79
-	STypePipelineLayoutResourceTable                                          = 80
-	STypeAdapterPropertiesExplicitComputeSubgroupSizeConfigs                  = 81
-	STypeAdapterPropertiesDrm                                                 = 82
+	STypeShaderSourceSPIRV                 SType = 1
+	STypeShaderSourceWGSL                  SType = 2
+	STypeRenderPassMaxDrawCount            SType = 3
+	STypeSurfaceSourceMetalLayer           SType = 4
+	STypeSurfaceSourceWindowsHWND          SType = 5
+	STypeSurfaceSourceXlibWindow           SType = 6
+	STypeSurfaceSourceWaylandSurface       SType = 7
+	STypeSurfaceSourceAndroidNativeWindow  SType = 8
+	STypeSurfaceSourceXCBWindow            SType = 9
+	STypeSurfaceColorManagement            SType = 10
+	STypeRequestAdapterWebXROptions        SType = 11
+	STypeTextureComponentSwizzleDescriptor SType = 12
+	STypeExternalTextureBindingLayout      SType = 13
+	STypeExternalTextureBindingEntry       SType = 14
+	STypeCompatibilityModeLimits           SType = 15
+	STypeTextureBindingViewDimension       SType = 16
 )
 
-type SamplerBindingType int
+type SamplerBindingType C.WGPUSamplerBindingType
 
 const (
 	SamplerBindingTypeBindingNotUsed SamplerBindingType = 0
-	SamplerBindingTypeUndefined                         = 1
-	SamplerBindingTypeFiltering                         = 2
-	SamplerBindingTypeNonFiltering                      = 3
-	SamplerBindingTypeComparison                        = 4
+	SamplerBindingTypeUndefined      SamplerBindingType = 1
+	SamplerBindingTypeFiltering      SamplerBindingType = 2
+	SamplerBindingTypeNonFiltering   SamplerBindingType = 3
+	SamplerBindingTypeComparison     SamplerBindingType = 4
 )
 
-type ShaderStage int
+type ShaderStage C.WGPUShaderStage
 
 const (
 	ShaderStageNone     ShaderStage = 0
-	ShaderStageVertex               = 1
-	ShaderStageFragment             = 2
-	ShaderStageCompute              = 4
+	ShaderStageVertex   ShaderStage = 1
+	ShaderStageFragment ShaderStage = 2
+	ShaderStageCompute  ShaderStage = 4
 )
 
-type statusCode int
+type statusCode C.WGPUStatus
 
 const (
 	statusCodeSuccess statusCode = 1
-	statusCodeError              = 2
+	statusCodeError   statusCode = 2
 )
 
-type StencilOperation int
+type StencilOperation C.WGPUStencilOperation
 
 const (
 	StencilOperationUndefined      StencilOperation = 0
-	StencilOperationKeep                            = 1
-	StencilOperationZero                            = 2
-	StencilOperationReplace                         = 3
-	StencilOperationInvert                          = 4
-	StencilOperationIncrementClamp                  = 5
-	StencilOperationDecrementClamp                  = 6
-	StencilOperationIncrementWrap                   = 7
-	StencilOperationDecrementWrap                   = 8
+	StencilOperationKeep           StencilOperation = 1
+	StencilOperationZero           StencilOperation = 2
+	StencilOperationReplace        StencilOperation = 3
+	StencilOperationInvert         StencilOperation = 4
+	StencilOperationIncrementClamp StencilOperation = 5
+	StencilOperationDecrementClamp StencilOperation = 6
+	StencilOperationIncrementWrap  StencilOperation = 7
+	StencilOperationDecrementWrap  StencilOperation = 8
 )
 
-type StorageTextureAccess int
+type StorageTextureAccess C.WGPUStorageTextureAccess
 
 const (
 	StorageTextureAccessBindingNotUsed StorageTextureAccess = 0
-	StorageTextureAccessUndefined                           = 1
-	StorageTextureAccessWriteOnly                           = 2
-	StorageTextureAccessReadOnly                            = 3
-	StorageTextureAccessReadWrite                           = 4
+	StorageTextureAccessUndefined      StorageTextureAccess = 1
+	StorageTextureAccessWriteOnly      StorageTextureAccess = 2
+	StorageTextureAccessReadOnly       StorageTextureAccess = 3
+	StorageTextureAccessReadWrite      StorageTextureAccess = 4
 )
 
-type StoreOp int
+type StoreOp C.WGPUStoreOp
 
 const (
 	StoreOpUndefined StoreOp = 0
-	StoreOpStore             = 1
-	StoreOpDiscard           = 2
+	StoreOpStore     StoreOp = 1
+	StoreOpDiscard   StoreOp = 2
 )
 
-type SurfaceGetCurrentTextureStatus int
+type SurfaceGetCurrentTextureStatus C.WGPUSurfaceGetCurrentTextureStatus
 
 const (
 	SurfaceGetCurrentTextureStatusSuccessOptimal    SurfaceGetCurrentTextureStatus = 1
-	SurfaceGetCurrentTextureStatusSuccessSuboptimal                                = 2
-	SurfaceGetCurrentTextureStatusTimeout                                          = 3
-	SurfaceGetCurrentTextureStatusOutdated                                         = 4
-	SurfaceGetCurrentTextureStatusLost                                             = 5
-	SurfaceGetCurrentTextureStatusError                                            = 6
+	SurfaceGetCurrentTextureStatusSuccessSuboptimal SurfaceGetCurrentTextureStatus = 2
+	SurfaceGetCurrentTextureStatusTimeout           SurfaceGetCurrentTextureStatus = 3
+	SurfaceGetCurrentTextureStatusOutdated          SurfaceGetCurrentTextureStatus = 4
+	SurfaceGetCurrentTextureStatusLost              SurfaceGetCurrentTextureStatus = 5
+	SurfaceGetCurrentTextureStatusError             SurfaceGetCurrentTextureStatus = 6
 )
 
-type TextureAspect int
+type TextureAspect C.WGPUTextureAspect
 
 const (
 	TextureAspectUndefined   TextureAspect = 0
-	TextureAspectAll                       = 1
-	TextureAspectStencilOnly               = 2
-	TextureAspectDepthOnly                 = 3
-	TextureAspectPlane0Only                = 0
-	TextureAspectPlane1Only                = 1
-	TextureAspectPlane2Only                = 2
+	TextureAspectAll         TextureAspect = 1
+	TextureAspectStencilOnly TextureAspect = 2
+	TextureAspectDepthOnly   TextureAspect = 3
+	TextureAspectPlane0Only  TextureAspect = 0
+	TextureAspectPlane1Only  TextureAspect = 1
+	TextureAspectPlane2Only  TextureAspect = 2
 )
 
-type TextureDimension int
+type TextureDimension C.WGPUTextureDimension
 
 const (
 	TextureDimensionUndefined TextureDimension = 0
-	TextureDimension1D                         = 1
-	TextureDimension2D                         = 2
-	TextureDimension3D                         = 3
+	TextureDimension1D        TextureDimension = 1
+	TextureDimension2D        TextureDimension = 2
+	TextureDimension3D        TextureDimension = 3
 )
 
-type TextureFormat int
+type TextureFormat C.WGPUTextureFormat
 
 const (
 	TextureFormatUndefined            TextureFormat = 0
@@ -1098,110 +953,110 @@ func (t TextureFormat) String() string {
 	}
 }
 
-type TextureSampleType int
+type TextureSampleType C.WGPUTextureSampleType
 
 const (
 	TextureSampleTypeBindingNotUsed    TextureSampleType = 0
-	TextureSampleTypeUndefined                           = 1
-	TextureSampleTypeFloat                               = 2
-	TextureSampleTypeUnfilterableFloat                   = 3
-	TextureSampleTypeDepth                               = 4
-	TextureSampleTypeSint                                = 5
-	TextureSampleTypeUint                                = 6
+	TextureSampleTypeUndefined         TextureSampleType = 1
+	TextureSampleTypeFloat             TextureSampleType = 2
+	TextureSampleTypeUnfilterableFloat TextureSampleType = 3
+	TextureSampleTypeDepth             TextureSampleType = 4
+	TextureSampleTypeSint              TextureSampleType = 5
+	TextureSampleTypeUint              TextureSampleType = 6
 )
 
-type TextureUsage int
+type TextureUsage C.WGPUTextureUsage
 
 const (
 	TextureUsageNone                TextureUsage = 0
-	TextureUsageCopySrc                          = 1
-	TextureUsageCopyDst                          = 2
-	TextureUsageTextureBinding                   = 4
-	TextureUsageStorageBinding                   = 8
-	TextureUsageRenderAttachment                 = 16
-	TextureUsageTransientAttachment              = 32
-	TextureUsageStorageAttachment                = 64
+	TextureUsageCopySrc             TextureUsage = 1
+	TextureUsageCopyDst             TextureUsage = 2
+	TextureUsageTextureBinding      TextureUsage = 4
+	TextureUsageStorageBinding      TextureUsage = 8
+	TextureUsageRenderAttachment    TextureUsage = 16
+	TextureUsageTransientAttachment TextureUsage = 32
+	TextureUsageStorageAttachment   TextureUsage = 64
 )
 
-type TextureViewDimension int
+type TextureViewDimension C.WGPUTextureViewDimension
 
 const (
 	TextureViewDimensionUndefined TextureViewDimension = 0
-	TextureViewDimension1D                             = 1
-	TextureViewDimension2D                             = 2
-	TextureViewDimension2DArray                        = 3
-	TextureViewDimensionCube                           = 4
-	TextureViewDimensionCubeArray                      = 5
-	TextureViewDimension3D                             = 6
+	TextureViewDimension1D        TextureViewDimension = 1
+	TextureViewDimension2D        TextureViewDimension = 2
+	TextureViewDimension2DArray   TextureViewDimension = 3
+	TextureViewDimensionCube      TextureViewDimension = 4
+	TextureViewDimensionCubeArray TextureViewDimension = 5
+	TextureViewDimension3D        TextureViewDimension = 6
 )
 
-type ToneMappingMode int
+type ToneMappingMode C.WGPUToneMappingMode
 
 const (
 	ToneMappingModeStandard ToneMappingMode = 1
-	ToneMappingModeExtended                 = 2
+	ToneMappingModeExtended ToneMappingMode = 2
 )
 
-type VertexFormat int
+type VertexFormat C.WGPUVertexFormat
 
 const (
 	VertexFormatUint8           VertexFormat = 1
-	VertexFormatUint8x2                      = 2
-	VertexFormatUint8x4                      = 3
-	VertexFormatSint8                        = 4
-	VertexFormatSint8x2                      = 5
-	VertexFormatSint8x4                      = 6
-	VertexFormatUnorm8                       = 7
-	VertexFormatUnorm8x2                     = 8
-	VertexFormatUnorm8x4                     = 9
-	VertexFormatSnorm8                       = 10
-	VertexFormatSnorm8x2                     = 11
-	VertexFormatSnorm8x4                     = 12
-	VertexFormatUint16                       = 13
-	VertexFormatUint16x2                     = 14
-	VertexFormatUint16x4                     = 15
-	VertexFormatSint16                       = 16
-	VertexFormatSint16x2                     = 17
-	VertexFormatSint16x4                     = 18
-	VertexFormatUnorm16                      = 19
-	VertexFormatUnorm16x2                    = 20
-	VertexFormatUnorm16x4                    = 21
-	VertexFormatSnorm16                      = 22
-	VertexFormatSnorm16x2                    = 23
-	VertexFormatSnorm16x4                    = 24
-	VertexFormatFloat16                      = 25
-	VertexFormatFloat16x2                    = 26
-	VertexFormatFloat16x4                    = 27
-	VertexFormatFloat32                      = 28
-	VertexFormatFloat32x2                    = 29
-	VertexFormatFloat32x3                    = 30
-	VertexFormatFloat32x4                    = 31
-	VertexFormatUint32                       = 32
-	VertexFormatUint32x2                     = 33
-	VertexFormatUint32x3                     = 34
-	VertexFormatUint32x4                     = 35
-	VertexFormatSint32                       = 36
-	VertexFormatSint32x2                     = 37
-	VertexFormatSint32x3                     = 38
-	VertexFormatSint32x4                     = 39
-	VertexFormatUnorm10_10_10_2              = 40
-	VertexFormatUnorm8x4BGRA                 = 41
+	VertexFormatUint8x2         VertexFormat = 2
+	VertexFormatUint8x4         VertexFormat = 3
+	VertexFormatSint8           VertexFormat = 4
+	VertexFormatSint8x2         VertexFormat = 5
+	VertexFormatSint8x4         VertexFormat = 6
+	VertexFormatUnorm8          VertexFormat = 7
+	VertexFormatUnorm8x2        VertexFormat = 8
+	VertexFormatUnorm8x4        VertexFormat = 9
+	VertexFormatSnorm8          VertexFormat = 10
+	VertexFormatSnorm8x2        VertexFormat = 11
+	VertexFormatSnorm8x4        VertexFormat = 12
+	VertexFormatUint16          VertexFormat = 13
+	VertexFormatUint16x2        VertexFormat = 14
+	VertexFormatUint16x4        VertexFormat = 15
+	VertexFormatSint16          VertexFormat = 16
+	VertexFormatSint16x2        VertexFormat = 17
+	VertexFormatSint16x4        VertexFormat = 18
+	VertexFormatUnorm16         VertexFormat = 19
+	VertexFormatUnorm16x2       VertexFormat = 20
+	VertexFormatUnorm16x4       VertexFormat = 21
+	VertexFormatSnorm16         VertexFormat = 22
+	VertexFormatSnorm16x2       VertexFormat = 23
+	VertexFormatSnorm16x4       VertexFormat = 24
+	VertexFormatFloat16         VertexFormat = 25
+	VertexFormatFloat16x2       VertexFormat = 26
+	VertexFormatFloat16x4       VertexFormat = 27
+	VertexFormatFloat32         VertexFormat = 28
+	VertexFormatFloat32x2       VertexFormat = 29
+	VertexFormatFloat32x3       VertexFormat = 30
+	VertexFormatFloat32x4       VertexFormat = 31
+	VertexFormatUint32          VertexFormat = 32
+	VertexFormatUint32x2        VertexFormat = 33
+	VertexFormatUint32x3        VertexFormat = 34
+	VertexFormatUint32x4        VertexFormat = 35
+	VertexFormatSint32          VertexFormat = 36
+	VertexFormatSint32x2        VertexFormat = 37
+	VertexFormatSint32x3        VertexFormat = 38
+	VertexFormatSint32x4        VertexFormat = 39
+	VertexFormatUnorm10_10_10_2 VertexFormat = 40
+	VertexFormatUnorm8x4BGRA    VertexFormat = 41
 )
 
-type VertexStepMode int
+type VertexStepMode C.WGPUVertexStepMode
 
 const (
 	VertexStepModeUndefined VertexStepMode = 0
-	VertexStepModeVertex                   = 1
-	VertexStepModeInstance                 = 2
+	VertexStepModeVertex    VertexStepMode = 1
+	VertexStepModeInstance  VertexStepMode = 2
 )
 
-type WaitStatus int
+type WaitStatus C.WGPUWaitStatus
 
 const (
 	WaitStatusSuccess  WaitStatus = 1
-	WaitStatusTimedOut            = 2
-	WaitStatusError               = 3
+	WaitStatusTimedOut WaitStatus = 2
+	WaitStatusError    WaitStatus = 3
 )
 
 const (

@@ -34,9 +34,8 @@ type BindGroupEntry struct {
 }
 
 type BindGroupLayoutDescriptor struct {
-	Label      string
-	EntryCount int
-	Entries    BindGroupLayoutEntry
+	Label   string
+	Entries []BindGroupLayoutEntry
 }
 
 type BindGroupLayoutEntry struct {
