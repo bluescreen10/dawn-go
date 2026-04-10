@@ -640,46 +640,29 @@ func (d *Device) CreateSampler(descriptor *SamplerDescriptor) *Sampler {
 
 func (d *Device) CreateShaderModule(descriptor ShaderModuleDescriptor) *ShaderModule {
 
-	var cDescriptor C.WGPUShaderModuleDescriptor
-
-	if descriptor.Label != "" {
-		cDescriptor.label.data = C.CString(descriptor.Label)
-		cDescriptor.label.length = C.size_t(len(descriptor.Label))
-		defer C.free(unsafe.Pointer(cDescriptor.label.data))
+	cDescriptor := C.WGPUShaderModuleDescriptor{
+		label: toCStr(descriptor.Label),
 	}
 
 	if descriptor.WGSLSource != nil {
-		source := C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderSourceWGSL{})))
-		defer C.free(source)
+		wgslSource := (*C.WGPUShaderSourceWGSL)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderSourceWGSL{}))))
+		defer C.free(unsafe.Pointer(wgslSource))
 
-		wgslSource := (*C.WGPUShaderSourceWGSL)(source)
 		wgslSource.chain.next = nil
 		wgslSource.chain.sType = C.WGPUSType_ShaderSourceWGSL
-
-		wgslSource.code.length = C.size_t(len(descriptor.WGSLSource.Code))
-		wgslSource.code.data = C.CString(descriptor.WGSLSource.Code)
-		defer C.free(unsafe.Pointer(wgslSource.code.data))
-
-		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(source)
+		wgslSource.code = toCStr(descriptor.WGSLSource.Code)
+		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(wgslSource))
 	}
 
 	if descriptor.SPIRVSource != nil {
-		source := C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderSourceSPIRV{})))
-		defer C.free(source)
+		spirvSource := (*C.WGPUShaderSourceSPIRV)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPUShaderSourceSPIRV{}))))
+		defer C.free(unsafe.Pointer(spirvSource))
 
-		spirvSource := (*C.WGPUShaderSourceSPIRV)(source)
 		spirvSource.chain.next = nil
 		spirvSource.chain.sType = C.WGPUSType_ShaderSourceSPIRV
-
-		codeSize := len(descriptor.SPIRVSource.Code)
-		if codeSize > 0 {
-			code := C.malloc(C.size_t(codeSize) * C.size_t(unsafe.Sizeof(uint32(0))))
-			slice := unsafe.Slice((*uint32)(code), codeSize)
-			copy(slice, descriptor.SPIRVSource.Code)
-			spirvSource.code = (*C.uint32_t)(code)
-			spirvSource.codeSize = C.uint32_t(codeSize)
-			defer C.free(code)
-		}
+		spirvSource.code = (*C.uint32_t)(&descriptor.SPIRVSource.Code[0])
+		spirvSource.codeSize = C.uint32_t(len(descriptor.SPIRVSource.Code))
+		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(spirvSource))
 	}
 
 	return &ShaderModule{ref: C.wgpuDeviceCreateShaderModule(d.ref, &cDescriptor)}
