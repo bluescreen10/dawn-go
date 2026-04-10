@@ -186,13 +186,6 @@ type Extent3D struct {
 	DepthOrArrayLayers uint32
 }
 
-type ExternalTextureBindingEntry struct {
-	ExternalTexture *ExternalTexture
-}
-
-type ExternalTextureBindingLayout struct {
-}
-
 type FragmentState struct {
 	Module     *ShaderModule
 	EntryPoint string
