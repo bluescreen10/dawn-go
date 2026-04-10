@@ -1,14 +1,10 @@
 package wgpu
 
 /*
-#include "./lib/webgpu.h"
-
-extern void cgo_callback_PopErrorScopeCallback(WGPUPopErrorScopeStatus status, WGPUErrorType typ, WGPUStringView message, void *userData1, void *userData2);
+#include "webgpu.h"
 */
 import "C"
 import (
-	"fmt"
-	"runtime/cgo"
 	"unsafe"
 )
 
@@ -24,23 +20,6 @@ func toCStr(val string) C.WGPUStringView {
 	return C.WGPUStringView{
 		data:   (*C.char)(unsafe.Pointer(unsafe.StringData(val))),
 		length: C.size_t(len(val)),
-	}
-}
-
-func makeErrorCallback(err *error) C.WGPUPopErrorScopeCallbackInfo {
-	callback := popErrorScopeCallback(func(_ popErrorScopeStatus, typ ErrorType, message string) {
-		if typ != ErrorTypeNoError {
-			*err = fmt.Errorf("error: %s", message)
-		}
-	})
-
-	handle := cgo.NewHandle(callback)
-
-	return C.WGPUPopErrorScopeCallbackInfo{
-		mode:      C.WGPUCallbackMode(callbackModeAllowSpontaneous),
-		callback:  C.WGPUPopErrorScopeCallback(C.cgo_callback_PopErrorScopeCallback),
-		userdata1: unsafe.Pointer(handle),
-		userdata2: nil,
 	}
 }
 

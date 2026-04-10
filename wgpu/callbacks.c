@@ -1,4 +1,3 @@
-// CODE GENERATED. DO NOT EDIT
 #include "webgpu.h"
 #include "_cgo_export.h"
 

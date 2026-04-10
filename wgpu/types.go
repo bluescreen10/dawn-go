@@ -78,7 +78,7 @@ type BufferInitDescriptor struct {
 	Contents []byte
 }
 
-type BufferMapCallbackInfo struct {
+type bufferMapCallbackInfo struct {
 	Mode     callbackMode
 	Callback BufferMapCallback
 }
@@ -563,4 +563,3 @@ type compilationInfoCallback func(status compilationInfoRequestStatus, compilati
 type popErrorScopeCallback func(status popErrorScopeStatus, typ ErrorType, message string)
 type requestAdapterCallback func(status requestAdapterStatus, adapter *Adapter, message string)
 type requestDeviceCallback func(status requestDeviceStatus, device *Device, message string)
-type errorCallback func(typ ErrorType, message string)
