@@ -111,10 +111,6 @@ type CompatibilityModeLimits struct {
 	MaxStorageTexturesInFragmentStage uint32
 }
 
-type CompilationInfo struct {
-	Messages []CompilationMessage
-}
-
 type CompilationMessage struct {
 	Message string
 	Type    CompilationMessageType
@@ -559,7 +555,7 @@ type DeviceLostCallback func(device *Device, reason DeviceLostReason, message st
 type QueueWorkDoneCallback func(status QueueWorkDoneStatus, message string)
 type UncapturedErrorCallback func(device *Device, typ ErrorType, message string)
 
-type compilationInfoCallback func(status compilationInfoRequestStatus, compilationInfo CompilationInfo)
+type compilationInfoCallback func(status compilationInfoRequestStatus, messages []CompilationMessage)
 type popErrorScopeCallback func(status popErrorScopeStatus, typ ErrorType, message string)
 type requestAdapterCallback func(status requestAdapterStatus, adapter *Adapter, message string)
 type requestDeviceCallback func(status requestDeviceStatus, device *Device, message string)
