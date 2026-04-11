@@ -3,11 +3,13 @@
 package wgpu
 
 /*
-#include <stdlib.h>
 #include "webgpu.h"
 */
 import "C"
-import "unsafe"
+import (
+	"runtime"
+	"unsafe"
+)
 
 type RenderPassEncoder struct {
 	ref C.WGPURenderPassEncoder
@@ -45,16 +47,20 @@ func (r *RenderPassEncoder) DrawIndexedIndirect(indirectBuffer *Buffer, indirect
 }
 
 func (r *RenderPassEncoder) ExecuteBundles(bundles ...*RenderBundle) {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
 	cBundleCount := C.size_t(len(bundles))
 	var cBundles *C.WGPURenderBundle
 
 	if cBundleCount > 0 {
-		cBundles = (*C.WGPURenderBundle)(C.malloc(C.size_t(unsafe.Sizeof(C.WGPURenderBundle(nil))) * cBundleCount))
-		defer C.free(unsafe.Pointer(cBundles))
+		bds := make([]C.WGPURenderBundle, cBundleCount)
+		pinner.Pin(&bundles[0])
 
-		slice := unsafe.Slice((*C.WGPURenderBundle)(cBundles), cBundleCount)
+		cBundles = (*C.WGPURenderBundle)(unsafe.Pointer(&bds[0]))
+
 		for i, b := range bundles {
-			slice[i] = C.WGPURenderBundle(b.ref)
+			bds[i] = C.WGPURenderBundle(b.ref)
 		}
 	}
 

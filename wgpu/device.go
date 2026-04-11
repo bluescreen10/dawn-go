@@ -3,7 +3,6 @@
 package wgpu
 
 /*
-#include <stdlib.h>
 #include "webgpu.h"
 
 extern void cgo_callback_CreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline, WGPUStringView message, void *userData1, void *userData2);
@@ -26,6 +25,8 @@ type Device struct {
 }
 
 func (d *Device) CreateBindGroup(descriptor BindGroupDescriptor) *BindGroup {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
 
 	cDescriptor := C.WGPUBindGroupDescriptor{
 		label: toCStr(descriptor.Label),
@@ -35,56 +36,52 @@ func (d *Device) CreateBindGroup(descriptor BindGroupDescriptor) *BindGroup {
 		cDescriptor.layout = descriptor.Layout.ref
 	}
 
-	entriesCount := len(descriptor.Entries)
-	if entriesCount > 0 {
-		entries := C.malloc(C.size_t(entriesCount) * C.size_t(unsafe.Sizeof(C.WGPUBindGroupEntry{})))
-		slice := unsafe.Slice((*C.WGPUBindGroupEntry)(entries), entriesCount)
-		defer C.free(unsafe.Pointer(entries))
+	if count := C.size_t(len(descriptor.Entries)); count > 0 {
+		entries := make([]C.WGPUBindGroupEntry, count)
+		pinner.Pin(&entries[0])
+
+		cDescriptor.entries = (*C.WGPUBindGroupEntry)(unsafe.Pointer(&entries[0]))
+		cDescriptor.entryCount = count
 
 		for i, e := range descriptor.Entries {
-			slice[i].binding = C.uint32_t(e.Binding)
-			slice[i].offset = C.uint64_t(e.Offset)
-			slice[i].size = C.uint64_t(e.Size)
+			entries[i].binding = C.uint32_t(e.Binding)
+			entries[i].offset = C.uint64_t(e.Offset)
+			entries[i].size = C.uint64_t(e.Size)
 
 			if e.Buffer != nil {
-				slice[i].buffer = e.Buffer.ref
+				entries[i].buffer = e.Buffer.ref
 			}
 
 			if e.Sampler != nil {
-				slice[i].sampler = e.Sampler.ref
+				entries[i].sampler = e.Sampler.ref
 			}
 
 			if e.TextureView != nil {
-				slice[i].textureView = e.TextureView.ref
+				entries[i].textureView = e.TextureView.ref
 			}
 		}
-
-		cDescriptor.entries = (*C.WGPUBindGroupEntry)(entries)
-		cDescriptor.entryCount = C.size_t(entriesCount)
 	}
 
 	return &BindGroup{ref: C.wgpuDeviceCreateBindGroup(d.ref, &cDescriptor)}
 }
 
 func (d *Device) CreateBindGroupLayout(descriptor BindGroupLayoutDescriptor) BindGroupLayout {
-
-	count := C.size_t(len(descriptor.Entries))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
 
 	cDescriptor := C.WGPUBindGroupLayoutDescriptor{
 		label: toCStr(descriptor.Label),
 	}
 
-	if count > 0 {
-		entries := (*C.WGPUBindGroupLayoutEntry)(C.malloc(count * C.size_t(unsafe.Sizeof(C.WGPUBindGroupLayoutEntry{}))))
-		defer C.free(unsafe.Pointer(entries))
+	if count := C.size_t(len(descriptor.Entries)); count > 0 {
+		entries := make([]C.WGPUBindGroupLayoutEntry, count)
+		pinner.Pin(&entries[0])
 
-		cDescriptor.entries = entries
+		cDescriptor.entries = (*C.WGPUBindGroupLayoutEntry)(unsafe.Pointer(&entries[0]))
 		cDescriptor.entryCount = count
 
-		cEntries := unsafe.Slice(entries, count)
-
 		for i, e := range descriptor.Entries {
-			cEntries[i] = C.WGPUBindGroupLayoutEntry{
+			entries[i] = C.WGPUBindGroupLayoutEntry{
 				binding:          C.uint32_t(e.Binding),
 				visibility:       C.WGPUShaderStage(e.Visibility),
 				bindingArraySize: C.uint32_t(e.BindingArraySize),
@@ -108,7 +105,6 @@ func (d *Device) CreateBindGroupLayout(descriptor BindGroupLayoutDescriptor) Bin
 				},
 			}
 		}
-
 	}
 
 	return BindGroupLayout{ref: C.wgpuDeviceCreateBindGroupLayout(d.ref, &cDescriptor)}

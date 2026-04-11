@@ -3,7 +3,6 @@
 package wgpu
 
 /*
-#include <stdlib.h>
 #include "webgpu.h"
 
 extern void cgo_callback_RequestAdapterCallback(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message, void *userData1, void *userData2);
@@ -21,19 +20,23 @@ type Instance struct {
 }
 
 func (i *Instance) CreateSurface(descriptor SurfaceDescriptor) *Surface {
+	var pinner runtime.Pinner
 
 	cDescriptor := C.WGPUSurfaceDescriptor{
 		label: toCStr(descriptor.Label),
 	}
 
 	if descriptor.MetalLayer != nil {
-		metalSourcePtr := C.malloc(C.size_t(unsafe.Sizeof(C.WGPUSurfaceSourceMetalLayer{})))
-		metalSource := (*C.WGPUSurfaceSourceMetalLayer)(metalSourcePtr)
-		metalSource.chain.next = nil
-		metalSource.chain.sType = C.WGPUSType_SurfaceSourceMetalLayer
-		metalSource.layer = descriptor.MetalLayer.Layer
-		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(metalSourcePtr)
-		defer C.free(metalSourcePtr)
+		metalSource := &C.WGPUSurfaceSourceMetalLayer{
+			chain: C.WGPUChainedStruct{
+				next:  nil,
+				sType: C.WGPUSType_SurfaceSourceMetalLayer,
+			},
+			layer: descriptor.MetalLayer.Layer,
+		}
+
+		pinner.Pin(metalSource)
+		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(metalSource))
 	}
 
 	return &Surface{ref: C.wgpuInstanceCreateSurface(i.ref, &cDescriptor)}

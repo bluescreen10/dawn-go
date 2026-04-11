@@ -3,7 +3,6 @@
 package wgpu
 
 /*
-#include <stdlib.h>
 #include "webgpu.h"
 */
 import "C"

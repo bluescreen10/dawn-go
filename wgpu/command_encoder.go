@@ -3,11 +3,13 @@
 package wgpu
 
 /*
-#include <stdlib.h>
 #include "webgpu.h"
 */
 import "C"
-import "unsafe"
+import (
+	"runtime"
+	"unsafe"
+)
 
 type CommandEncoder struct {
 	ref C.WGPUCommandEncoder
@@ -47,37 +49,37 @@ func (c *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) Com
 }
 
 func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) *RenderPassEncoder {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
 
 	cDescriptor := C.WGPURenderPassDescriptor{
 		label: toCStr(descriptor.Label),
 	}
 
-	colorAttachmentsCount := len(descriptor.ColorAttachments)
-	if colorAttachmentsCount > 0 {
-		colorAttachments := C.malloc(C.size_t(colorAttachmentsCount) * C.size_t(unsafe.Sizeof(C.WGPURenderPassColorAttachment{})))
-		slice := unsafe.Slice((*C.WGPURenderPassColorAttachment)(colorAttachments), colorAttachmentsCount)
-		defer C.free(unsafe.Pointer(colorAttachments))
+	if count := C.size_t(len(descriptor.ColorAttachments)); count > 0 {
+		colorAttachments := make([]C.WGPURenderPassColorAttachment, count)
+		pinner.Pin(&colorAttachments[0])
+
+		cDescriptor.colorAttachments = (*C.WGPURenderPassColorAttachment)(unsafe.Pointer(&colorAttachments[0]))
+		cDescriptor.colorAttachmentCount = count
 
 		for i, a := range descriptor.ColorAttachments {
-			slice[i].depthSlice = C.WGPU_DEPTH_SLICE_UNDEFINED
-			slice[i].loadOp = C.WGPULoadOp(a.LoadOp)
-			slice[i].storeOp = C.WGPUStoreOp(a.StoreOp)
-			slice[i].clearValue.r = C.double(a.ClearValue.R)
-			slice[i].clearValue.g = C.double(a.ClearValue.G)
-			slice[i].clearValue.b = C.double(a.ClearValue.B)
-			slice[i].clearValue.a = C.double(a.ClearValue.A)
+			colorAttachments[i].depthSlice = C.WGPU_DEPTH_SLICE_UNDEFINED
+			colorAttachments[i].loadOp = C.WGPULoadOp(a.LoadOp)
+			colorAttachments[i].storeOp = C.WGPUStoreOp(a.StoreOp)
+			colorAttachments[i].clearValue.r = C.double(a.ClearValue.R)
+			colorAttachments[i].clearValue.g = C.double(a.ClearValue.G)
+			colorAttachments[i].clearValue.b = C.double(a.ClearValue.B)
+			colorAttachments[i].clearValue.a = C.double(a.ClearValue.A)
 
 			if a.View != nil {
-				slice[i].view = a.View.ref
+				colorAttachments[i].view = a.View.ref
 			}
 
 			if a.ResolveTarget != nil {
-				slice[i].resolveTarget = a.ResolveTarget.ref
+				colorAttachments[i].resolveTarget = a.ResolveTarget.ref
 			}
 		}
-
-		cDescriptor.colorAttachments = (*C.WGPURenderPassColorAttachment)(colorAttachments)
-		cDescriptor.colorAttachmentCount = C.size_t(colorAttachmentsCount)
 	}
 
 	if descriptor.DepthStencilAttachment != nil {
@@ -91,6 +93,7 @@ func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) *Rende
 			stencilClearValue: C.uint32_t(descriptor.DepthStencilAttachment.StencilClearValue),
 			stencilReadOnly:   toCBool(descriptor.DepthStencilAttachment.StencilReadOnly),
 		}
+		pinner.Pin(cDescriptor.depthStencilAttachment)
 
 		if descriptor.DepthStencilAttachment.View != nil {
 			cDescriptor.depthStencilAttachment.view = descriptor.DepthStencilAttachment.View.ref
