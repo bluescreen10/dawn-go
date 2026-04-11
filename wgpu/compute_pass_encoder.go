@@ -14,8 +14,7 @@ type ComputePassEncoder struct {
 }
 
 func (c *ComputePassEncoder) InsertDebugMarker(markerLabel string) {
-	cMarkerLabel := toCStr(markerLabel)
-	C.wgpuComputePassEncoderInsertDebugMarker(c.ref, cMarkerLabel)
+	C.wgpuComputePassEncoderInsertDebugMarker(c.ref, toCStr(markerLabel))
 }
 
 func (c *ComputePassEncoder) PopDebugGroup() {
@@ -23,8 +22,7 @@ func (c *ComputePassEncoder) PopDebugGroup() {
 }
 
 func (c *ComputePassEncoder) PushDebugGroup(groupLabel string) {
-	cGroupLabel := toCStr(groupLabel)
-	C.wgpuComputePassEncoderPushDebugGroup(c.ref, cGroupLabel)
+	C.wgpuComputePassEncoderPushDebugGroup(c.ref, toCStr(groupLabel))
 }
 
 func (c *ComputePassEncoder) SetPipeline(pipeline *ComputePipeline) {
@@ -32,26 +30,21 @@ func (c *ComputePassEncoder) SetPipeline(pipeline *ComputePipeline) {
 }
 
 func (c *ComputePassEncoder) SetBindGroup(groupIndex uint32, group *BindGroup, dynamicOffsets []uint32) {
-	cGroupIndex := C.uint32_t(groupIndex)
 	cDynamicOffsetCount := C.size_t(len(dynamicOffsets))
 	var cDynamicOffsets *C.uint32_t
 
 	if cDynamicOffsetCount > 0 {
 		cDynamicOffsets = (*C.uint32_t)(unsafe.Pointer(&dynamicOffsets[0]))
 	}
-	C.wgpuComputePassEncoderSetBindGroup(c.ref, cGroupIndex, group.ref, cDynamicOffsetCount, cDynamicOffsets)
+	C.wgpuComputePassEncoderSetBindGroup(c.ref, C.uint32_t(groupIndex), group.ref, cDynamicOffsetCount, cDynamicOffsets)
 }
 
 func (c *ComputePassEncoder) DispatchWorkgroups(workgroupCountX uint32, workgroupCountY uint32, workgroupCountZ uint32) {
-	cWorkgroupCountX := C.uint32_t(workgroupCountX)
-	cWorkgroupCountY := C.uint32_t(workgroupCountY)
-	cWorkgroupCountZ := C.uint32_t(workgroupCountZ)
-	C.wgpuComputePassEncoderDispatchWorkgroups(c.ref, cWorkgroupCountX, cWorkgroupCountY, cWorkgroupCountZ)
+	C.wgpuComputePassEncoderDispatchWorkgroups(c.ref, C.uint32_t(workgroupCountX), C.uint32_t(workgroupCountY), C.uint32_t(workgroupCountZ))
 }
 
 func (c *ComputePassEncoder) DispatchWorkgroupsIndirect(indirectBuffer *Buffer, indirectOffset uint64) {
-	cIndirectOffset := C.uint64_t(indirectOffset)
-	C.wgpuComputePassEncoderDispatchWorkgroupsIndirect(c.ref, indirectBuffer.ref, cIndirectOffset)
+	C.wgpuComputePassEncoderDispatchWorkgroupsIndirect(c.ref, indirectBuffer.ref, C.uint64_t(indirectOffset))
 }
 
 func (c *ComputePassEncoder) End() {
@@ -59,6 +52,5 @@ func (c *ComputePassEncoder) End() {
 }
 
 func (c *ComputePassEncoder) SetLabel(label string) {
-	cLabel := toCStr(label)
-	C.wgpuComputePassEncoderSetLabel(c.ref, cLabel)
+	C.wgpuComputePassEncoderSetLabel(c.ref, toCStr(label))
 }

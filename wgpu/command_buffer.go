@@ -12,8 +12,7 @@ type CommandBuffer struct {
 }
 
 func (c *CommandBuffer) SetLabel(label string) {
-	cLabel := toCStr(label)
-	C.wgpuCommandBufferSetLabel(c.ref, cLabel)
+	C.wgpuCommandBufferSetLabel(c.ref, toCStr(label))
 }
 
 func (c *CommandBuffer) Release() {

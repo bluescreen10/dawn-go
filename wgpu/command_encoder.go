@@ -48,12 +48,8 @@ func (c *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) Com
 
 func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) *RenderPassEncoder {
 
-	var cDescriptor C.WGPURenderPassDescriptor
-
-	if descriptor.Label != "" {
-		cDescriptor.label.data = C.CString(descriptor.Label)
-		cDescriptor.label.length = C.size_t(len(descriptor.Label))
-		defer C.free(unsafe.Pointer(cDescriptor.label.data))
+	cDescriptor := C.WGPURenderPassDescriptor{
+		label: toCStr(descriptor.Label),
 	}
 
 	colorAttachmentsCount := len(descriptor.ColorAttachments)
@@ -72,15 +68,11 @@ func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) *Rende
 			slice[i].clearValue.a = C.double(a.ClearValue.A)
 
 			if a.View != nil {
-				slice[i].view = C.WGPUTextureView(unsafe.Pointer(a.View.ref))
-			}
-
-			if a.DepthSlice != 0 {
-				slice[i].depthSlice = C.uint32_t(a.DepthSlice)
+				slice[i].view = a.View.ref
 			}
 
 			if a.ResolveTarget != nil {
-				slice[i].resolveTarget = C.WGPUTextureView(unsafe.Pointer(a.ResolveTarget.ref))
+				slice[i].resolveTarget = a.ResolveTarget.ref
 			}
 		}
 
@@ -89,25 +81,28 @@ func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) *Rende
 	}
 
 	if descriptor.DepthStencilAttachment != nil {
-		if descriptor.DepthStencilAttachment.View != nil {
-			cDescriptor.depthStencilAttachment.view = C.WGPUTextureView(unsafe.Pointer(descriptor.DepthStencilAttachment.View.ref))
+		cDescriptor.depthStencilAttachment = &C.WGPURenderPassDepthStencilAttachment{
+			depthLoadOp:       C.WGPULoadOp(descriptor.DepthStencilAttachment.DepthLoadOp),
+			depthStoreOp:      C.WGPUStoreOp(descriptor.DepthStencilAttachment.DepthStoreOp),
+			depthClearValue:   C.float(descriptor.DepthStencilAttachment.DepthClearValue),
+			depthReadOnly:     toCBool(descriptor.DepthStencilAttachment.DepthReadOnly),
+			stencilLoadOp:     C.WGPULoadOp(descriptor.DepthStencilAttachment.StencilLoadOp),
+			stencilStoreOp:    C.WGPUStoreOp(descriptor.DepthStencilAttachment.StencilStoreOp),
+			stencilClearValue: C.uint32_t(descriptor.DepthStencilAttachment.StencilClearValue),
+			stencilReadOnly:   toCBool(descriptor.DepthStencilAttachment.StencilReadOnly),
 		}
-		cDescriptor.depthStencilAttachment.depthLoadOp = C.WGPULoadOp(descriptor.DepthStencilAttachment.DepthLoadOp)
-		cDescriptor.depthStencilAttachment.depthStoreOp = C.WGPUStoreOp(descriptor.DepthStencilAttachment.DepthStoreOp)
-		cDescriptor.depthStencilAttachment.depthClearValue = C.float(descriptor.DepthStencilAttachment.DepthClearValue)
-		cDescriptor.depthStencilAttachment.depthReadOnly = toCBool(descriptor.DepthStencilAttachment.DepthReadOnly)
-		cDescriptor.depthStencilAttachment.stencilLoadOp = C.WGPULoadOp(descriptor.DepthStencilAttachment.StencilLoadOp)
-		cDescriptor.depthStencilAttachment.stencilStoreOp = C.WGPUStoreOp(descriptor.DepthStencilAttachment.StencilStoreOp)
-		cDescriptor.depthStencilAttachment.stencilClearValue = C.uint32_t(descriptor.DepthStencilAttachment.StencilClearValue)
-		cDescriptor.depthStencilAttachment.stencilReadOnly = toCBool(descriptor.DepthStencilAttachment.StencilReadOnly)
+
+		if descriptor.DepthStencilAttachment.View != nil {
+			cDescriptor.depthStencilAttachment.view = descriptor.DepthStencilAttachment.View.ref
+		}
 	}
 
 	if descriptor.OcclusionQuerySet != nil {
-		cDescriptor.occlusionQuerySet = C.WGPUQuerySet(unsafe.Pointer(descriptor.OcclusionQuerySet.ref))
+		cDescriptor.occlusionQuerySet = descriptor.OcclusionQuerySet.ref
 	}
 
 	if descriptor.TimestampWrites != nil {
-		cDescriptor.timestampWrites.querySet = C.WGPUQuerySet(unsafe.Pointer(descriptor.TimestampWrites.QuerySet.ref))
+		cDescriptor.timestampWrites.querySet = descriptor.TimestampWrites.QuerySet.ref
 		cDescriptor.timestampWrites.beginningOfPassWriteIndex = C.uint32_t(descriptor.TimestampWrites.BeginningOfPassWriteIndex)
 		cDescriptor.timestampWrites.endOfPassWriteIndex = C.uint32_t(descriptor.TimestampWrites.EndOfPassWriteIndex)
 	}
@@ -116,153 +111,130 @@ func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) *Rende
 }
 
 func (c *CommandEncoder) CopyBufferToBuffer(source *Buffer, sourceOffset uint64, destination *Buffer, destinationOffset uint64, size uint64) {
-	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
-
-	pSource := C.WGPUBuffer(unsafe.Pointer(source.ref))
-	cSourceOffset := C.uint64_t(sourceOffset)
-	pDestination := C.WGPUBuffer(unsafe.Pointer(destination.ref))
-	cDestinationOffset := C.uint64_t(destinationOffset)
-	cSize := C.uint64_t(size)
-	// Call and return
-	C.wgpuCommandEncoderCopyBufferToBuffer(cCommandEncoder, pSource, cSourceOffset, pDestination, cDestinationOffset, cSize)
+	C.wgpuCommandEncoderCopyBufferToBuffer(c.ref, source.ref, C.uint64_t(sourceOffset), destination.ref, C.uint64_t(destinationOffset), C.uint64_t(size))
 }
 
 func (c *CommandEncoder) CopyBufferToTexture(source TexelCopyBufferInfo, destination TexelCopyTextureInfo, copySize Extent3D) {
-	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
 
-	var cSource C.WGPUTexelCopyBufferInfo
-	cSource.layout.offset = C.uint64_t(source.Layout.Offset)
-	cSource.layout.bytesPerRow = C.uint32_t(source.Layout.BytesPerRow)
-	cSource.layout.rowsPerImage = C.uint32_t(source.Layout.RowsPerImage)
-	cSource.buffer = C.WGPUBuffer(unsafe.Pointer(source.Buffer.ref))
-	var cDestination C.WGPUTexelCopyTextureInfo
-	cDestination.texture = C.WGPUTexture(unsafe.Pointer(destination.Texture.ref))
-	cDestination.mipLevel = C.uint32_t(destination.MipLevel)
-	cDestination.origin.x = C.uint32_t(destination.Origin.X)
-	cDestination.origin.y = C.uint32_t(destination.Origin.Y)
-	cDestination.origin.z = C.uint32_t(destination.Origin.Z)
-	cDestination.aspect = C.WGPUTextureAspect(destination.Aspect)
-	var cCopySize C.WGPUExtent3D
-	cCopySize.width = C.uint32_t(copySize.Width)
-	cCopySize.height = C.uint32_t(copySize.Height)
-	cCopySize.depthOrArrayLayers = C.uint32_t(copySize.DepthOrArrayLayers)
-	// Call and return
-	C.wgpuCommandEncoderCopyBufferToTexture(cCommandEncoder, &cSource, &cDestination, &cCopySize)
+	cSource := C.WGPUTexelCopyBufferInfo{
+		layout: C.WGPUTexelCopyBufferLayout{
+			offset:       C.uint64_t(source.Layout.Offset),
+			bytesPerRow:  C.uint32_t(source.Layout.BytesPerRow),
+			rowsPerImage: C.uint32_t(source.Layout.RowsPerImage),
+		},
+		buffer: source.Buffer.ref,
+	}
+
+	cDestination := C.WGPUTexelCopyTextureInfo{
+		texture:  destination.Texture.ref,
+		mipLevel: C.uint32_t(destination.MipLevel),
+		origin: C.WGPUOrigin3D{
+			x: C.uint32_t(destination.Origin.X),
+			y: C.uint32_t(destination.Origin.Y),
+			z: C.uint32_t(destination.Origin.Z),
+		},
+		aspect: C.WGPUTextureAspect(destination.Aspect),
+	}
+
+	cCopySize := C.WGPUExtent3D{
+		width:              C.uint32_t(copySize.Width),
+		height:             C.uint32_t(copySize.Height),
+		depthOrArrayLayers: C.uint32_t(copySize.DepthOrArrayLayers),
+	}
+
+	C.wgpuCommandEncoderCopyBufferToTexture(c.ref, &cSource, &cDestination, &cCopySize)
 }
 
 func (c *CommandEncoder) CopyTextureToBuffer(source TexelCopyTextureInfo, destination TexelCopyBufferInfo, copySize Extent3D) {
-	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
 
-	var cSource C.WGPUTexelCopyTextureInfo
-	cSource.texture = C.WGPUTexture(unsafe.Pointer(source.Texture.ref))
-	cSource.mipLevel = C.uint32_t(source.MipLevel)
-	cSource.origin.x = C.uint32_t(source.Origin.X)
-	cSource.origin.y = C.uint32_t(source.Origin.Y)
-	cSource.origin.z = C.uint32_t(source.Origin.Z)
-	cSource.aspect = C.WGPUTextureAspect(source.Aspect)
-	var cDestination C.WGPUTexelCopyBufferInfo
-	cDestination.layout.offset = C.uint64_t(destination.Layout.Offset)
-	cDestination.layout.bytesPerRow = C.uint32_t(destination.Layout.BytesPerRow)
-	cDestination.layout.rowsPerImage = C.uint32_t(destination.Layout.RowsPerImage)
-	cDestination.buffer = C.WGPUBuffer(unsafe.Pointer(destination.Buffer.ref))
-	var cCopySize C.WGPUExtent3D
-	cCopySize.width = C.uint32_t(copySize.Width)
-	cCopySize.height = C.uint32_t(copySize.Height)
-	cCopySize.depthOrArrayLayers = C.uint32_t(copySize.DepthOrArrayLayers)
-	// Call and return
-	C.wgpuCommandEncoderCopyTextureToBuffer(cCommandEncoder, &cSource, &cDestination, &cCopySize)
+	cSource := C.WGPUTexelCopyTextureInfo{
+		texture:  source.Texture.ref,
+		mipLevel: C.uint32_t(source.MipLevel),
+		origin: C.WGPUOrigin3D{
+			x: C.uint32_t(source.Origin.X),
+			y: C.uint32_t(source.Origin.Y),
+			z: C.uint32_t(source.Origin.Z),
+		},
+		aspect: C.WGPUTextureAspect(source.Aspect),
+	}
+
+	cDestination := C.WGPUTexelCopyBufferInfo{
+		layout: C.WGPUTexelCopyBufferLayout{
+			offset:       C.uint64_t(destination.Layout.Offset),
+			bytesPerRow:  C.uint32_t(destination.Layout.BytesPerRow),
+			rowsPerImage: C.uint32_t(destination.Layout.RowsPerImage),
+		},
+		buffer: destination.Buffer.ref,
+	}
+
+	cCopySize := C.WGPUExtent3D{
+		width:              C.uint32_t(copySize.Width),
+		height:             C.uint32_t(copySize.Height),
+		depthOrArrayLayers: C.uint32_t(copySize.DepthOrArrayLayers),
+	}
+
+	C.wgpuCommandEncoderCopyTextureToBuffer(c.ref, &cSource, &cDestination, &cCopySize)
 }
 
 func (c *CommandEncoder) CopyTextureToTexture(source TexelCopyTextureInfo, destination TexelCopyTextureInfo, copySize Extent3D) {
-	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
 
-	var cSource C.WGPUTexelCopyTextureInfo
-	cSource.texture = C.WGPUTexture(unsafe.Pointer(source.Texture.ref))
-	cSource.mipLevel = C.uint32_t(source.MipLevel)
-	cSource.origin.x = C.uint32_t(source.Origin.X)
-	cSource.origin.y = C.uint32_t(source.Origin.Y)
-	cSource.origin.z = C.uint32_t(source.Origin.Z)
-	cSource.aspect = C.WGPUTextureAspect(source.Aspect)
-	var cDestination C.WGPUTexelCopyTextureInfo
-	cDestination.texture = C.WGPUTexture(unsafe.Pointer(destination.Texture.ref))
-	cDestination.mipLevel = C.uint32_t(destination.MipLevel)
-	cDestination.origin.x = C.uint32_t(destination.Origin.X)
-	cDestination.origin.y = C.uint32_t(destination.Origin.Y)
-	cDestination.origin.z = C.uint32_t(destination.Origin.Z)
-	cDestination.aspect = C.WGPUTextureAspect(destination.Aspect)
-	var cCopySize C.WGPUExtent3D
-	cCopySize.width = C.uint32_t(copySize.Width)
-	cCopySize.height = C.uint32_t(copySize.Height)
-	cCopySize.depthOrArrayLayers = C.uint32_t(copySize.DepthOrArrayLayers)
-	// Call and return
-	C.wgpuCommandEncoderCopyTextureToTexture(cCommandEncoder, &cSource, &cDestination, &cCopySize)
+	cSource := C.WGPUTexelCopyTextureInfo{
+		texture:  source.Texture.ref,
+		mipLevel: C.uint32_t(source.MipLevel),
+		origin: C.WGPUOrigin3D{
+			x: C.uint32_t(source.Origin.X),
+			y: C.uint32_t(source.Origin.Y),
+			z: C.uint32_t(source.Origin.Z),
+		},
+		aspect: C.WGPUTextureAspect(source.Aspect),
+	}
+
+	cDestination := C.WGPUTexelCopyTextureInfo{
+		texture:  destination.Texture.ref,
+		mipLevel: C.uint32_t(destination.MipLevel),
+		origin: C.WGPUOrigin3D{
+			x: C.uint32_t(destination.Origin.X),
+			y: C.uint32_t(destination.Origin.Y),
+			z: C.uint32_t(destination.Origin.Z),
+		},
+		aspect: C.WGPUTextureAspect(destination.Aspect),
+	}
+
+	cCopySize := C.WGPUExtent3D{
+		width:              C.uint32_t(copySize.Width),
+		height:             C.uint32_t(copySize.Height),
+		depthOrArrayLayers: C.uint32_t(copySize.DepthOrArrayLayers),
+	}
+
+	C.wgpuCommandEncoderCopyTextureToTexture(c.ref, &cSource, &cDestination, &cCopySize)
 }
 
 func (c *CommandEncoder) ClearBuffer(buffer *Buffer, offset uint64, size uint64) {
-	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
-
-	pBuffer := C.WGPUBuffer(unsafe.Pointer(buffer.ref))
-	cOffset := C.uint64_t(offset)
-	cSize := C.uint64_t(size)
-	// Call and return
-	C.wgpuCommandEncoderClearBuffer(cCommandEncoder, pBuffer, cOffset, cSize)
+	C.wgpuCommandEncoderClearBuffer(c.ref, buffer.ref, C.uint64_t(offset), C.uint64_t(size))
 }
 
 func (c *CommandEncoder) InsertDebugMarker(markerLabel string) {
-	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
-
-	cMarkerLabelStr := C.CString(markerLabel)
-	defer C.free(unsafe.Pointer(cMarkerLabelStr))
-	var cMarkerLabel C.WGPUStringView
-	cMarkerLabel.data = cMarkerLabelStr
-	cMarkerLabel.length = C.size_t(len(markerLabel))
-	// Call and return
-	C.wgpuCommandEncoderInsertDebugMarker(cCommandEncoder, cMarkerLabel)
+	C.wgpuCommandEncoderInsertDebugMarker(c.ref, toCStr(markerLabel))
 }
 
 func (c *CommandEncoder) PopDebugGroup() {
-	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
-
-	// Call and return
-	C.wgpuCommandEncoderPopDebugGroup(cCommandEncoder)
+	C.wgpuCommandEncoderPopDebugGroup(c.ref)
 }
 
 func (c *CommandEncoder) PushDebugGroup(groupLabel string) {
-	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
-
-	cGroupLabelStr := C.CString(groupLabel)
-	defer C.free(unsafe.Pointer(cGroupLabelStr))
-	var cGroupLabel C.WGPUStringView
-	cGroupLabel.data = cGroupLabelStr
-	cGroupLabel.length = C.size_t(len(groupLabel))
-	// Call and return
-	C.wgpuCommandEncoderPushDebugGroup(cCommandEncoder, cGroupLabel)
+	C.wgpuCommandEncoderPushDebugGroup(c.ref, toCStr(groupLabel))
 }
 
 func (c *CommandEncoder) ResolveQuerySet(querySet *QuerySet, firstQuery uint32, queryCount uint32, destination *Buffer, destinationOffset uint64) {
-	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
-
-	pQuerySet := C.WGPUQuerySet(unsafe.Pointer(querySet.ref))
-	cFirstQuery := C.uint32_t(firstQuery)
-	cQueryCount := C.uint32_t(queryCount)
-	pDestination := C.WGPUBuffer(unsafe.Pointer(destination.ref))
-	cDestinationOffset := C.uint64_t(destinationOffset)
-	// Call and return
-	C.wgpuCommandEncoderResolveQuerySet(cCommandEncoder, pQuerySet, cFirstQuery, cQueryCount, pDestination, cDestinationOffset)
+	C.wgpuCommandEncoderResolveQuerySet(c.ref, querySet.ref, C.uint32_t(firstQuery), C.uint32_t(queryCount), destination.ref, C.uint64_t(destinationOffset))
 }
 
 func (c *CommandEncoder) WriteTimestamp(querySet *QuerySet, queryIndex uint32) {
-	cCommandEncoder := C.WGPUCommandEncoder(unsafe.Pointer(c.ref))
-
-	pQuerySet := C.WGPUQuerySet(unsafe.Pointer(querySet.ref))
-	cQueryIndex := C.uint32_t(queryIndex)
-	// Call and return
-	C.wgpuCommandEncoderWriteTimestamp(cCommandEncoder, pQuerySet, cQueryIndex)
+	C.wgpuCommandEncoderWriteTimestamp(c.ref, querySet.ref, C.uint32_t(queryIndex))
 }
 
 func (c *CommandEncoder) SetLabel(label string) {
-	cLabel := toCStr(label)
-	C.wgpuCommandEncoderSetLabel(c.ref, cLabel)
+	C.wgpuCommandEncoderSetLabel(c.ref, toCStr(label))
 }
 
 func (c *CommandEncoder) Release() {

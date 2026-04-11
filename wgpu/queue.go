@@ -65,8 +65,6 @@ func (q *Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
 }
 
 func (q *Queue) WriteBuffer(buffer *Buffer, offset uint64, data []byte) {
-
-	cBufferOffset := C.uint64_t(offset)
 	cSize := C.size_t(len(data))
 
 	var cData unsafe.Pointer
@@ -74,7 +72,7 @@ func (q *Queue) WriteBuffer(buffer *Buffer, offset uint64, data []byte) {
 		cData = unsafe.Pointer(&data[0])
 	}
 
-	C.wgpuQueueWriteBuffer(q.ref, buffer.ref, cBufferOffset, cData, cSize)
+	C.wgpuQueueWriteBuffer(q.ref, buffer.ref, C.uint64_t(offset), cData, cSize)
 }
 
 func (q *Queue) WriteTexture(destination TexelCopyTextureInfo, data []byte, dataLayout TexelCopyBufferLayout, writeSize Extent3D) {
@@ -112,8 +110,7 @@ func (q *Queue) WriteTexture(destination TexelCopyTextureInfo, data []byte, data
 }
 
 func (q *Queue) SetLabel(label string) {
-	cLabel := toCStr(label)
-	C.wgpuQueueSetLabel(q.ref, cLabel)
+	C.wgpuQueueSetLabel(q.ref, toCStr(label))
 }
 
 func (q *Queue) Release() {

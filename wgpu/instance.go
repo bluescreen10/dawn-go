@@ -11,6 +11,7 @@ extern void cgo_callback_RequestAdapterCallback(WGPURequestAdapterStatus status,
 import "C"
 import (
 	"fmt"
+	"runtime"
 	"runtime/cgo"
 	"unsafe"
 )
@@ -151,16 +152,22 @@ func (i *Instance) Release() {
 
 func CreateInstance(descriptor *InstanceDescriptor) Instance {
 	var cDescriptor *C.WGPUInstanceDescriptor
+
 	if descriptor != nil {
-		cDescriptor := &C.WGPUInstanceDescriptor{}
+		var pinner runtime.Pinner
+		defer pinner.Unpin()
+
+		cDescriptor = &C.WGPUInstanceDescriptor{}
 
 		if count := len(descriptor.RequiredFeatures); count > 0 {
+			pinner.Pin(&descriptor.RequiredFeatures[0])
 			cDescriptor.requiredFeatureCount = C.size_t(count)
 			cDescriptor.requiredFeatures = (*C.WGPUInstanceFeatureName)(&descriptor.RequiredFeatures[0])
 		}
 
 		if descriptor.RequiredLimits != nil {
-			cDescriptor.requiredLimits.timedWaitAnyMaxCount = C.size_t(descriptor.RequiredLimits.TimedWaitAnyMaxCount)
+			limits := &C.WGPUInstanceLimits{timedWaitAnyMaxCount: C.size_t(descriptor.RequiredLimits.TimedWaitAnyMaxCount)}
+			pinner.Pin(limits)
 		}
 	}
 
@@ -209,6 +216,5 @@ func GetInstanceLimits() (InstanceLimits, error) {
 // }
 
 func HasInstanceFeature(feature InstanceFeatureName) bool {
-	cFeature := C.WGPUInstanceFeatureName(feature)
-	return bool(C.wgpuHasInstanceFeature(cFeature) != 0)
+	return bool(C.wgpuHasInstanceFeature(C.WGPUInstanceFeatureName(feature)) != 0)
 }

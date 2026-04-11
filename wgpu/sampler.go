@@ -14,3 +14,7 @@ type Sampler struct {
 func (s *Sampler) SetLabel(label string) {
 	C.wgpuSamplerSetLabel(s.ref, toCStr(label))
 }
+
+func (s *Sampler) Release() {
+	C.wgpuSamplerRelease(s.ref)
+}

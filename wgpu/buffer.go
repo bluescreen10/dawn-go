@@ -39,11 +39,6 @@ func goBufferMapCallbackHandler(status C.WGPUMapAsyncStatus, message C.WGPUStrin
 	)
 }
 func (b *Buffer) MapAsync(mode MapMode, offset int, size int, callback BufferMapCallback) {
-
-	cMode := C.WGPUMapMode(mode)
-	cOffset := C.size_t(offset)
-	cSize := C.size_t(size)
-
 	handle := cgo.NewHandle(callback)
 
 	cCallbackInfo := C.WGPUBufferMapCallbackInfo{
@@ -52,28 +47,23 @@ func (b *Buffer) MapAsync(mode MapMode, offset int, size int, callback BufferMap
 		userdata1: unsafe.Pointer(handle),
 	}
 
-	C.wgpuBufferMapAsync(b.ref, cMode, cOffset, cSize, cCallbackInfo)
+	C.wgpuBufferMapAsync(b.ref, C.WGPUMapMode(mode), C.size_t(offset), C.size_t(size), cCallbackInfo)
 }
 
 // MapModeWrite
 func (b *Buffer) GetMappedRange(offset int, size int) []byte {
-	cOffset := C.size_t(offset)
-	cSize := C.size_t(size)
-	buf := C.wgpuBufferGetMappedRange(b.ref, cOffset, cSize)
+	buf := C.wgpuBufferGetMappedRange(b.ref, C.size_t(offset), C.size_t(size))
 	return unsafe.Slice((*byte)(buf), size)
 }
 
 // MapModeRead
 func (b *Buffer) GetConstMappedRange(offset int, size int) []byte {
-	cOffset := C.size_t(offset)
-	cSize := C.size_t(size)
-	buf := C.wgpuBufferGetConstMappedRange(b.ref, cOffset, cSize)
+	buf := C.wgpuBufferGetConstMappedRange(b.ref, C.size_t(offset), C.size_t(size))
 	return unsafe.Slice((*byte)(buf), size)
 }
 
 func (b *Buffer) SetLabel(label string) {
-	cLabel := toCStr(label)
-	C.wgpuBufferSetLabel(b.ref, cLabel)
+	C.wgpuBufferSetLabel(b.ref, toCStr(label))
 }
 
 func (b *Buffer) GetUsage() BufferUsage {

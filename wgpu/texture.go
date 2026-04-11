@@ -35,14 +35,21 @@ func (t *Texture) CreateView(descriptor *TextureViewDescriptor) *TextureView {
 			aspect:          C.WGPUTextureAspect(descriptor.Aspect),
 			usage:           C.WGPUTextureUsage(descriptor.Usage),
 		}
+
+		if cDescriptor.mipLevelCount == 0 {
+			cDescriptor.mipLevelCount = MipLevelCountUndefined
+		}
+
+		if cDescriptor.arrayLayerCount == 0 {
+			cDescriptor.arrayLayerCount = ArrayLayerCountUndefined
+		}
 	}
 
 	return &TextureView{ref: C.wgpuTextureCreateView(t.ref, cDescriptor)}
 }
 
 func (t *Texture) SetLabel(label string) {
-	cLabel := toCStr(label)
-	C.wgpuTextureSetLabel(t.ref, cLabel)
+	C.wgpuTextureSetLabel(t.ref, toCStr(label))
 }
 
 func (t *Texture) GetWidth() uint32 {
@@ -90,8 +97,7 @@ type TextureView struct {
 }
 
 func (t *TextureView) SetLabel(label string) {
-	cLabel := toCStr(label)
-	C.wgpuTextureViewSetLabel(t.ref, cLabel)
+	C.wgpuTextureViewSetLabel(t.ref, toCStr(label))
 }
 
 func (t *TextureView) Release() {

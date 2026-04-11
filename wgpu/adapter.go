@@ -223,13 +223,7 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 
 		featuresCount := len(descriptor.RequiredFeatures)
 		if featuresCount > 0 {
-			requiredFeatures := C.malloc(C.size_t(featuresCount) * C.size_t(unsafe.Sizeof(C.WGPUFeatureName(0))))
-			defer C.free(requiredFeatures)
-
-			slice := unsafe.Slice((*FeatureName)(requiredFeatures), featuresCount)
-			copy(slice, descriptor.RequiredFeatures)
-
-			cDescriptor.requiredFeatures = (*C.WGPUFeatureName)(requiredFeatures)
+			cDescriptor.requiredFeatures = (*C.WGPUFeatureName)(unsafe.Pointer(&descriptor.RequiredFeatures[0]))
 			cDescriptor.requiredFeatureCount = C.size_t(featuresCount)
 		}
 

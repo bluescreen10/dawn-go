@@ -12,8 +12,7 @@ type BindGroupLayout struct {
 }
 
 func (b *BindGroupLayout) SetLabel(label string) {
-	cLabel := toCStr(label)
-	C.wgpuBindGroupLayoutSetLabel(b.ref, cLabel)
+	C.wgpuBindGroupLayoutSetLabel(b.ref, toCStr(label))
 }
 
 func (b *BindGroupLayout) Release() {

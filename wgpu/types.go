@@ -132,10 +132,9 @@ type ComputePipelineDescriptor struct {
 }
 
 type ComputeState struct {
-	Module        *ShaderModule
-	EntryPoint    string
-	ConstantCount int
-	Constants     ConstantEntry
+	Module     *ShaderModule
+	EntryPoint string
+	Constants  []ConstantEntry
 }
 
 type ConstantEntry struct {
@@ -265,15 +264,14 @@ type PassTimestampWrites struct {
 }
 
 type PipelineLayoutDescriptor struct {
-	Label                string
-	BindGroupLayoutCount int
-	BindGroupLayouts     *BindGroupLayout
-	ImmediateSize        uint32
+	Label            string
+	BindGroupLayouts []*BindGroupLayout
+	ImmediateSize    uint32
 }
 
 type popErrorScopeCallbackInfo struct {
 	Mode     callbackMode
-	Callback popErrorScopeCallback
+	Callback PopErrorScopeCallback
 }
 
 type PrimitiveState struct {
@@ -545,10 +543,10 @@ type BufferMapCallback func(status MapAsyncStatus, message string)
 type CreateComputePipelineAsyncCallback func(status CreatePipelineAsyncStatus, pipeline *ComputePipeline, message string)
 type CreateRenderPipelineAsyncCallback func(status CreatePipelineAsyncStatus, pipeline *RenderPipeline, message string)
 type DeviceLostCallback func(device *Device, reason DeviceLostReason, message string)
+type PopErrorScopeCallback func(typ ErrorType, message string)
 type QueueWorkDoneCallback func(status QueueWorkDoneStatus, message string)
 type UncapturedErrorCallback func(device *Device, typ ErrorType, message string)
 
 type compilationInfoCallback func(status compilationInfoRequestStatus, messages []CompilationMessage)
-type popErrorScopeCallback func(status popErrorScopeStatus, typ ErrorType, message string)
 type requestAdapterCallback func(status requestAdapterStatus, adapter *Adapter, message string)
 type requestDeviceCallback func(status requestDeviceStatus, device *Device, message string)

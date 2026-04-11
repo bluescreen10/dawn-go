@@ -9,6 +9,7 @@ package wgpu
 import "C"
 import (
 	"fmt"
+	"runtime"
 	"unsafe"
 )
 
@@ -36,6 +37,10 @@ func (s *Surface) Configure(config SurfaceConfiguration) {
 	if len(config.ViewFormats) > 0 {
 		cConfig.viewFormats = (*C.WGPUTextureFormat)(unsafe.Pointer(&config.ViewFormats[0]))
 		cConfig.viewFormatCount = C.size_t(len(config.ViewFormats))
+
+		var pinner runtime.Pinner
+		pinner.Pin(&config.ViewFormats[0])
+		defer pinner.Unpin()
 	}
 
 	C.wgpuSurfaceConfigure(s.ref, &cConfig)
@@ -140,6 +145,5 @@ func (s *Surface) Unconfigure() {
 }
 
 func (s *Surface) SetLabel(label string) {
-	cLabel := toCStr(label)
-	C.wgpuSurfaceSetLabel(s.ref, cLabel)
+	C.wgpuSurfaceSetLabel(s.ref, toCStr(label))
 }

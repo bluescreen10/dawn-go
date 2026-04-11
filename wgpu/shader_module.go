@@ -84,8 +84,7 @@ func (s *ShaderModule) TryGetCompilationInfo() ([]CompilationMessage, error) {
 }
 
 func (s *ShaderModule) SetLabel(label string) {
-	cLabel := toCStr(label)
-	C.wgpuShaderModuleSetLabel(s.ref, cLabel)
+	C.wgpuShaderModuleSetLabel(s.ref, toCStr(label))
 }
 
 func (s *ShaderModule) Release() {
