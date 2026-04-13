@@ -11,3 +11,6 @@
 ![Go Version](https://img.shields.io/github/go-mod/go-version/bluescreen10/dawn-go)
 
 Go bindings for Google Dawn (WebGPU).
+
+## About
+This project uses the Dawn library, which is licensed under the BSD 3-Clause License. See THIRD_PARTY_NOTICES for details.
