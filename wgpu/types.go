@@ -1,6 +1,3 @@
-// CODE GENERATED. DO NOT EDIT
-//
-//go:generate go run ./cmd/wrapper/.
 package wgpu
 
 import "unsafe"

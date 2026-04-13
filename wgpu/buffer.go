@@ -17,6 +17,17 @@ type Buffer struct {
 	ref C.WGPUBuffer
 }
 
+func (b *Buffer) AsImageCopyBuffer(bytesPerRow, rowsPerImage uint32) TexelCopyBufferInfo {
+	return TexelCopyBufferInfo{
+		Layout: TexelCopyBufferLayout{
+			Offset:       0,
+			BytesPerRow:  bytesPerRow,
+			RowsPerImage: rowsPerImage,
+		},
+		Buffer: b,
+	}
+}
+
 //export goBufferMapCallbackHandler
 func goBufferMapCallbackHandler(status C.WGPUMapAsyncStatus, message C.WGPUStringView, userData1 unsafe.Pointer, userData2 unsafe.Pointer) {
 	handleID := uintptr(userData1)
@@ -42,7 +53,7 @@ func (b *Buffer) MapAsync(mode MapMode, offset int, size int, callback BufferMap
 	handle := cgo.NewHandle(callback)
 
 	cCallbackInfo := C.WGPUBufferMapCallbackInfo{
-		mode:      C.WGPUCallbackMode(callbackModeAllowProcessEvents),
+		mode:      C.WGPUCallbackMode(callbackModeAllowSpontaneous),
 		callback:  C.WGPUBufferMapCallback(C.cgo_callback_BufferMapCallback),
 		userdata1: unsafe.Pointer(handle),
 	}

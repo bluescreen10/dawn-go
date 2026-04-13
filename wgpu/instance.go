@@ -42,26 +42,6 @@ func (i *Instance) CreateSurface(descriptor SurfaceDescriptor) *Surface {
 	return &Surface{ref: C.wgpuInstanceCreateSurface(i.ref, &cDescriptor)}
 }
 
-// Not needed
-// func (i *Instance) ProcessEvents() {
-// 	C.wgpuInstanceProcessEvents(i.ref)
-// }
-
-// Not needed
-// func (i *Instance) WaitAny(futureCount int, futures *FutureWaitInfo, timeoutNS uint64) WaitStatus {
-// 	cInstance := C.WGPUInstance(unsafe.Pointer(i.ref))
-
-// 	cFutureCount := C.size_t(futureCount)
-// 	if futures != nil {
-// 		var pFutures C.WGPUFutureWaitInfo
-// 		pFutures.future.id = C.uint64_t(futures.Future.Id)
-// 		pFutures.completed = toCBool(futures.Completed)
-// 	}
-// 	cTimeoutNS := C.uint64_t(timeoutNS)
-// 	// Call and return
-// 	return WaitStatus(C.wgpuInstanceWaitAny(cInstance, cFutureCount, pFutures, cTimeoutNS))
-// }
-
 //export goRequestAdapterCallbackHandler
 func goRequestAdapterCallbackHandler(status C.WGPURequestAdapterStatus, adapter C.WGPUAdapter, message C.WGPUStringView, userData1 unsafe.Pointer, userData2 unsafe.Pointer) {
 	handleID := uintptr(userData1)
@@ -149,11 +129,15 @@ func (i *Instance) GetWGSLLanguageFeatures() []WGSLLanguageFeatureName {
 	return features
 }
 
+func (i *Instance) ProcessEvents() {
+	C.wgpuInstanceProcessEvents(i.ref)
+}
+
 func (i *Instance) Release() {
 	C.wgpuInstanceRelease(i.ref)
 }
 
-func CreateInstance(descriptor *InstanceDescriptor) Instance {
+func CreateInstance(descriptor *InstanceDescriptor) *Instance {
 	var cDescriptor *C.WGPUInstanceDescriptor
 
 	if descriptor != nil {
@@ -174,7 +158,7 @@ func CreateInstance(descriptor *InstanceDescriptor) Instance {
 		}
 	}
 
-	return Instance{ref: C.wgpuCreateInstance(cDescriptor)}
+	return &Instance{ref: C.wgpuCreateInstance(cDescriptor)}
 }
 
 func GetInstanceFeatures() []InstanceFeatureName {
@@ -207,16 +191,6 @@ func GetInstanceLimits() (InstanceLimits, error) {
 
 	return limits, nil
 }
-
-// func GetProcAddress(procName string) uintptr {
-// 	cProcNameStr := C.CString(procName)
-// 	defer C.free(unsafe.Pointer(cProcNameStr))
-// 	var cProcName C.WGPUStringView
-// 	cProcName.data = cProcNameStr
-// 	cProcName.length = C.size_t(len(procName))
-// 	// Call and return
-// 	return uintptr(C.wgpuGetProcAddress(cProcName))
-// }
 
 func HasInstanceFeature(feature InstanceFeatureName) bool {
 	return bool(C.wgpuHasInstanceFeature(C.WGPUInstanceFeatureName(feature)) != 0)

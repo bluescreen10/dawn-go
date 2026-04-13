@@ -269,7 +269,7 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 			handle := cgo.NewHandle(descriptor.DeviceLostCallback)
 			handles = append(handles, handle)
 			cDescriptor.deviceLostCallbackInfo = C.WGPUDeviceLostCallbackInfo{
-				mode:      C.WGPUCallbackMode(callbackModeAllowProcessEvents),
+				mode:      C.WGPUCallbackMode(callbackModeAllowSpontaneous),
 				callback:  C.WGPUDeviceLostCallback(C.cgo_callback_DeviceLostCallback),
 				userdata1: unsafe.Pointer(handle),
 			}

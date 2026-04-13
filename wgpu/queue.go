@@ -56,7 +56,7 @@ func (q *Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
 	handle := cgo.NewHandle(callback)
 
 	cCallbackInfo := C.WGPUQueueWorkDoneCallbackInfo{
-		mode:      C.WGPUCallbackMode(callbackModeAllowProcessEvents),
+		mode:      C.WGPUCallbackMode(callbackModeAllowSpontaneous),
 		callback:  C.WGPUQueueWorkDoneCallback(C.cgo_callback_QueueWorkDoneCallback),
 		userdata1: unsafe.Pointer(handle),
 	}

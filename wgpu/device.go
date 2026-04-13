@@ -187,7 +187,7 @@ func (d *Device) CreateComputePipelineAsync(descriptor ComputePipelineDescriptor
 	handle := cgo.NewHandle(callback)
 
 	cCallbackInfo := C.WGPUCreateComputePipelineAsyncCallbackInfo{
-		mode:      C.WGPUCallbackMode(callbackModeAllowProcessEvents),
+		mode:      C.WGPUCallbackMode(callbackModeAllowSpontaneous),
 		callback:  C.WGPUCreateComputePipelineAsyncCallback(C.cgo_callback_CreateComputePipelineAsyncCallback),
 		userdata1: unsafe.Pointer(handle),
 	}
@@ -257,7 +257,7 @@ func (d *Device) CreateRenderPipelineAsync(descriptor RenderPipelineDescriptor, 
 	handle := cgo.NewHandle(callback)
 
 	cCallbackInfo := C.WGPUCreateRenderPipelineAsyncCallbackInfo{
-		mode:      C.WGPUCallbackMode(callbackModeAllowProcessEvents),
+		mode:      C.WGPUCallbackMode(callbackModeAllowSpontaneous),
 		callback:  C.WGPUCreateRenderPipelineAsyncCallback(C.cgo_callback_CreateRenderPipelineAsyncCallback),
 		userdata1: unsafe.Pointer(handle),
 	}
