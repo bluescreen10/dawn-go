@@ -17,7 +17,7 @@ func init() {
 }
 
 func TestTriangleRendering(t *testing.T) {
-	ctx, err := createTestContext()
+	ctx, err := createTestContext(t)
 	if err != nil {
 		t.Fatalf("error creating test context: %v", err)
 	}
@@ -108,11 +108,14 @@ func TestTriangleRendering(t *testing.T) {
 
 	future := readbackBuffer.MapAsync(wgpu.MapModeRead, 0, int(bufferSize), func(status wgpu.MapAsyncStatus, message string) {
 		if status != wgpu.MapAsyncStatusSuccess {
-			t.Errorf("MapAsync failed: %s", message)
+			t.Fatalf("MapAsync failed: %s", message)
 		}
 	})
 
-	ctx.instance.WaitAny([]wgpu.Future{future}, uint64(10*time.Second))
+	err = ctx.instance.WaitAny([]wgpu.Future{future}, uint64(10*time.Second))
+	if err != nil {
+		t.Fatalf("error waiting futures: %v", err)
+	}
 
 	pixels := readbackBuffer.GetConstMappedRange(0, int(bufferSize))
 	defer readbackBuffer.Unmap()
@@ -144,7 +147,7 @@ func (c *wgpuContext) CleanUp() {
 	c.instance.Release()
 }
 
-func createTestContext() (*wgpuContext, error) {
+func createTestContext(t *testing.T) (*wgpuContext, error) {
 	var ctx wgpuContext
 	var err error
 
@@ -161,7 +164,7 @@ func createTestContext() (*wgpuContext, error) {
 
 	ctx.device = ctx.adapter.RequestDevice(&wgpu.DeviceDescriptor{
 		UncapturedErrorCallback: func(device *wgpu.Device, typ wgpu.ErrorType, message string) {
-			panic(fmt.Sprintf("%s error: %s\n", typ, message))
+			t.Fatalf("%s error: %s", typ, message)
 		},
 	})
 
