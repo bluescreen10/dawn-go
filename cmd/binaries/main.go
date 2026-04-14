@@ -223,7 +223,7 @@ func addLibGoToZip(zw *zip.Writer, prefix string, osName string) {
 		sb.WriteString("#cgo darwin LDFLAGS: -framework Metal -framework IOKit -framework QuartzCore -framework Foundation -framework IOSurface -lc++ -lwebgpu_dawn\n")
 	case "linux":
 		sb.WriteString(fmt.Sprintf("#cgo %s,amd64 LDFLAGS: -L${SRCDIR}/amd64\n", osName))
-		sb.WriteString("#cgo linux LDFLAGS: -lwebgpu_dawn -ldl -lpthread -lm\n")
+		sb.WriteString("#cgo linux LDFLAGS: -lwebgpu_dawn -lstdc++ -lm -lpthread -ldl\n")
 	case "windows":
 		sb.WriteString(fmt.Sprintf("#cgo %s,amd64 LDFLAGS: -L${SRCDIR}/amd64\n", osName))
 		sb.WriteString("#cgo windows LDFLAGS: -lwebgpu_dawn -ld3d12 -ldxgi -ld3dcompiler\n")
