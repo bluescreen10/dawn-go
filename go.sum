@@ -1,2 +1,10 @@
+bluescreen10.com/wgpu-android v0.0.4 h1:Y8nJPvSBuZda/lWtqARmdS49ShFECmtEIFQYozGKALY=
+bluescreen10.com/wgpu-android v0.0.4/go.mod h1:opNtynIbctsNukS09IWTA2vNsmg5f2FHlWUjxEsjq70=
+bluescreen10.com/wgpu-darwin v0.0.4 h1:dxANVYAOwO3e7D75jJduXqbDn0Cs2erv1dAT4VPIOQc=
+bluescreen10.com/wgpu-darwin v0.0.4/go.mod h1:Ayb3gfvXbjYYi2bSWR5rXQoA0F/k9AzDQN2II3FdrPk=
+bluescreen10.com/wgpu-linux v0.0.4 h1:BEHIkyg+g32vWxDc2iPo+/O1gOBFmV/wqsC1YmcxPzU=
+bluescreen10.com/wgpu-linux v0.0.4/go.mod h1:2H6dgArKlaVpIdS/wbNJl9X2q/JUi1hY2jILfyftNdg=
+bluescreen10.com/wgpu-windows v0.0.4 h1:I+rYk4FvMS8YGXLxmNAX8YDZRj17TkZcAMOj0yM0jj8=
+bluescreen10.com/wgpu-windows v0.0.4/go.mod h1:x74d7b4BoXfdVN9gllt/ByohtOJU+gcvXHTv3Cl2d2Y=
 github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1 h1:nIVzcwqIaO1mK8LFr0fGkKpgQD4wJDDHRyv4t5k40Ps=
 github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1/go.mod h1:T5Dn0JwIJOX1euPZ/iT4tq6nFYtmukjcYa7937HuYK8=

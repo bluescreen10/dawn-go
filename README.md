@@ -1,7 +1,7 @@
 # Dawn Go
 
 <p align="center">
-    <img src="logo/logo.png" width="500" alt="logo" />
+    <img src="logo/logo.png" width="300" alt="logo" />
 </p>
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/bluescreen10/dawn-go.svg)](https://pkg.go.dev/github.com/bluescreen10/dawn-go)
