@@ -177,7 +177,7 @@ func goCreateComputePipelineAsyncCallbackHandler(status C.WGPUCreatePipelineAsyn
 		msg,
 	)
 }
-func (d *Device) CreateComputePipelineAsync(descriptor ComputePipelineDescriptor, callback CreateComputePipelineAsyncCallback) {
+func (d *Device) CreateComputePipelineAsync(descriptor ComputePipelineDescriptor, callback CreateComputePipelineAsyncCallback) Future {
 
 	pinner := &runtime.Pinner{}
 	defer pinner.Unpin()
@@ -192,7 +192,8 @@ func (d *Device) CreateComputePipelineAsync(descriptor ComputePipelineDescriptor
 		userdata1: unsafe.Pointer(handle),
 	}
 
-	C.wgpuDeviceCreateComputePipelineAsync(d.ref, &cDescriptor, cCallbackInfo)
+	future := C.wgpuDeviceCreateComputePipelineAsync(d.ref, &cDescriptor, cCallbackInfo)
+	return Future{id: uint64(future.id)}
 }
 
 func (d *Device) CreatePipelineLayout(descriptor PipelineLayoutDescriptor) PipelineLayout {
@@ -249,7 +250,7 @@ func goCreateRenderPipelineAsyncCallbackHandler(status C.WGPUCreatePipelineAsync
 		msg,
 	)
 }
-func (d *Device) CreateRenderPipelineAsync(descriptor RenderPipelineDescriptor, callback CreateRenderPipelineAsyncCallback) {
+func (d *Device) CreateRenderPipelineAsync(descriptor RenderPipelineDescriptor, callback CreateRenderPipelineAsyncCallback) Future {
 
 	pinner := &runtime.Pinner{}
 	cDescriptor := toCRenderPipelineDescriptor(pinner, descriptor)
@@ -262,7 +263,8 @@ func (d *Device) CreateRenderPipelineAsync(descriptor RenderPipelineDescriptor, 
 		userdata1: unsafe.Pointer(handle),
 	}
 
-	C.wgpuDeviceCreateRenderPipelineAsync(d.ref, &cDescriptor, cCallbackInfo)
+	future := C.wgpuDeviceCreateRenderPipelineAsync(d.ref, &cDescriptor, cCallbackInfo)
+	return Future{id: uint64(future.id)}
 }
 
 func (d *Device) CreateRenderBundleEncoder(descriptor RenderBundleEncoderDescriptor) RenderBundleEncoder {

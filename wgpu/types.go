@@ -189,6 +189,10 @@ type FragmentState struct {
 	Targets    []ColorTargetState
 }
 
+type Future struct {
+	id uint64
+}
+
 type InstanceDescriptor struct {
 	RequiredFeatures []InstanceFeatureName
 	RequiredLimits   *InstanceLimits

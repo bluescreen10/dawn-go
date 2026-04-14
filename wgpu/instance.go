@@ -137,6 +137,31 @@ func (i *Instance) Release() {
 	C.wgpuInstanceRelease(i.ref)
 }
 
+func (i *Instance) WaitAny(futures []Future, timeoutNs uint64) error {
+
+	cCount := C.size_t(len(futures))
+	var cFutureWaitInfo *C.WGPUFutureWaitInfo
+	if cCount > 0 {
+		futureWaitInfo := make([]C.WGPUFutureWaitInfo, cCount)
+		cFutureWaitInfo = (*C.WGPUFutureWaitInfo)(unsafe.Pointer(&futureWaitInfo[0]))
+
+		for i, f := range futures {
+			futureWaitInfo[i].future = C.WGPUFuture{id: C.uint64_t(f.id)}
+		}
+	}
+
+	status := C.wgpuInstanceWaitAny(i.ref, cCount, cFutureWaitInfo, C.uint64_t(timeoutNs))
+
+	switch waitStatus(status) {
+	case waitStatusTimedOut:
+		return fmt.Errorf("waitAny status timeout error")
+	case waitStatusError:
+		return fmt.Errorf("waitAny status error")
+	default:
+		return nil
+	}
+}
+
 func CreateInstance(descriptor *InstanceDescriptor) *Instance {
 	var cDescriptor *C.WGPUInstanceDescriptor
 

@@ -49,7 +49,7 @@ func goBufferMapCallbackHandler(status C.WGPUMapAsyncStatus, message C.WGPUStrin
 		msg,
 	)
 }
-func (b *Buffer) MapAsync(mode MapMode, offset int, size int, callback BufferMapCallback) {
+func (b *Buffer) MapAsync(mode MapMode, offset int, size int, callback BufferMapCallback) Future {
 	handle := cgo.NewHandle(callback)
 
 	cCallbackInfo := C.WGPUBufferMapCallbackInfo{
@@ -58,7 +58,8 @@ func (b *Buffer) MapAsync(mode MapMode, offset int, size int, callback BufferMap
 		userdata1: unsafe.Pointer(handle),
 	}
 
-	C.wgpuBufferMapAsync(b.ref, C.WGPUMapMode(mode), C.size_t(offset), C.size_t(size), cCallbackInfo)
+	future := C.wgpuBufferMapAsync(b.ref, C.WGPUMapMode(mode), C.size_t(offset), C.size_t(size), cCallbackInfo)
+	return Future{id: uint64(future.id)}
 }
 
 // MapModeWrite

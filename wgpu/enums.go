@@ -1051,12 +1051,12 @@ const (
 	VertexStepModeInstance  VertexStepMode = 2
 )
 
-type WaitStatus C.WGPUWaitStatus
+type waitStatus C.WGPUWaitStatus
 
 const (
-	WaitStatusSuccess  WaitStatus = 1
-	WaitStatusTimedOut WaitStatus = 2
-	WaitStatusError    WaitStatus = 3
+	waitStatusSuccess  waitStatus = 1
+	waitStatusTimedOut waitStatus = 2
+	waitStatusError    waitStatus = 3
 )
 
 const (
