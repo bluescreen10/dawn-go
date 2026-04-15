@@ -44,7 +44,7 @@ func goBufferMapCallbackHandler(status C.WGPUMapAsyncStatus, message C.WGPUStrin
 		msg = C.GoStringN(message.data, C.int(message.length))
 	}
 
-	fn(
+	go fn(
 		MapAsyncStatus(status),
 		msg,
 	)

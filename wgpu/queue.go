@@ -46,7 +46,7 @@ func goQueueWorkDoneCallbackHandler(status C.WGPUQueueWorkDoneStatus, message C.
 		msg = C.GoStringN(message.data, C.int(message.length))
 	}
 
-	fn(
+	go fn(
 		QueueWorkDoneStatus(status),
 		msg,
 	)

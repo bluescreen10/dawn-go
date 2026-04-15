@@ -176,7 +176,7 @@ func goDeviceLostCallbackHandler(device C.WGPUDevice, reason C.WGPUDeviceLostRea
 		msg = C.GoStringN(message.data, C.int(message.length))
 	}
 
-	fn(
+	go fn(
 		&Device{ref: device},
 		DeviceLostReason(reason),
 		msg,
@@ -198,7 +198,7 @@ func goUncapturedErrorCallbackHandler(device C.WGPUDevice, typ C.WGPUErrorType, 
 		msg = C.GoStringN(message.data, C.int(message.length))
 	}
 
-	fn(
+	go fn(
 		&Device{ref: device},
 		ErrorType(typ),
 		msg,

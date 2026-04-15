@@ -171,7 +171,7 @@ func goCreateComputePipelineAsyncCallbackHandler(status C.WGPUCreatePipelineAsyn
 		msg = C.GoStringN(message.data, C.int(message.length))
 	}
 
-	fn(
+	go fn(
 		CreatePipelineAsyncStatus(status),
 		&ComputePipeline{ref: pipeline},
 		msg,
@@ -244,7 +244,8 @@ func goCreateRenderPipelineAsyncCallbackHandler(status C.WGPUCreatePipelineAsync
 	if message.data != nil && message.length > 0 {
 		msg = C.GoStringN(message.data, C.int(message.length))
 	}
-	fn(
+
+	go fn(
 		CreatePipelineAsyncStatus(status),
 		&RenderPipeline{ref: pipeline},
 		msg,
@@ -538,7 +539,7 @@ func goPopErrorScopeCallbackHandler(status C.WGPUPopErrorScopeStatus, typ C.WGPU
 	}
 
 	if popErrorScopeStatus(status) == popErrorScopeStatusSuccess {
-		fn(ErrorType(typ), msg)
+		go fn(ErrorType(typ), msg)
 	}
 }
 
