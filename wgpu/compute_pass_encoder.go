@@ -53,3 +53,7 @@ func (c *ComputePassEncoder) End() {
 func (c *ComputePassEncoder) SetLabel(label string) {
 	C.wgpuComputePassEncoderSetLabel(c.ref, toCStr(label))
 }
+
+func (c *ComputePassEncoder) Release() {
+	C.wgpuComputePassEncoderRelease(c.ref)
+}

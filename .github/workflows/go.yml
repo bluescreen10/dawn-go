@@ -35,9 +35,6 @@ jobs:
             mesa-vulkan-drivers \
             libxcb-xfixes0-dev
 
-      - name: Verify Vulkan sees LavaPipe
-        run: vulkaninfo --summary || true
-
       # Download dependencies (optional but explicit)
       - name: Download modules
         run: go mod download

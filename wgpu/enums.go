@@ -1043,6 +1043,66 @@ const (
 	VertexFormatUnorm8x4BGRA    VertexFormat = 41
 )
 
+func (f VertexFormat) Size() int {
+	switch f {
+
+	case VertexFormatUint8,
+		VertexFormatSint8,
+		VertexFormatUnorm8,
+		VertexFormatSnorm8:
+		return 1
+
+	case VertexFormatUint8x2,
+		VertexFormatSint8x2,
+		VertexFormatUnorm8x2,
+		VertexFormatSnorm8x2,
+		VertexFormatUint16,
+		VertexFormatSint16,
+		VertexFormatUnorm16,
+		VertexFormatSnorm16,
+		VertexFormatFloat16:
+		return 2
+
+	case VertexFormatUint8x4,
+		VertexFormatSint8x4,
+		VertexFormatUnorm8x4,
+		VertexFormatSnorm8x4,
+		VertexFormatUint16x2,
+		VertexFormatSint16x2,
+		VertexFormatUnorm16x2,
+		VertexFormatSnorm16x2,
+		VertexFormatFloat16x2,
+		VertexFormatFloat32,
+		VertexFormatUint32,
+		VertexFormatSint32,
+		VertexFormatUnorm10_10_10_2,
+		VertexFormatUnorm8x4BGRA:
+		return 4
+
+	case VertexFormatUint16x4,
+		VertexFormatSint16x4,
+		VertexFormatUnorm16x4,
+		VertexFormatSnorm16x4,
+		VertexFormatFloat16x4,
+		VertexFormatFloat32x2,
+		VertexFormatUint32x2,
+		VertexFormatSint32x2:
+		return 8
+
+	case VertexFormatFloat32x3,
+		VertexFormatUint32x3,
+		VertexFormatSint32x3:
+		return 12
+
+	case VertexFormatFloat32x4,
+		VertexFormatUint32x4,
+		VertexFormatSint32x4:
+		return 16
+	}
+
+	panic("unknown VertexFormat")
+}
+
 type VertexStepMode C.WGPUVertexStepMode
 
 const (

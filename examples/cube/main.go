@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
-	"os"
 	"runtime"
-	"strings"
 	"unsafe"
 
 	"github.com/bluescreen10/dawn-go/examples/glm"
@@ -137,47 +135,40 @@ type State struct {
 	bindGroup  *wgpu.BindGroup
 }
 
-func InitState(window *glfw.Window) (s *State, err error) {
+func (s *State) Init(window *glfw.Window) (err error) {
 	defer func() {
 		if err != nil {
 			s.Destroy()
 			s = nil
 		}
 	}()
-	s = &State{}
 
 	instance := wgpu.CreateInstance(nil)
 	defer instance.Release()
 
-	fmt.Println(instance.GetWGSLLanguageFeatures())
-
 	s.surface = instance.CreateSurface(wgpuglfw.GetSurfaceDescriptor(window))
 
-	adapter, err := instance.RequestAdapter(&wgpu.RequestAdapterOptions{
+	s.adapter, err = instance.RequestAdapter(&wgpu.RequestAdapterOptions{
 		ForceFallbackAdapter: false,
 		CompatibleSurface:    s.surface,
 	})
+
 	if err != nil {
 		panic(err)
 	}
 
-	defer adapter.Release()
-
-	s.device = adapter.RequestDevice(&wgpu.DeviceDescriptor{
+	s.device = s.adapter.RequestDevice(&wgpu.DeviceDescriptor{
 		UncapturedErrorCallback: wgpu.UncapturedErrorCallback(func(_ *wgpu.Device, typ wgpu.ErrorType, message string) {
-			fmt.Printf("Type: %s Msg: %s\n", typ, message)
-			os.Exit(1)
+			panic(fmt.Sprintf("Type: %s Msg: %s\n", typ, message))
 		}),
 	})
 
 	s.queue = s.device.GetQueue()
 
-	caps, err := s.surface.GetCapabilities(adapter)
+	caps, err := s.surface.GetCapabilities(s.adapter)
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(caps)
 
 	width, height := window.GetSize()
 	s.config = wgpu.SurfaceConfiguration{
@@ -204,7 +195,6 @@ func InitState(window *glfw.Window) (s *State, err error) {
 		Usage:    wgpu.BufferUsageIndex,
 	})
 
-	texels := createTexels()
 	textureExtent := wgpu.Extent3D{
 		Width:              texelsSize,
 		Height:             texelsSize,
@@ -219,20 +209,9 @@ func InitState(window *glfw.Window) (s *State, err error) {
 		Usage:         wgpu.TextureUsageTextureBinding | wgpu.TextureUsageCopyDst,
 	})
 
-	sampler := s.device.CreateSampler(&wgpu.SamplerDescriptor{
-		Label:         "test",
-		MaxAnisotropy: 1,
-	})
-	defer sampler.Release()
-
-	//defer texture.Destroy()
-
 	textureView := texture.CreateView(nil)
-	if err != nil {
-		return s, err
-	}
-	//defer textureView.Release()
 
+	texels := createTexels()
 	s.queue.WriteTexture(
 		texture.AsImageCopy(),
 		wgpu.ToBytes(texels[:]),
@@ -251,7 +230,7 @@ func InitState(window *glfw.Window) (s *State, err error) {
 		Usage:    wgpu.BufferUsageUniform | wgpu.BufferUsageCopyDst,
 	})
 	if err != nil {
-		return s, err
+		return err
 	}
 
 	shader := s.device.CreateShaderModule(wgpu.ShaderModuleDescriptor{
@@ -310,7 +289,7 @@ func InitState(window *glfw.Window) (s *State, err error) {
 		},
 	})
 
-	return s, nil
+	return nil
 }
 
 func (s *State) Resize(width, height int) {
@@ -361,10 +340,6 @@ func (s *State) Render() error {
 }
 
 func (s *State) Destroy() {
-	if s.pipeline != nil {
-		s.pipeline.Release()
-	}
-
 	if s.bindGroup != nil {
 		s.bindGroup.Release()
 		s.bindGroup = nil
@@ -396,6 +371,12 @@ func (s *State) Destroy() {
 		s.device.Destroy()
 		s.device = nil
 	}
+
+	if s.adapter != nil {
+		s.adapter.Release()
+		s.adapter = nil
+	}
+
 	if s.surface != nil {
 		s.surface.Release()
 		s.surface = nil
@@ -415,7 +396,8 @@ func main() {
 	}
 	defer window.Destroy()
 
-	s, err := InitState(window)
+	s := &State{}
+	err = s.Init(window)
 	if err != nil {
 		panic(err)
 	}
@@ -427,19 +409,6 @@ func main() {
 
 	for !window.ShouldClose() {
 		glfw.PollEvents()
-
-		err := s.Render()
-		if err != nil {
-			fmt.Println("error occured while rendering:", err)
-
-			errstr := err.Error()
-			switch {
-			case strings.Contains(errstr, "Surface timed out"): // do nothing
-			case strings.Contains(errstr, "Surface is outdated"): // do nothing
-			case strings.Contains(errstr, "Surface was lost"): // do nothing
-			default:
-				panic(err)
-			}
-		}
+		s.Render()
 	}
 }

@@ -124,12 +124,17 @@ func (d *Device) CreateBufferInit(descriptor BufferInitDescriptor) *Buffer {
 }
 
 func (d *Device) CreateBuffer(descriptor BufferDescriptor) *Buffer {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
 	cDescriptor := C.WGPUBufferDescriptor{
 		label:            toCStr(descriptor.Label),
 		usage:            C.WGPUBufferUsage(descriptor.Usage),
 		size:             C.uint64_t(descriptor.Size),
 		mappedAtCreation: toCBool(descriptor.MappedAtCreation),
 	}
+
+	pinner.Pin(cDescriptor.label.data)
 
 	return &Buffer{ref: C.wgpuDeviceCreateBuffer(d.ref, &cDescriptor)}
 }
@@ -147,12 +152,12 @@ func (d *Device) CreateCommandEncoder(descriptor *CommandEncoderDescriptor) *Com
 	return &CommandEncoder{ref: C.wgpuDeviceCreateCommandEncoder(d.ref, cDescriptor)}
 }
 
-func (d *Device) CreateComputePipeline(descriptor ComputePipelineDescriptor) ComputePipeline {
+func (d *Device) CreateComputePipeline(descriptor ComputePipelineDescriptor) *ComputePipeline {
 	pinner := &runtime.Pinner{}
 	defer pinner.Unpin()
 
 	cDescriptor := toCComputePipelineDescriptor(pinner, descriptor)
-	return ComputePipeline{ref: C.wgpuDeviceCreateComputePipeline(d.ref, &cDescriptor)}
+	return &ComputePipeline{ref: C.wgpuDeviceCreateComputePipeline(d.ref, &cDescriptor)}
 }
 
 //export goCreateComputePipelineAsyncCallbackHandler

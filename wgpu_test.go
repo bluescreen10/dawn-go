@@ -108,11 +108,11 @@ func TestTriangleRendering(t *testing.T) {
 
 	future := readbackBuffer.MapAsync(wgpu.MapModeRead, 0, int(bufferSize), func(status wgpu.MapAsyncStatus, message string) {
 		if status != wgpu.MapAsyncStatusSuccess {
-			t.Fatalf("MapAsync failed: %s", message)
+			panic(fmt.Sprintf("MapAsync failed: %s", message))
 		}
 	})
 
-	err = ctx.instance.WaitAny([]wgpu.Future{future}, uint64(10*time.Second))
+	err = ctx.instance.Wait(future, 10*time.Second)
 	if err != nil {
 		t.Fatalf("error waiting futures: %v", err)
 	}
@@ -133,6 +133,111 @@ func TestTriangleRendering(t *testing.T) {
 	// }
 
 	imagesAreEqual(t, expected, got)
+}
+
+func TestComputePipeline(t *testing.T) {
+	ctx, err := createTestContext()
+	if err != nil {
+		t.Fatalf("error creating test context: %v", err)
+	}
+	defer ctx.CleanUp()
+
+	inputData := []uint32{1, 2, 3, 4}
+	inputSize := uint64(len(inputData) * 4)
+
+	inputBuffer := ctx.device.CreateBuffer(wgpu.BufferDescriptor{
+		Label: "Input Buffer",
+		Size:  inputSize,
+		Usage: wgpu.BufferUsageStorage | wgpu.BufferUsageCopyDst,
+	})
+	defer inputBuffer.Destroy()
+
+	outputBuffer := ctx.device.CreateBuffer(wgpu.BufferDescriptor{
+		Label: "Output Buffer",
+		Size:  inputSize,
+		Usage: wgpu.BufferUsageStorage | wgpu.BufferUsageCopySrc,
+	})
+	defer outputBuffer.Destroy()
+
+	readbackBuffer := ctx.device.CreateBuffer(wgpu.BufferDescriptor{
+		Label: "Readback Buffer",
+		Size:  inputSize,
+		Usage: wgpu.BufferUsageCopyDst | wgpu.BufferUsageMapRead,
+	})
+	defer readbackBuffer.Destroy()
+
+	ctx.device.GetQueue().WriteBuffer(inputBuffer, 0, wgpu.ToBytes(inputData))
+
+	shader := ctx.device.CreateShaderModule(wgpu.ShaderModuleDescriptor{
+		WGSLSource: &wgpu.ShaderSourceWGSL{
+			Code: `
+			@group(0) @binding(0) var<storage, read> input: array<u32>;
+			@group(0) @binding(1) var<storage, read_write> output: array<u32>;
+
+			@compute @workgroup_size(1)
+			fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+				output[global_id.x] = input[global_id.x] * 2u;
+			}`,
+		},
+	})
+	defer shader.Release()
+
+	pipeline := ctx.device.CreateComputePipeline(wgpu.ComputePipelineDescriptor{
+		Compute: wgpu.ComputeState{
+			Module:     shader,
+			EntryPoint: "main",
+		},
+	})
+	defer pipeline.Release()
+
+	bindGroup := ctx.device.CreateBindGroup(wgpu.BindGroupDescriptor{
+		Layout: pipeline.GetBindGroupLayout(0),
+		Entries: []wgpu.BindGroupEntry{
+			{
+				Binding: 0,
+				Buffer:  inputBuffer,
+				Size:    inputSize,
+			},
+			{
+				Binding: 1,
+				Buffer:  outputBuffer,
+				Size:    inputSize,
+			},
+		},
+	})
+	defer bindGroup.Release()
+
+	encoder := ctx.device.CreateCommandEncoder(nil)
+	pass := encoder.BeginComputePass(nil)
+	pass.SetPipeline(pipeline)
+	pass.SetBindGroup(0, bindGroup, nil)
+	pass.DispatchWorkgroups(uint32(len(inputData)), 1, 1)
+	pass.End()
+
+	encoder.CopyBufferToBuffer(outputBuffer, 0, readbackBuffer, 0, inputSize)
+
+	ctx.device.GetQueue().Submit(encoder.Finish(nil))
+
+	future := readbackBuffer.MapAsync(wgpu.MapModeRead, 0, int(inputSize), func(status wgpu.MapAsyncStatus, message string) {
+		if status != wgpu.MapAsyncStatusSuccess {
+			panic(fmt.Sprintf("MapAsync failed: %s", message))
+		}
+	})
+
+	err = ctx.instance.Wait(future, 10*time.Second)
+	if err != nil {
+		t.Fatalf("error waiting futures: %v", err)
+	}
+
+	result := readbackBuffer.GetConstMappedRange(0, int(inputSize))
+	defer readbackBuffer.Unmap()
+
+	got := wgpu.FromBytes[uint32](result)
+	for i, v := range got {
+		if v != inputData[i]*2 {
+			t.Errorf("at index %d: expected %d, got %d", i, inputData[i]*2, v)
+		}
+	}
 }
 
 type wgpuContext struct {

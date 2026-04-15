@@ -12,3 +12,11 @@ func ToBytes[T any, E []T](data E) []byte {
 
 	return unsafe.Slice((*byte)(unsafe.Pointer(&data[0])), l*unsafe.Sizeof(data[0]))
 }
+
+func FromBytes[T any](data []byte) []T {
+	if len(data) == 0 {
+		return nil
+	}
+	var v T
+	return unsafe.Slice((*T)(unsafe.Pointer(&data[0])), uintptr(len(data))/unsafe.Sizeof(v))
+}

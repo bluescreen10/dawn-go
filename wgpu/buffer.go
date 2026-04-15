@@ -94,6 +94,10 @@ func (b *Buffer) Unmap() {
 	C.wgpuBufferUnmap(b.ref)
 }
 
+func (b *Buffer) Release() {
+	C.wgpuBufferRelease(b.ref)
+}
+
 func (b *Buffer) Destroy() {
 	C.wgpuBufferDestroy(b.ref)
 }

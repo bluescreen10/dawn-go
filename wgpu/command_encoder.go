@@ -28,7 +28,7 @@ func (c *CommandEncoder) Finish(descriptor *CommandBufferDescriptor) *CommandBuf
 	return &CommandBuffer{ref: C.wgpuCommandEncoderFinish(c.ref, cDescriptor)}
 }
 
-func (c *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) ComputePassEncoder {
+func (c *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) *ComputePassEncoder {
 
 	var cDescriptor *C.WGPUComputePassDescriptor
 	if descriptor != nil {
@@ -45,7 +45,7 @@ func (c *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) Com
 		}
 	}
 
-	return ComputePassEncoder{ref: C.wgpuCommandEncoderBeginComputePass(c.ref, cDescriptor)}
+	return &ComputePassEncoder{ref: C.wgpuCommandEncoderBeginComputePass(c.ref, cDescriptor)}
 }
 
 func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) *RenderPassEncoder {

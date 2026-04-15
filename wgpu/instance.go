@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"runtime"
 	"runtime/cgo"
+	"time"
 	"unsafe"
 )
 
@@ -137,7 +138,12 @@ func (i *Instance) Release() {
 	C.wgpuInstanceRelease(i.ref)
 }
 
-func (i *Instance) WaitAny(futures []Future, timeoutNs uint64) error {
+func (i *Instance) Wait(future Future, timeout time.Duration) error {
+	return i.WaitAny([]Future{future}, timeout)
+}
+
+func (i *Instance) WaitAny(futures []Future, timeout time.Duration) error {
+	cTimeoutNs := C.uint64_t(timeout.Nanoseconds())
 
 	cCount := C.size_t(len(futures))
 	var cFutureWaitInfo *C.WGPUFutureWaitInfo
@@ -150,7 +156,7 @@ func (i *Instance) WaitAny(futures []Future, timeoutNs uint64) error {
 		}
 	}
 
-	status := C.wgpuInstanceWaitAny(i.ref, cCount, cFutureWaitInfo, C.uint64_t(timeoutNs))
+	status := C.wgpuInstanceWaitAny(i.ref, cCount, cFutureWaitInfo, cTimeoutNs)
 
 	switch waitStatus(status) {
 	case waitStatusTimedOut:
