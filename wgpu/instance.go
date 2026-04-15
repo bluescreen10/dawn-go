@@ -16,10 +16,14 @@ import (
 	"unsafe"
 )
 
+// Instance is a WebGPU instance, which serves as the entry point for all WebGPU operations.
+// It manages the underlying GPU backend and is used to request adapters.
 type Instance struct {
 	ref C.WGPUInstance
 }
 
+// CreateSurface creates a surface for rendering to a window.
+// The surface is configured for the specified descriptor, which defines how the surface should be presented.
 func (i *Instance) CreateSurface(descriptor SurfaceDescriptor) *Surface {
 	var pinner runtime.Pinner
 
@@ -100,6 +104,8 @@ func goRequestAdapterCallbackHandler(status C.WGPURequestAdapterStatus, adapter 
 	)
 }
 
+// RequestAdapter requests a GPU adapter from the instance based on the provided options.
+// Returns the adapter and an error if the request fails.
 func (i *Instance) RequestAdapter(options *RequestAdapterOptions) (*Adapter, error) {
 
 	var cOptions *C.WGPURequestAdapterOptions
@@ -141,11 +147,14 @@ func (i *Instance) RequestAdapter(options *RequestAdapterOptions) (*Adapter, err
 	return adapter, nil
 }
 
+// HasWGSLLanguageFeature checks if the instance supports the given WGSL language feature.
+// Returns true if the feature is supported, false otherwise.
 func (i *Instance) HasWGSLLanguageFeature(feature WGSLLanguageFeatureName) bool {
 	cFeature := C.WGPUWGSLLanguageFeatureName(feature)
 	return bool(C.wgpuInstanceHasWGSLLanguageFeature(i.ref, cFeature) != 0)
 }
 
+// GetWGSLLanguageFeatures returns all WGSL language features supported by the instance.
 func (i *Instance) GetWGSLLanguageFeatures() []WGSLLanguageFeatureName {
 	var cFeatures C.WGPUSupportedWGSLLanguageFeatures
 	C.wgpuInstanceGetWGSLLanguageFeatures(i.ref, &cFeatures)
@@ -166,18 +175,26 @@ func (i *Instance) GetWGSLLanguageFeatures() []WGSLLanguageFeatureName {
 	return features
 }
 
+// ProcessEvents processes any pending events in the instance, such as callbacks and device lost notifications.
+// This must be called periodically to ensure callbacks are executed.
 func (i *Instance) ProcessEvents() {
 	C.wgpuInstanceProcessEvents(i.ref)
 }
 
+// Release releases the instance and all associated resources.
+// After calling this method, the instance should no longer be used.
 func (i *Instance) Release() {
 	C.wgpuInstanceRelease(i.ref)
 }
 
+// Wait blocks the current thread until the specified future completes or the timeout expires.
+// Returns an error if the wait fails or times out.
 func (i *Instance) Wait(future Future, timeout time.Duration) error {
 	return i.WaitAny([]Future{future}, timeout)
 }
 
+// WaitAny blocks the current thread until any of the specified futures completes or the timeout expires.
+// Returns an error if the wait fails or times out.
 func (i *Instance) WaitAny(futures []Future, timeout time.Duration) error {
 	cTimeoutNs := C.uint64_t(timeout.Nanoseconds())
 
@@ -204,6 +221,8 @@ func (i *Instance) WaitAny(futures []Future, timeout time.Duration) error {
 	}
 }
 
+// CreateInstance creates a new WebGPU instance with optional descriptor.
+// The instance is the entry point for all WebGPU operations.
 func CreateInstance(descriptor *InstanceDescriptor) *Instance {
 	var cDescriptor *C.WGPUInstanceDescriptor
 
@@ -228,6 +247,7 @@ func CreateInstance(descriptor *InstanceDescriptor) *Instance {
 	return &Instance{ref: C.wgpuCreateInstance(cDescriptor)}
 }
 
+// GetInstanceFeatures returns a list of all instance-level features supported by the WebGPU implementation.
 func GetInstanceFeatures() []InstanceFeatureName {
 	var cFeatures C.WGPUSupportedInstanceFeatures
 	C.wgpuGetInstanceFeatures(&cFeatures)
@@ -243,6 +263,8 @@ func GetInstanceFeatures() []InstanceFeatureName {
 	return features
 }
 
+// GetInstanceLimits returns the instance-level limits supported by the WebGPU implementation.
+// Returns the limits and an error if they cannot be retrieved.
 func GetInstanceLimits() (InstanceLimits, error) {
 	var cLimits C.WGPUInstanceLimits
 
@@ -259,6 +281,8 @@ func GetInstanceLimits() (InstanceLimits, error) {
 	return limits, nil
 }
 
+// HasInstanceFeature checks if the given instance feature is supported by the WebGPU implementation.
+// Returns true if the feature is supported, false otherwise.
 func HasInstanceFeature(feature InstanceFeatureName) bool {
 	return bool(C.wgpuHasInstanceFeature(C.WGPUInstanceFeatureName(feature)) != 0)
 }

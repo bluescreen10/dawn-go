@@ -19,11 +19,14 @@ import (
 	"unsafe"
 )
 
+// Device represents a logical GPU device that can be used to create resources and execute commands.
+// It is the main interface for interacting with the GPU.
 type Device struct {
 	ref     C.WGPUDevice
 	handles []cgo.Handle
 }
 
+// CreateBindGroup creates a bind group from the given descriptor, which defines a set of resources to be bound together.
 func (d *Device) CreateBindGroup(descriptor BindGroupDescriptor) *BindGroup {
 	var pinner runtime.Pinner
 	defer pinner.Unpin()
@@ -65,6 +68,7 @@ func (d *Device) CreateBindGroup(descriptor BindGroupDescriptor) *BindGroup {
 	return &BindGroup{ref: C.wgpuDeviceCreateBindGroup(d.ref, &cDescriptor)}
 }
 
+// CreateBindGroupLayout creates a bind group layout from the given descriptor, which defines the interface for a bind group.
 func (d *Device) CreateBindGroupLayout(descriptor BindGroupLayoutDescriptor) BindGroupLayout {
 	var pinner runtime.Pinner
 	defer pinner.Unpin()
@@ -110,6 +114,8 @@ func (d *Device) CreateBindGroupLayout(descriptor BindGroupLayoutDescriptor) Bin
 	return BindGroupLayout{ref: C.wgpuDeviceCreateBindGroupLayout(d.ref, &cDescriptor)}
 }
 
+// CreateBufferInit creates a buffer and initializes it with the given contents in a single operation.
+// This is more efficient than creating and then writing to the buffer separately.
 func (d *Device) CreateBufferInit(descriptor BufferInitDescriptor) *Buffer {
 
 	buffer := d.CreateBuffer(BufferDescriptor{
@@ -123,6 +129,8 @@ func (d *Device) CreateBufferInit(descriptor BufferInitDescriptor) *Buffer {
 	return buffer
 }
 
+// CreateBuffer creates a new buffer with the given descriptor.
+// Buffers are used to store data that can be read and written by shaders.
 func (d *Device) CreateBuffer(descriptor BufferDescriptor) *Buffer {
 	var pinner runtime.Pinner
 	defer pinner.Unpin()
@@ -139,6 +147,8 @@ func (d *Device) CreateBuffer(descriptor BufferDescriptor) *Buffer {
 	return &Buffer{ref: C.wgpuDeviceCreateBuffer(d.ref, &cDescriptor)}
 }
 
+// CreateCommandEncoder creates a command encoder from the given descriptor.
+// Command encoders are used to record commands that will be submitted to the GPU queue.
 func (d *Device) CreateCommandEncoder(descriptor *CommandEncoderDescriptor) *CommandEncoder {
 
 	var cDescriptor *C.WGPUCommandEncoderDescriptor
@@ -152,6 +162,8 @@ func (d *Device) CreateCommandEncoder(descriptor *CommandEncoderDescriptor) *Com
 	return &CommandEncoder{ref: C.wgpuDeviceCreateCommandEncoder(d.ref, cDescriptor)}
 }
 
+// CreateComputePipeline creates a compute pipeline from the given descriptor.
+// Compute pipelines execute compute shaders on the GPU.
 func (d *Device) CreateComputePipeline(descriptor ComputePipelineDescriptor) *ComputePipeline {
 	pinner := &runtime.Pinner{}
 	defer pinner.Unpin()
@@ -182,6 +194,10 @@ func goCreateComputePipelineAsyncCallbackHandler(status C.WGPUCreatePipelineAsyn
 		msg,
 	)
 }
+
+// CreateComputePipelineAsync creates a compute pipeline asynchronously from the given descriptor.
+// Returns a Future that can be used to wait for the pipeline to be created.
+// The callback is called when the pipeline is ready or an error occurs.
 func (d *Device) CreateComputePipelineAsync(descriptor ComputePipelineDescriptor, callback CreateComputePipelineAsyncCallback) Future {
 
 	pinner := &runtime.Pinner{}
@@ -201,6 +217,8 @@ func (d *Device) CreateComputePipelineAsync(descriptor ComputePipelineDescriptor
 	return Future{id: uint64(future.id)}
 }
 
+// CreatePipelineLayout creates a pipeline layout from the given descriptor.
+// Pipeline layouts define the resource bindings used by pipelines.
 func (d *Device) CreatePipelineLayout(descriptor PipelineLayoutDescriptor) PipelineLayout {
 	pinner := runtime.Pinner{}
 	defer pinner.Unpin()
@@ -224,6 +242,8 @@ func (d *Device) CreatePipelineLayout(descriptor PipelineLayoutDescriptor) Pipel
 	return PipelineLayout{ref: C.wgpuDeviceCreatePipelineLayout(d.ref, &cDescriptor)}
 }
 
+// CreateQuerySet creates a query set from the given descriptor.
+// Query sets are used to collect timestamp and occlusion query results.
 func (d *Device) CreateQuerySet(descriptor QuerySetDescriptor) QuerySet {
 	cDescriptor := C.WGPUQuerySetDescriptor{
 		label: toCStr(descriptor.Label),
@@ -256,6 +276,10 @@ func goCreateRenderPipelineAsyncCallbackHandler(status C.WGPUCreatePipelineAsync
 		msg,
 	)
 }
+
+// CreateRenderPipelineAsync creates a render pipeline asynchronously from the given descriptor.
+// Returns a Future that can be used to wait for the pipeline to be created.
+// The callback is called when the pipeline is ready or an error occurs.
 func (d *Device) CreateRenderPipelineAsync(descriptor RenderPipelineDescriptor, callback CreateRenderPipelineAsyncCallback) Future {
 
 	pinner := &runtime.Pinner{}
@@ -273,6 +297,8 @@ func (d *Device) CreateRenderPipelineAsync(descriptor RenderPipelineDescriptor, 
 	return Future{id: uint64(future.id)}
 }
 
+// CreateRenderBundleEncoder creates a render bundle encoder from the given descriptor.
+// Render bundles are pre-recorded render commands that can be executed efficiently multiple times.
 func (d *Device) CreateRenderBundleEncoder(descriptor RenderBundleEncoderDescriptor) RenderBundleEncoder {
 	var pinner runtime.Pinner
 	defer pinner.Unpin()
@@ -300,6 +326,8 @@ func (d *Device) CreateRenderBundleEncoder(descriptor RenderBundleEncoderDescrip
 	return RenderBundleEncoder{ref: C.wgpuDeviceCreateRenderBundleEncoder(d.ref, &cDescriptor)}
 }
 
+// CreateRenderPipeline creates a render pipeline from the given descriptor.
+// Render pipelines define how graphics are rendered.
 func (d *Device) CreateRenderPipeline(descriptor RenderPipelineDescriptor) *RenderPipeline {
 	pinner := &runtime.Pinner{}
 	defer pinner.Unpin()
@@ -308,6 +336,8 @@ func (d *Device) CreateRenderPipeline(descriptor RenderPipelineDescriptor) *Rend
 	return &RenderPipeline{ref: C.wgpuDeviceCreateRenderPipeline(d.ref, &cDescriptor)}
 }
 
+// CreateSampler creates a sampler from the given descriptor.
+// Samplers define how textures are sampled in shaders.
 func (d *Device) CreateSampler(descriptor *SamplerDescriptor) *Sampler {
 	var cDescriptor *C.WGPUSamplerDescriptor
 
@@ -330,6 +360,8 @@ func (d *Device) CreateSampler(descriptor *SamplerDescriptor) *Sampler {
 	return &Sampler{ref: C.wgpuDeviceCreateSampler(d.ref, cDescriptor)}
 }
 
+// CreateShaderModule creates a shader module from the given descriptor.
+// Shader modules contain shader code (WGSL or SPIR-V) that can be used in pipelines.
 func (d *Device) CreateShaderModule(descriptor ShaderModuleDescriptor) *ShaderModule {
 	var pinner runtime.Pinner
 	defer pinner.Unpin()
@@ -367,6 +399,8 @@ func (d *Device) CreateShaderModule(descriptor ShaderModuleDescriptor) *ShaderMo
 	return &ShaderModule{ref: C.wgpuDeviceCreateShaderModule(d.ref, &cDescriptor)}
 }
 
+// CreateTexture creates a new texture with the given descriptor.
+// Textures are used to store image data that can be sampled by shaders.
 func (d *Device) CreateTexture(descriptor *TextureDescriptor) *Texture {
 	var pinner runtime.Pinner
 	defer pinner.Unpin()
@@ -405,6 +439,8 @@ func (d *Device) CreateTexture(descriptor *TextureDescriptor) *Texture {
 	return &Texture{ref: C.wgpuDeviceCreateTexture(d.ref, cDescriptor)}
 }
 
+// Release releases the device and all associated resources.
+// After calling this method, the device should no longer be used.
 func (d *Device) Release() {
 	for _, h := range d.handles {
 		h.Delete()
@@ -414,6 +450,8 @@ func (d *Device) Release() {
 	C.wgpuDeviceRelease(d.ref)
 }
 
+// Destroy destroys the device and all associated resources.
+// This is similar to Release but also frees all GPU resources associated with the device.
 func (d *Device) Destroy() {
 	for _, h := range d.handles {
 		h.Delete()
@@ -423,6 +461,8 @@ func (d *Device) Destroy() {
 	C.wgpuDeviceDestroy(d.ref)
 }
 
+// GetLimits returns the limits supported by the device.
+// Returns the limits and an error if they cannot be retrieved.
 func (d *Device) GetLimits() (Limits, error) {
 
 	var cLimits C.WGPULimits
@@ -470,10 +510,13 @@ func (d *Device) GetLimits() (Limits, error) {
 	return limits, nil
 }
 
+// HasFeature checks if the device supports the given feature.
+// Returns true if the feature is supported, false otherwise.
 func (d *Device) HasFeature(feature FeatureName) bool {
 	return bool(C.wgpuDeviceHasFeature(d.ref, C.WGPUFeatureName(feature)) != 0)
 }
 
+// GetFeatures returns a list of all features supported by the device.
 func (d *Device) GetFeatures() []FeatureName {
 	var cFeatures C.WGPUSupportedFeatures
 	C.wgpuDeviceGetFeatures(d.ref, &cFeatures)
@@ -492,6 +535,8 @@ func (d *Device) GetFeatures() []FeatureName {
 	return features
 }
 
+// GetAdapterInfo returns information about the adapter that created this device.
+// Returns the adapter info and an error if it cannot be retrieved.
 func (d *Device) GetAdapterInfo() (AdapterInfo, error) {
 	var cAdapterInfo C.WGPUAdapterInfo
 
@@ -515,15 +560,21 @@ func (d *Device) GetAdapterInfo() (AdapterInfo, error) {
 	}, nil
 }
 
+// GetQueue returns the default queue for this device.
+// The queue is used to submit commands to the GPU.
 func (d *Device) GetQueue() *Queue {
 	return &Queue{ref: C.wgpuDeviceGetQueue(d.ref)}
 }
 
+// SetLabel sets the debug label for the device.
+// This label appears in debuggers and validation layers.
 func (d *Device) SetLabel(label string) {
 	cLabel := toCStr(label)
 	C.wgpuDeviceSetLabel(d.ref, cLabel)
 }
 
+// PushErrorScope pushes an error scope onto the device's error scope stack.
+// Errors that match the filter will be captured in the scope.
 func (d *Device) PushErrorScope(filter ErrorFilter) {
 	C.wgpuDevicePushErrorScope(d.ref, C.WGPUErrorFilter(filter))
 }
@@ -548,6 +599,8 @@ func goPopErrorScopeCallbackHandler(status C.WGPUPopErrorScopeStatus, typ C.WGPU
 	}
 }
 
+// PopErrorScope pops an error scope from the device's error scope stack and calls the callback with the result.
+// The callback is called with the error type and message, or no error if the scope was empty.
 func (d *Device) PopErrorScope(callback PopErrorScopeCallback) {
 	handle := cgo.NewHandle(callback)
 	defer handle.Delete()
@@ -560,6 +613,9 @@ func (d *Device) PopErrorScope(callback PopErrorScopeCallback) {
 	C.wgpuDevicePopErrorScope(d.ref, cCallbackInfo)
 }
 
+// Try executes the given function and captures any errors that occur.
+// The optional filters specify which error types to capture; if not provided, all error types are captured.
+// Returns the captured error, if any.
 func (d *Device) Try(fn func(), filters ...ErrorFilter) error {
 	if len(filters) == 0 {
 		filters = []ErrorFilter{ErrorFilterValidation, ErrorFilterOutOfMemory, ErrorFilterInternal}

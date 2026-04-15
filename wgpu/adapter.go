@@ -17,10 +17,13 @@ extern void cgo_callback_UncapturedErrorCallback(WGPUDevice device, WGPUErrorTyp
 */
 import "C"
 
+// Adapter represents a GPU adapter, which is a physical or virtual device that can be used to create WebGPU resources.
 type Adapter struct {
 	ref C.WGPUAdapter
 }
 
+// GetLimits returns the limits supported by the adapter.
+// Returns the limits, panics if they cannot be retrieved.
 func (a *Adapter) GetLimits() Limits {
 	limits, err := a.TryGetLimits()
 	if err != nil {
@@ -29,6 +32,7 @@ func (a *Adapter) GetLimits() Limits {
 	return limits
 }
 
+// TryGetLimits returns the limits supported by the adapter, or an error if they cannot be retrieved.
 func (a *Adapter) TryGetLimits() (Limits, error) {
 	cAdapter := C.WGPUAdapter(unsafe.Pointer(a.ref))
 
@@ -77,6 +81,8 @@ func (a *Adapter) TryGetLimits() (Limits, error) {
 	return limits, nil
 }
 
+// GetInfo returns information about the adapter, such as vendor, device name, and backend type.
+// Panics if the information cannot be retrieved.
 func (a *Adapter) GetInfo() AdapterInfo {
 	info, err := a.TryGetInfo()
 	if err != nil {
@@ -85,6 +91,7 @@ func (a *Adapter) GetInfo() AdapterInfo {
 	return info
 }
 
+// TryGetInfo returns information about the adapter, or an error if it cannot be retrieved.
 func (a *Adapter) TryGetInfo() (AdapterInfo, error) {
 	cAdapter := C.WGPUAdapter(unsafe.Pointer(a.ref))
 
@@ -113,11 +120,14 @@ func (a *Adapter) TryGetInfo() (AdapterInfo, error) {
 	return info, nil
 }
 
+// HasFeature checks if the adapter supports the given feature.
+// Returns true if the feature is supported, false otherwise.
 func (a *Adapter) HasFeature(feature FeatureName) bool {
 	cFeature := C.WGPUFeatureName(feature)
 	return bool(C.wgpuAdapterHasFeature(a.ref, cFeature) != 0)
 }
 
+// GetFeatures returns a list of all features supported by the adapter.
 func (a *Adapter) GetFeatures() []FeatureName {
 
 	var cFeatures C.WGPUSupportedFeatures
@@ -205,6 +215,8 @@ func goUncapturedErrorCallbackHandler(device C.WGPUDevice, typ C.WGPUErrorType, 
 	)
 }
 
+// RequestDevice requests a logical GPU device from the adapter with the given descriptor.
+// Panics if the request fails.
 func (a *Adapter) RequestDevice(descriptor *DeviceDescriptor) *Device {
 	device, err := a.TryRequestDevice(descriptor)
 	if err != nil {
@@ -213,6 +225,7 @@ func (a *Adapter) RequestDevice(descriptor *DeviceDescriptor) *Device {
 	return device
 }
 
+// TryRequestDevice requests a logical GPU device from the adapter, returning the device and any error.
 func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
 	var cDescriptor C.WGPUDeviceDescriptor
 	var handles []cgo.Handle
@@ -314,6 +327,8 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 	return device, nil
 }
 
+// Release releases the adapter and all associated resources.
+// After calling this method, the adapter should no longer be used.
 func (a *Adapter) Release() {
 	C.wgpuAdapterRelease(a.ref)
 }

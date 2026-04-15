@@ -11,10 +11,14 @@ import (
 	"unsafe"
 )
 
+// CommandEncoder encodes a sequence of GPU commands that can be submitted to a queue.
+// Command encoders are created from a device and are used to build command buffers.
 type CommandEncoder struct {
 	ref C.WGPUCommandEncoder
 }
 
+// Finish finishes recording commands and returns a command buffer.
+// The descriptor can be used to set the label of the command buffer.
 func (c *CommandEncoder) Finish(descriptor *CommandBufferDescriptor) *CommandBuffer {
 
 	var cDescriptor *C.WGPUCommandBufferDescriptor
@@ -28,6 +32,8 @@ func (c *CommandEncoder) Finish(descriptor *CommandBufferDescriptor) *CommandBuf
 	return &CommandBuffer{ref: C.wgpuCommandEncoderFinish(c.ref, cDescriptor)}
 }
 
+// BeginComputePass begins a compute pass and returns a compute pass encoder.
+// The descriptor can be used to set the label and timestamp writes for the pass.
 func (c *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) *ComputePassEncoder {
 
 	var cDescriptor *C.WGPUComputePassDescriptor
@@ -48,6 +54,8 @@ func (c *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) *Co
 	return &ComputePassEncoder{ref: C.wgpuCommandEncoderBeginComputePass(c.ref, cDescriptor)}
 }
 
+// BeginRenderPass begins a render pass and returns a render pass encoder.
+// The descriptor defines the color attachments, depth stencil attachment, and other settings for the pass.
 func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) *RenderPassEncoder {
 	var pinner runtime.Pinner
 	defer pinner.Unpin()
@@ -113,10 +121,14 @@ func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) *Rende
 	return &RenderPassEncoder{ref: C.wgpuCommandEncoderBeginRenderPass(c.ref, &cDescriptor)}
 }
 
+// CopyBufferToBuffer copies data from one buffer to another.
+// The source and destination buffers must have the CopySrc and CopyDst usage flags respectively.
 func (c *CommandEncoder) CopyBufferToBuffer(source *Buffer, sourceOffset uint64, destination *Buffer, destinationOffset uint64, size uint64) {
 	C.wgpuCommandEncoderCopyBufferToBuffer(c.ref, source.ref, C.uint64_t(sourceOffset), destination.ref, C.uint64_t(destinationOffset), C.uint64_t(size))
 }
 
+// CopyBufferToTexture copies data from a buffer to a texture.
+// The source defines the buffer and layout, and the destination defines the texture and region.
 func (c *CommandEncoder) CopyBufferToTexture(source TexelCopyBufferInfo, destination TexelCopyTextureInfo, copySize Extent3D) {
 
 	cSource := C.WGPUTexelCopyBufferInfo{
@@ -148,6 +160,8 @@ func (c *CommandEncoder) CopyBufferToTexture(source TexelCopyBufferInfo, destina
 	C.wgpuCommandEncoderCopyBufferToTexture(c.ref, &cSource, &cDestination, &cCopySize)
 }
 
+// CopyTextureToBuffer copies data from a texture to a buffer.
+// The source defines the texture and region, and the destination defines the buffer and layout.
 func (c *CommandEncoder) CopyTextureToBuffer(source TexelCopyTextureInfo, destination TexelCopyBufferInfo, copySize Extent3D) {
 
 	cSource := C.WGPUTexelCopyTextureInfo{
@@ -179,6 +193,8 @@ func (c *CommandEncoder) CopyTextureToBuffer(source TexelCopyTextureInfo, destin
 	C.wgpuCommandEncoderCopyTextureToBuffer(c.ref, &cSource, &cDestination, &cCopySize)
 }
 
+// CopyTextureToTexture copies data from one texture to another.
+// The source and destination define their respective textures and regions.
 func (c *CommandEncoder) CopyTextureToTexture(source TexelCopyTextureInfo, destination TexelCopyTextureInfo, copySize Extent3D) {
 
 	cSource := C.WGPUTexelCopyTextureInfo{
@@ -212,34 +228,50 @@ func (c *CommandEncoder) CopyTextureToTexture(source TexelCopyTextureInfo, desti
 	C.wgpuCommandEncoderCopyTextureToTexture(c.ref, &cSource, &cDestination, &cCopySize)
 }
 
+// ClearBuffer fills a buffer with zeros or a specific value.
+// The offset and size specify the range of the buffer to clear.
+// If size is 0, the whole buffer is cleared.
 func (c *CommandEncoder) ClearBuffer(buffer *Buffer, offset uint64, size uint64) {
 	C.wgpuCommandEncoderClearBuffer(c.ref, buffer.ref, C.uint64_t(offset), C.uint64_t(size))
 }
 
+// InsertDebugMarker inserts a debug marker into the command encoder.
+// The marker label is used to identify the marker in debuggers and profilers.
 func (c *CommandEncoder) InsertDebugMarker(markerLabel string) {
 	C.wgpuCommandEncoderInsertDebugMarker(c.ref, toCStr(markerLabel))
 }
 
+// PopDebugGroup pops the most recently pushed debug group from the command encoder.
 func (c *CommandEncoder) PopDebugGroup() {
 	C.wgpuCommandEncoderPopDebugGroup(c.ref)
 }
 
+// PushDebugGroup pushes a debug group into the command encoder with the given label.
+// Debug groups can be nested and are used to group commands in debuggers and profilers.
 func (c *CommandEncoder) PushDebugGroup(groupLabel string) {
 	C.wgpuCommandEncoderPushDebugGroup(c.ref, toCStr(groupLabel))
 }
 
+// ResolveQuerySet resolves an occlusion or timestamp query set to a buffer.
+// The query results are written to the destination buffer starting at destinationOffset.
 func (c *CommandEncoder) ResolveQuerySet(querySet *QuerySet, firstQuery uint32, queryCount uint32, destination *Buffer, destinationOffset uint64) {
 	C.wgpuCommandEncoderResolveQuerySet(c.ref, querySet.ref, C.uint32_t(firstQuery), C.uint32_t(queryCount), destination.ref, C.uint64_t(destinationOffset))
 }
 
+// WriteTimestamp writes a timestamp to a query set at the current point in the command encoder.
+// Timestamps can be used to measure GPU execution times.
 func (c *CommandEncoder) WriteTimestamp(querySet *QuerySet, queryIndex uint32) {
 	C.wgpuCommandEncoderWriteTimestamp(c.ref, querySet.ref, C.uint32_t(queryIndex))
 }
 
+// SetLabel sets the debug label for the command encoder.
+// This label appears in debuggers and validation layers.
 func (c *CommandEncoder) SetLabel(label string) {
 	C.wgpuCommandEncoderSetLabel(c.ref, toCStr(label))
 }
 
+// Release releases the command encoder and all associated resources.
+// After calling this method, the encoder should no longer be used.
 func (c *CommandEncoder) Release() {
 	C.wgpuCommandEncoderRelease(c.ref)
 }

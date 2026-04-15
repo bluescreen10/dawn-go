@@ -13,10 +13,14 @@ import (
 	"unsafe"
 )
 
+// Queue represents a command queue that is used to submit commands to the GPU.
+// Queues are obtained from a device and are used to execute command buffers.
 type Queue struct {
 	ref C.WGPUQueue
 }
 
+// Submit submits command buffers to the queue for execution.
+// The command buffers contain recorded commands that will be executed on the GPU.
 func (q *Queue) Submit(commands ...*CommandBuffer) {
 	commandsCount := len(commands)
 
@@ -52,6 +56,8 @@ func goQueueWorkDoneCallbackHandler(status C.WGPUQueueWorkDoneStatus, message C.
 	)
 }
 
+// OnSubmittedWorkDone registers a callback that is called when all previously submitted commands complete.
+// The callback is called when the GPU has finished executing all commands submitted up to this point.
 func (q *Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
 	handle := cgo.NewHandle(callback)
 
@@ -64,6 +70,8 @@ func (q *Queue) OnSubmittedWorkDone(callback QueueWorkDoneCallback) {
 	C.wgpuQueueOnSubmittedWorkDone(q.ref, cCallbackInfo)
 }
 
+// WriteBuffer writes data from the CPU to a buffer on the GPU.
+// The offset specifies where to start writing in the buffer.
 func (q *Queue) WriteBuffer(buffer *Buffer, offset uint64, data []byte) {
 	cSize := C.size_t(len(data))
 
@@ -75,6 +83,8 @@ func (q *Queue) WriteBuffer(buffer *Buffer, offset uint64, data []byte) {
 	C.wgpuQueueWriteBuffer(q.ref, buffer.ref, C.uint64_t(offset), cData, cSize)
 }
 
+// WriteTexture writes data from the CPU to a texture on the GPU.
+// The destination defines the texture region to write to, and the dataLayout defines the layout of the source data.
 func (q *Queue) WriteTexture(destination TexelCopyTextureInfo, data []byte, dataLayout TexelCopyBufferLayout, writeSize Extent3D) {
 	cDestination := C.WGPUTexelCopyTextureInfo{
 		texture:  C.WGPUTexture(destination.Texture.ref),
@@ -109,10 +119,14 @@ func (q *Queue) WriteTexture(destination TexelCopyTextureInfo, data []byte, data
 	C.wgpuQueueWriteTexture(q.ref, &cDestination, cData, cDataSize, &cDataLayout, &cWriteSize)
 }
 
+// SetLabel sets the debug label for the queue.
+// This label appears in debuggers and validation layers.
 func (q *Queue) SetLabel(label string) {
 	C.wgpuQueueSetLabel(q.ref, toCStr(label))
 }
 
+// Release releases the queue and all associated resources.
+// After calling this method, the queue should no longer be used.
 func (q *Queue) Release() {
 	C.wgpuQueueRelease(q.ref)
 }

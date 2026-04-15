@@ -14,6 +14,8 @@ import (
 	"unsafe"
 )
 
+// ShaderModule represents a compiled shader module that can be used in GPU pipelines.
+// Shader modules are created from WGSL or SPIR-V source code.
 type ShaderModule struct {
 	ref C.WGPUShaderModule
 }
@@ -48,6 +50,8 @@ func goCompilationInfoCallbackHandler(status C.WGPUCompilationInfoRequestStatus,
 	)
 }
 
+// GetCompilationInfo returns compilation messages from the shader module compilation.
+// Panics if the information cannot be retrieved.
 func (s *ShaderModule) GetCompilationInfo() []CompilationMessage {
 	info, err := s.TryGetCompilationInfo()
 	if err != nil {
@@ -56,6 +60,7 @@ func (s *ShaderModule) GetCompilationInfo() []CompilationMessage {
 	return info
 }
 
+// TryGetCompilationInfo returns compilation messages from the shader module compilation, or an error if they cannot be retrieved.
 func (s *ShaderModule) TryGetCompilationInfo() ([]CompilationMessage, error) {
 	var status compilationInfoRequestStatus
 	var info []CompilationMessage
@@ -83,10 +88,14 @@ func (s *ShaderModule) TryGetCompilationInfo() ([]CompilationMessage, error) {
 	return info, nil
 }
 
+// SetLabel sets the debug label for the shader module.
+// This label appears in debuggers and validation layers.
 func (s *ShaderModule) SetLabel(label string) {
 	C.wgpuShaderModuleSetLabel(s.ref, toCStr(label))
 }
 
+// Release releases the shader module and all associated resources.
+// After calling this method, the module should no longer be used.
 func (s *ShaderModule) Release() {
 	C.wgpuShaderModuleRelease(s.ref)
 }
