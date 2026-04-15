@@ -18,3 +18,9 @@ type PipelineLayout struct {
 func (p *PipelineLayout) SetLabel(label string) {
 	C.wgpuPipelineLayoutSetLabel(p.ref, toCStr(label))
 }
+
+// Release releases the device and all associated resources.
+// After calling this method, the device should no longer be used.
+func (p *PipelineLayout) Release() {
+	C.wgpuPipelineLayoutRelease(p.ref)
+}

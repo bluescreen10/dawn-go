@@ -7,7 +7,7 @@ import (
 // ToBytes converts a slice of any type to a slice of bytes.
 // This is useful for passing data to C functions that expect byte arrays.
 // Returns nil if the input slice is empty.
-func ToBytes[T any, E []T](data E) []byte {
+func ToBytes[T any, E ~[]T](data E) []byte {
 	l := uintptr(len(data))
 	if l == 0 {
 		return nil

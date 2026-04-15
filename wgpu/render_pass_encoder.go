@@ -163,3 +163,9 @@ func (r *RenderPassEncoder) End() {
 func (r *RenderPassEncoder) SetLabel(label string) {
 	C.wgpuRenderPassEncoderSetLabel(r.ref, toCStr(label))
 }
+
+// Release releases the device and all associated resources.
+// After calling this method, the device should no longer be used.
+func (r *RenderPassEncoder) Release() {
+	C.wgpuRenderPassEncoderRelease(r.ref)
+}

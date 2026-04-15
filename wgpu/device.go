@@ -219,7 +219,7 @@ func (d *Device) CreateComputePipelineAsync(descriptor ComputePipelineDescriptor
 
 // CreatePipelineLayout creates a pipeline layout from the given descriptor.
 // Pipeline layouts define the resource bindings used by pipelines.
-func (d *Device) CreatePipelineLayout(descriptor PipelineLayoutDescriptor) PipelineLayout {
+func (d *Device) CreatePipelineLayout(descriptor PipelineLayoutDescriptor) *PipelineLayout {
 	pinner := runtime.Pinner{}
 	defer pinner.Unpin()
 
@@ -239,7 +239,7 @@ func (d *Device) CreatePipelineLayout(descriptor PipelineLayoutDescriptor) Pipel
 		}
 	}
 
-	return PipelineLayout{ref: C.wgpuDeviceCreatePipelineLayout(d.ref, &cDescriptor)}
+	return &PipelineLayout{ref: C.wgpuDeviceCreatePipelineLayout(d.ref, &cDescriptor)}
 }
 
 // CreateQuerySet creates a query set from the given descriptor.
