@@ -38,6 +38,42 @@ func (i *Instance) CreateSurface(descriptor SurfaceDescriptor) *Surface {
 
 		pinner.Pin(metalSource)
 		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(metalSource))
+	} else if descriptor.WindowsHWND != nil {
+		windowsSource := &C.WGPUSurfaceSourceWindowsHWND{
+			chain: C.WGPUChainedStruct{
+				next:  nil,
+				sType: C.WGPUSType_SurfaceSourceWindowsHWND,
+			},
+			hinstance: descriptor.WindowsHWND.Hinstance,
+			hwnd:      descriptor.WindowsHWND.Hwnd,
+		}
+
+		pinner.Pin(windowsSource)
+		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(windowsSource))
+	} else if descriptor.WaylandSurface != nil {
+		waylandSource := &C.WGPUSurfaceSourceWaylandSurface{
+			chain: C.WGPUChainedStruct{
+				next:  nil,
+				sType: C.WGPUSType_SurfaceSourceWaylandSurface,
+			},
+			display: descriptor.WaylandSurface.Display,
+			surface: descriptor.WaylandSurface.Surface,
+		}
+
+		pinner.Pin(waylandSource)
+		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(waylandSource))
+	} else if descriptor.XlibWindow != nil {
+		xlibSource := &C.WGPUSurfaceSourceXlibWindow{
+			chain: C.WGPUChainedStruct{
+				next:  nil,
+				sType: C.WGPUSType_SurfaceSourceXlibWindow,
+			},
+			display: descriptor.XlibWindow.Display,
+			window:  C.uint64_t(descriptor.XlibWindow.Window),
+		}
+
+		pinner.Pin(xlibSource)
+		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(&xlibSource))
 	}
 
 	return &Surface{ref: C.wgpuInstanceCreateSurface(i.ref, &cDescriptor)}

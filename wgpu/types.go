@@ -437,12 +437,30 @@ type SurfaceConfiguration struct {
 }
 
 type SurfaceDescriptor struct {
-	Label      string
-	MetalLayer *SurfaceSourceMetalLayer
+	Label          string
+	MetalLayer     *SurfaceSourceMetalLayer
+	WaylandSurface *SurfaceSourceWaylandSurface
+	XlibWindow     *SurfaceSourceXlibWindow
+	WindowsHWND    *SurfaceSourceWindowsHWND
 }
 
 type SurfaceSourceMetalLayer struct {
 	Layer unsafe.Pointer
+}
+
+type SurfaceSourceWaylandSurface struct {
+	Display unsafe.Pointer
+	Surface unsafe.Pointer
+}
+
+type SurfaceSourceXlibWindow struct {
+	Display unsafe.Pointer
+	Window  uint64
+}
+
+type SurfaceSourceWindowsHWND struct {
+	Hwnd      unsafe.Pointer
+	Hinstance unsafe.Pointer
 }
 
 type TexelCopyBufferInfo struct {
