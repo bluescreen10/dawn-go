@@ -605,16 +605,35 @@ const (
 	StoreOpDiscard   StoreOp = 2
 )
 
-type SurfaceGetCurrentTextureStatus C.WGPUSurfaceGetCurrentTextureStatus
+type surfaceGetCurrentTextureStatus C.WGPUSurfaceGetCurrentTextureStatus
 
 const (
-	SurfaceGetCurrentTextureStatusSuccessOptimal    SurfaceGetCurrentTextureStatus = 1
-	SurfaceGetCurrentTextureStatusSuccessSuboptimal SurfaceGetCurrentTextureStatus = 2
-	SurfaceGetCurrentTextureStatusTimeout           SurfaceGetCurrentTextureStatus = 3
-	SurfaceGetCurrentTextureStatusOutdated          SurfaceGetCurrentTextureStatus = 4
-	SurfaceGetCurrentTextureStatusLost              SurfaceGetCurrentTextureStatus = 5
-	SurfaceGetCurrentTextureStatusError             SurfaceGetCurrentTextureStatus = 6
+	surfaceGetCurrentTextureStatusSuccessOptimal    surfaceGetCurrentTextureStatus = 1
+	surfaceGetCurrentTextureStatusSuccessSuboptimal surfaceGetCurrentTextureStatus = 2
+	surfaceGetCurrentTextureStatusTimeout           surfaceGetCurrentTextureStatus = 3
+	surfaceGetCurrentTextureStatusOutdated          surfaceGetCurrentTextureStatus = 4
+	surfaceGetCurrentTextureStatusLost              surfaceGetCurrentTextureStatus = 5
+	surfaceGetCurrentTextureStatusError             surfaceGetCurrentTextureStatus = 6
 )
+
+func (s surfaceGetCurrentTextureStatus) String() string {
+	switch s {
+	case surfaceGetCurrentTextureStatusSuccessOptimal:
+		return "Success"
+	case surfaceGetCurrentTextureStatusSuccessSuboptimal:
+		return "Suboptimal"
+	case surfaceGetCurrentTextureStatusTimeout:
+		return "Timeout"
+	case surfaceGetCurrentTextureStatusOutdated:
+		return "Outdated"
+	case surfaceGetCurrentTextureStatusLost:
+		return "Lost"
+	case surfaceGetCurrentTextureStatusError:
+		return "Error"
+	default:
+		return "Unknown"
+	}
+}
 
 type TextureAspect C.WGPUTextureAspect
 

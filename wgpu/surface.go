@@ -18,12 +18,6 @@ type Surface struct {
 	ref C.WGPUSurface
 }
 
-// SurfaceTexture contains a texture obtained from a surface and its presentation status.
-type SurfaceTexture struct {
-	Texture *Texture
-	Status  SurfaceGetCurrentTextureStatus
-}
-
 // Configure configures the surface for rendering with the specified device and settings.
 // The configuration defines the format, size, and present mode for the surface.
 func (s *Surface) Configure(config SurfaceConfiguration) {
@@ -97,7 +91,7 @@ func (s *Surface) GetCapabilities(adapter *Adapter) (SurfaceCapabilities, error)
 
 // GetCurrentTexture obtains the current texture to render to from the surface.
 // Panics if the texture cannot be obtained.
-func (s *Surface) GetCurrentTexture() *SurfaceTexture {
+func (s *Surface) GetCurrentTexture() *Texture {
 	surfaceTexture, err := s.TryGetCurrentTexture()
 	if err != nil {
 		panic(err)
@@ -106,40 +100,23 @@ func (s *Surface) GetCurrentTexture() *SurfaceTexture {
 }
 
 // TryGetCurrentTexture obtains the current texture to render to from the surface, or returns an error if it cannot be obtained.
-func (s *Surface) TryGetCurrentTexture() (*SurfaceTexture, error) {
+func (s *Surface) TryGetCurrentTexture() (*Texture, error) {
 
 	var cSurfaceTexture C.WGPUSurfaceTexture
 	C.wgpuSurfaceGetCurrentTexture(s.ref, &cSurfaceTexture)
 
-	status := SurfaceGetCurrentTextureStatus(cSurfaceTexture.status)
-	if status != SurfaceGetCurrentTextureStatusSuccessOptimal && status != SurfaceGetCurrentTextureStatusSuccessSuboptimal {
-		return nil, fmt.Errorf("error getting current texture")
+	status := surfaceGetCurrentTextureStatus(cSurfaceTexture.status)
+	if status != surfaceGetCurrentTextureStatusSuccessOptimal && status != surfaceGetCurrentTextureStatusSuccessSuboptimal {
+		return nil, fmt.Errorf("error getting current texture: %s", status)
 	}
 
-	surfaceTexture := &SurfaceTexture{
-		Texture: &Texture{ref: cSurfaceTexture.texture},
-		Status:  status,
-	}
-
-	return surfaceTexture, nil
+	return &Texture{ref: cSurfaceTexture.texture}, nil
 }
 
 // Release releases the surface and all associated resources.
 // After calling this method, the surface should no longer be used.
 func (s *Surface) Release() {
 	C.wgpuSurfaceRelease(s.ref)
-}
-
-// CreateView creates a texture view from the surface texture.
-// This view can be used as a render target in a render pass.
-func (s *SurfaceTexture) CreateView(descriptor *TextureViewDescriptor) *TextureView {
-	return s.Texture.CreateView(descriptor)
-}
-
-// Release releases the surface and all associated resources.
-// After calling this method, the surface should no longer be used.
-func (s *SurfaceTexture) Release() {
-	s.Texture.Release()
 }
 
 // Present presents the current texture to the screen.
