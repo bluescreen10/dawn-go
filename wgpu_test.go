@@ -17,7 +17,7 @@ func init() {
 }
 
 func TestTriangleRendering(t *testing.T) {
-	ctx, err := createTestContext(t)
+	ctx, err := createTestContext()
 	if err != nil {
 		t.Fatalf("error creating test context: %v", err)
 	}
@@ -147,7 +147,7 @@ func (c *wgpuContext) CleanUp() {
 	c.instance.Release()
 }
 
-func createTestContext(t *testing.T) (*wgpuContext, error) {
+func createTestContext() (*wgpuContext, error) {
 	var ctx wgpuContext
 	var err error
 
@@ -164,7 +164,7 @@ func createTestContext(t *testing.T) (*wgpuContext, error) {
 
 	ctx.device = ctx.adapter.RequestDevice(&wgpu.DeviceDescriptor{
 		UncapturedErrorCallback: func(device *wgpu.Device, typ wgpu.ErrorType, message string) {
-			t.Fatalf("%s error: %s", typ, message)
+			panic(fmt.Sprintf("%s error: %s", typ, message))
 		},
 	})
 
