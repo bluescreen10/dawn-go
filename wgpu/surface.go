@@ -136,6 +136,12 @@ func (s *SurfaceTexture) CreateView(descriptor *TextureViewDescriptor) *TextureV
 	return s.Texture.CreateView(descriptor)
 }
 
+// Release releases the surface and all associated resources.
+// After calling this method, the surface should no longer be used.
+func (s *SurfaceTexture) Release() {
+	s.Texture.Release()
+}
+
 // Present presents the current texture to the screen.
 // Panics if presentation fails.
 func (s *Surface) Present() {
