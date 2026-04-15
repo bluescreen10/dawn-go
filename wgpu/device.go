@@ -69,7 +69,7 @@ func (d *Device) CreateBindGroup(descriptor BindGroupDescriptor) *BindGroup {
 }
 
 // CreateBindGroupLayout creates a bind group layout from the given descriptor, which defines the interface for a bind group.
-func (d *Device) CreateBindGroupLayout(descriptor BindGroupLayoutDescriptor) BindGroupLayout {
+func (d *Device) CreateBindGroupLayout(descriptor BindGroupLayoutDescriptor) *BindGroupLayout {
 	var pinner runtime.Pinner
 	defer pinner.Unpin()
 
@@ -111,7 +111,7 @@ func (d *Device) CreateBindGroupLayout(descriptor BindGroupLayoutDescriptor) Bin
 		}
 	}
 
-	return BindGroupLayout{ref: C.wgpuDeviceCreateBindGroupLayout(d.ref, &cDescriptor)}
+	return &BindGroupLayout{ref: C.wgpuDeviceCreateBindGroupLayout(d.ref, &cDescriptor)}
 }
 
 // CreateBufferInit creates a buffer and initializes it with the given contents in a single operation.
