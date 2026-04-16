@@ -660,11 +660,13 @@ func toCComputePipelineDescriptor(pinner *runtime.Pinner, descriptor ComputePipe
 		cDescriptor.compute.constants = (*C.WGPUConstantEntry)(unsafe.Pointer(&constants[0]))
 		cDescriptor.compute.constantCount = count
 
-		for i, c := range descriptor.Compute.Constants {
+		var i int
+		for k, v := range descriptor.Compute.Constants {
 			constants[i] = C.WGPUConstantEntry{
-				key:   toCStr(c.Key),
-				value: C.double(c.Value),
+				key:   toCStr(k),
+				value: C.double(v),
 			}
+			i++
 		}
 	}
 
@@ -693,11 +695,13 @@ func toCRenderPipelineDescriptor(pinner *runtime.Pinner, descriptor RenderPipeli
 		cDescriptor.vertex.constants = (*C.WGPUConstantEntry)(unsafe.Pointer(&constants[0]))
 		cDescriptor.vertex.constantCount = count
 
-		for i, c := range descriptor.Vertex.Constants {
+		var i int
+		for k, v := range descriptor.Vertex.Constants {
 			constants[i] = C.WGPUConstantEntry{
-				key:   toCStr(c.Key),
-				value: C.double(c.Value),
+				key:   toCStr(k),
+				value: C.double(v),
 			}
+			i++
 		}
 	}
 
@@ -791,11 +795,13 @@ func toCRenderPipelineDescriptor(pinner *runtime.Pinner, descriptor RenderPipeli
 			cDescriptor.fragment.constants = (*C.WGPUConstantEntry)(unsafe.Pointer(&constants[0]))
 			cDescriptor.fragment.constantCount = count
 
-			for i, c := range descriptor.Fragment.Constants {
+			var i int
+			for k, v := range descriptor.Fragment.Constants {
 				constants[i] = C.WGPUConstantEntry{
-					key:   toCStr(c.Key),
-					value: C.double(c.Value),
+					key:   toCStr(k),
+					value: C.double(v),
 				}
+				i++
 			}
 
 		}

@@ -150,13 +150,7 @@ type ComputePipelineDescriptor struct {
 type ComputeState struct {
 	Module     *ShaderModule
 	EntryPoint string
-	Constants  []ConstantEntry
-}
-
-// ConstantEntry defines a constant value to be used in a shader module, keyed by name.
-type ConstantEntry struct {
-	Key   string
-	Value float64
+	Constants  map[string]float64
 }
 
 type createComputePipelineAsyncCallbackInfo struct {
@@ -209,7 +203,7 @@ type Extent3D struct {
 type FragmentState struct {
 	Module     *ShaderModule
 	EntryPoint string
-	Constants  []ConstantEntry
+	Constants  map[string]float64
 	Targets    []ColorTargetState
 }
 
@@ -615,7 +609,7 @@ type VertexBufferLayout struct {
 type VertexState struct {
 	Module     *ShaderModule
 	EntryPoint string
-	Constants  []ConstantEntry
+	Constants  map[string]float64
 	Buffers    []VertexBufferLayout
 }
 
