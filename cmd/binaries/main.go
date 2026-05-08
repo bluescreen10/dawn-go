@@ -21,6 +21,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/joho/godotenv"
 )
 
 // Configuration from Env and Flags
@@ -49,6 +50,11 @@ type Target struct {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	versionFlag := flag.String("ver", os.Getenv("NEW_VERSION"), "version to release (e.g. 0.0.1)")
 	flag.Parse()
 

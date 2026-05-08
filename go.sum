@@ -1,8 +1,8 @@
-bluescreen10.com/wgpu-android v0.0.5 h1:a6HjjPIfjIG4gZUGwnyL+keOSyuz4LdJQ1kTO2Py78c=
-bluescreen10.com/wgpu-android v0.0.5/go.mod h1:opNtynIbctsNukS09IWTA2vNsmg5f2FHlWUjxEsjq70=
-bluescreen10.com/wgpu-darwin v0.0.5 h1:TN4uNZ+554f9TTtx4kbPQf3elawpd3d6ID26jpI2Vto=
-bluescreen10.com/wgpu-darwin v0.0.5/go.mod h1:Ayb3gfvXbjYYi2bSWR5rXQoA0F/k9AzDQN2II3FdrPk=
-bluescreen10.com/wgpu-linux v0.0.5 h1:/lCndNSuJdaSjzlmGqZVRLtXgBuzvo7U/TR3wIB/9h4=
-bluescreen10.com/wgpu-linux v0.0.5/go.mod h1:2H6dgArKlaVpIdS/wbNJl9X2q/JUi1hY2jILfyftNdg=
-bluescreen10.com/wgpu-windows v0.0.5 h1:inRQge3MgMMAUbhWomnTdVNhagbll86k4GbaRqkiMVA=
-bluescreen10.com/wgpu-windows v0.0.5/go.mod h1:x74d7b4BoXfdVN9gllt/ByohtOJU+gcvXHTv3Cl2d2Y=
+bluescreen10.com/wgpu-android v0.0.13 h1:orMb7dyC9nYiWJVu7F01TP4zprsZ5UBMNh3hGuyMgSw=
+bluescreen10.com/wgpu-android v0.0.13/go.mod h1:opNtynIbctsNukS09IWTA2vNsmg5f2FHlWUjxEsjq70=
+bluescreen10.com/wgpu-darwin v0.0.13 h1:u9F9K1hFaPrnKuFqFzC46usQg10cNm+R1VaAZtYZKfM=
+bluescreen10.com/wgpu-darwin v0.0.13/go.mod h1:Ayb3gfvXbjYYi2bSWR5rXQoA0F/k9AzDQN2II3FdrPk=
+bluescreen10.com/wgpu-linux v0.0.13 h1:rWEnS21/TgQ04hyacf89OfGBZhNj88h/5rBuIKJ6Fcc=
+bluescreen10.com/wgpu-linux v0.0.13/go.mod h1:2H6dgArKlaVpIdS/wbNJl9X2q/JUi1hY2jILfyftNdg=
+bluescreen10.com/wgpu-windows v0.0.13 h1:wYHTQHrr/en/Arlh2qr11qC8yqJsNZc9ovB+j03Ia9Q=
+bluescreen10.com/wgpu-windows v0.0.13/go.mod h1:x74d7b4BoXfdVN9gllt/ByohtOJU+gcvXHTv3Cl2d2Y=
