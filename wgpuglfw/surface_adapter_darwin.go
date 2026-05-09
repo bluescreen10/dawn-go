@@ -6,7 +6,7 @@ import (
 	"unsafe"
 
 	"github.com/bluescreen10/dawn-go/wgpu"
-	"github.com/go-gl/glfw/v3.4/glfw"
+	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 /*
