@@ -283,6 +283,7 @@ func goCreateRenderPipelineAsyncCallbackHandler(status C.WGPUCreatePipelineAsync
 func (d *Device) CreateRenderPipelineAsync(descriptor RenderPipelineDescriptor, callback CreateRenderPipelineAsyncCallback) Future {
 
 	pinner := &runtime.Pinner{}
+	defer pinner.Unpin()
 	cDescriptor := toCRenderPipelineDescriptor(pinner, descriptor)
 
 	handle := cgo.NewHandle(callback)

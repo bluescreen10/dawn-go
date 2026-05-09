@@ -37,8 +37,8 @@ func (s *Surface) Configure(config SurfaceConfiguration) {
 		cConfig.viewFormatCount = C.size_t(len(config.ViewFormats))
 
 		var pinner runtime.Pinner
-		pinner.Pin(&config.ViewFormats[0])
 		defer pinner.Unpin()
+		pinner.Pin(&config.ViewFormats[0])
 	}
 
 	C.wgpuSurfaceConfigure(s.ref, &cConfig)

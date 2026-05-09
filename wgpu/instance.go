@@ -26,6 +26,7 @@ type Instance struct {
 // The surface is configured for the specified descriptor, which defines how the surface should be presented.
 func (i *Instance) CreateSurface(descriptor SurfaceDescriptor) *Surface {
 	var pinner runtime.Pinner
+	defer pinner.Unpin()
 
 	cDescriptor := C.WGPUSurfaceDescriptor{
 		label: toCStr(descriptor.Label),
