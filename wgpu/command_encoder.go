@@ -35,6 +35,8 @@ func (c *CommandEncoder) Finish(descriptor *CommandBufferDescriptor) *CommandBuf
 // BeginComputePass begins a compute pass and returns a compute pass encoder.
 // The descriptor can be used to set the label and timestamp writes for the pass.
 func (c *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) *ComputePassEncoder {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
 
 	var cDescriptor *C.WGPUComputePassDescriptor
 	if descriptor != nil {
@@ -48,6 +50,7 @@ func (c *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) *Co
 				beginningOfPassWriteIndex: C.uint32_t(descriptor.TimestampWrites.BeginningOfPassWriteIndex),
 				endOfPassWriteIndex:       C.uint32_t(descriptor.TimestampWrites.EndOfPassWriteIndex),
 			}
+			pinner.Pin(cDescriptor.timestampWrites)
 		}
 	}
 

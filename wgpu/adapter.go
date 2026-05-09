@@ -4,6 +4,7 @@ package wgpu
 
 import (
 	"fmt"
+	"runtime"
 	"runtime/cgo"
 	"unsafe"
 )
@@ -227,6 +228,9 @@ func (a *Adapter) RequestDevice(descriptor *DeviceDescriptor) *Device {
 
 // TryRequestDevice requests a logical GPU device from the adapter, returning the device and any error.
 func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error) {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
 	var cDescriptor C.WGPUDeviceDescriptor
 	var handles []cgo.Handle
 
@@ -235,6 +239,7 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 
 		featuresCount := len(descriptor.RequiredFeatures)
 		if featuresCount > 0 {
+			pinner.Pin(&descriptor.RequiredFeatures[0])
 			cDescriptor.requiredFeatures = (*C.WGPUFeatureName)(unsafe.Pointer(&descriptor.RequiredFeatures[0]))
 			cDescriptor.requiredFeatureCount = C.size_t(featuresCount)
 		}
@@ -274,6 +279,7 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 				maxComputeWorkgroupsPerDimension:          C.uint32_t(descriptor.RequiredLimits.MaxComputeWorkgroupsPerDimension),
 				maxImmediateSize:                          C.uint32_t(descriptor.RequiredLimits.MaxImmediateSize),
 			}
+			pinner.Pin(cDescriptor.requiredLimits)
 		}
 
 		cDescriptor.defaultQueue.label = toCStr(descriptor.DefaultQueue.Label)

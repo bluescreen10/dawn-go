@@ -240,8 +240,8 @@ func CreateInstance(descriptor *InstanceDescriptor) *Instance {
 		}
 
 		if descriptor.RequiredLimits != nil {
-			limits := &C.WGPUInstanceLimits{timedWaitAnyMaxCount: C.size_t(descriptor.RequiredLimits.TimedWaitAnyMaxCount)}
-			pinner.Pin(limits)
+			cDescriptor.requiredLimits = &C.WGPUInstanceLimits{timedWaitAnyMaxCount: C.size_t(descriptor.RequiredLimits.TimedWaitAnyMaxCount)}
+			pinner.Pin(cDescriptor.requiredLimits)
 		}
 	}
 

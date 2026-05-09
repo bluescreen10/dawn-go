@@ -132,17 +132,12 @@ func (d *Device) CreateBufferInit(descriptor BufferInitDescriptor) *Buffer {
 // CreateBuffer creates a new buffer with the given descriptor.
 // Buffers are used to store data that can be read and written by shaders.
 func (d *Device) CreateBuffer(descriptor BufferDescriptor) *Buffer {
-	var pinner runtime.Pinner
-	defer pinner.Unpin()
-
 	cDescriptor := C.WGPUBufferDescriptor{
 		label:            toCStr(descriptor.Label),
 		usage:            C.WGPUBufferUsage(descriptor.Usage),
 		size:             C.uint64_t(descriptor.Size),
 		mappedAtCreation: toCBool(descriptor.MappedAtCreation),
 	}
-
-	pinner.Pin(cDescriptor.label.data)
 
 	return &Buffer{ref: C.wgpuDeviceCreateBuffer(d.ref, &cDescriptor)}
 }
@@ -220,7 +215,7 @@ func (d *Device) CreateComputePipelineAsync(descriptor ComputePipelineDescriptor
 // CreatePipelineLayout creates a pipeline layout from the given descriptor.
 // Pipeline layouts define the resource bindings used by pipelines.
 func (d *Device) CreatePipelineLayout(descriptor PipelineLayoutDescriptor) *PipelineLayout {
-	pinner := runtime.Pinner{}
+	var pinner runtime.Pinner
 	defer pinner.Unpin()
 
 	cDescriptor := C.WGPUPipelineLayoutDescriptor{
@@ -384,6 +379,7 @@ func (d *Device) CreateShaderModule(descriptor ShaderModuleDescriptor) *ShaderMo
 	}
 
 	if descriptor.SPIRVSource != nil {
+		pinner.Pin(&descriptor.SPIRVSource.Code[0])
 		spirvSource := C.WGPUShaderSourceSPIRV{
 			chain: C.WGPUChainedStruct{
 				next:  nil,

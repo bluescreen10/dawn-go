@@ -30,7 +30,7 @@ func (r *RenderPassEncoder) SetBindGroup(groupIndex uint32, group *BindGroup, dy
 	var cDynamicOffsets *C.uint32_t
 
 	if cDynamicOffsetsCount > 0 {
-		cDynamicOffsets = (*C.uint32_t)(&dynamicOffsets[0])
+		cDynamicOffsets = (*C.uint32_t)(unsafe.Pointer(&dynamicOffsets[0]))
 	}
 
 	C.wgpuRenderPassEncoderSetBindGroup(r.ref, C.uint32_t(groupIndex), group.ref, cDynamicOffsetsCount, cDynamicOffsets)
