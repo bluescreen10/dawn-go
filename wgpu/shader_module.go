@@ -10,6 +10,7 @@ extern void cgo_callback_CompilationInfoCallback(WGPUCompilationInfoRequestStatu
 import "C"
 import (
 	"fmt"
+	"runtime"
 	"runtime/cgo"
 	"unsafe"
 )
@@ -91,7 +92,13 @@ func (s *ShaderModule) TryGetCompilationInfo() ([]CompilationMessage, error) {
 // SetLabel sets the debug label for the shader module.
 // This label appears in debuggers and validation layers.
 func (s *ShaderModule) SetLabel(label string) {
-	C.wgpuShaderModuleSetLabel(s.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuShaderModuleSetLabel(s.ref, cLabel)
 }
 
 // Release releases the shader module and all associated resources.

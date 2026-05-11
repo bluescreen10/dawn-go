@@ -6,6 +6,7 @@ package wgpu
 #include "webgpu.h"
 */
 import "C"
+import "runtime"
 
 // BindGroup represents a group of resources that are bound together and used in GPU commands.
 // Bind groups are created from a device using a bind group layout and a set of resources.
@@ -16,7 +17,12 @@ type BindGroup struct {
 // SetLabel sets the debug label for the bind group.
 // This label appears in debuggers and validation layers.
 func (b *BindGroup) SetLabel(label string) {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
 	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
 	C.wgpuBindGroupSetLabel(b.ref, cLabel)
 }
 

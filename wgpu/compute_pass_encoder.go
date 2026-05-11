@@ -6,7 +6,10 @@ package wgpu
 #include "webgpu.h"
 */
 import "C"
-import "unsafe"
+import (
+	"runtime"
+	"unsafe"
+)
 
 // ComputePassEncoder encodes compute commands that will be dispatched to the GPU.
 // Compute pass encoders are created from a command encoder and are used to issue compute work.
@@ -17,7 +20,13 @@ type ComputePassEncoder struct {
 // InsertDebugMarker inserts a debug marker into the compute pass.
 // The marker label is used to identify the marker in debuggers and profilers.
 func (c *ComputePassEncoder) InsertDebugMarker(markerLabel string) {
-	C.wgpuComputePassEncoderInsertDebugMarker(c.ref, toCStr(markerLabel))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(markerLabel)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuComputePassEncoderInsertDebugMarker(c.ref, cLabel)
 }
 
 // PopDebugGroup pops the most recently pushed debug group from the compute pass.
@@ -28,7 +37,13 @@ func (c *ComputePassEncoder) PopDebugGroup() {
 // PushDebugGroup pushes a debug group into the compute pass with the given label.
 // Debug groups can be nested and are used to group commands in debuggers and profilers.
 func (c *ComputePassEncoder) PushDebugGroup(groupLabel string) {
-	C.wgpuComputePassEncoderPushDebugGroup(c.ref, toCStr(groupLabel))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(groupLabel)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuComputePassEncoderPushDebugGroup(c.ref, cLabel)
 }
 
 // SetPipeline sets the compute pipeline to be used for subsequent compute commands.
@@ -70,7 +85,13 @@ func (c *ComputePassEncoder) End() {
 // SetLabel sets the debug label for the compute pass encoder.
 // This label appears in debuggers and validation layers.
 func (c *ComputePassEncoder) SetLabel(label string) {
-	C.wgpuComputePassEncoderSetLabel(c.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuComputePassEncoderSetLabel(c.ref, cLabel)
 }
 
 // Release releases the compute pass encoder and all associated resources.

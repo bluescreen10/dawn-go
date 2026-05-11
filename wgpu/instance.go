@@ -31,6 +31,7 @@ func (i *Instance) CreateSurface(descriptor SurfaceDescriptor) *Surface {
 	cDescriptor := C.WGPUSurfaceDescriptor{
 		label: toCStr(descriptor.Label),
 	}
+	pinner.Pin(cDescriptor.label.data)
 
 	if descriptor.MetalLayer != nil {
 		metalSource := &C.WGPUSurfaceSourceMetalLayer{
@@ -225,12 +226,12 @@ func (i *Instance) WaitAny(futures []Future, timeout time.Duration) error {
 // CreateInstance creates a new WebGPU instance with optional descriptor.
 // The instance is the entry point for all WebGPU operations.
 func CreateInstance(descriptor *InstanceDescriptor) *Instance {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
 	var cDescriptor *C.WGPUInstanceDescriptor
 
 	if descriptor != nil {
-		var pinner runtime.Pinner
-		defer pinner.Unpin()
-
 		cDescriptor = &C.WGPUInstanceDescriptor{}
 
 		if count := len(descriptor.RequiredFeatures); count > 0 {

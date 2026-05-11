@@ -4,6 +4,7 @@ package wgpu
 #include "webgpu.h"
 */
 import "C"
+import "runtime"
 
 // RenderPipeline represents a render pipeline that defines how graphics are rendered.
 // Render pipelines are created from a device and a render pipeline descriptor.
@@ -22,7 +23,12 @@ func (r *RenderPipeline) GetBindGroupLayout(groupIndex uint32) *BindGroupLayout 
 // SetLabel sets the debug label for the render pipeline.
 // This label appears in debuggers and validation layers.
 func (r *RenderPipeline) SetLabel(label string) {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
 	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
 	C.wgpuRenderPipelineSetLabel(r.ref, cLabel)
 }
 

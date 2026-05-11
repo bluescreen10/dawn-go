@@ -20,6 +20,8 @@ type CommandEncoder struct {
 // Finish finishes recording commands and returns a command buffer.
 // The descriptor can be used to set the label of the command buffer.
 func (c *CommandEncoder) Finish(descriptor *CommandBufferDescriptor) *CommandBuffer {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
 
 	var cDescriptor *C.WGPUCommandBufferDescriptor
 
@@ -27,6 +29,7 @@ func (c *CommandEncoder) Finish(descriptor *CommandBufferDescriptor) *CommandBuf
 		cDescriptor = &C.WGPUCommandBufferDescriptor{
 			label: toCStr(descriptor.Label),
 		}
+		pinner.Pin(cDescriptor.label.data)
 	}
 
 	return &CommandBuffer{ref: C.wgpuCommandEncoderFinish(c.ref, cDescriptor)}
@@ -43,6 +46,7 @@ func (c *CommandEncoder) BeginComputePass(descriptor *ComputePassDescriptor) *Co
 		cDescriptor = &C.WGPUComputePassDescriptor{
 			label: toCStr(descriptor.Label),
 		}
+		pinner.Pin(cDescriptor.label.data)
 
 		if descriptor.TimestampWrites != nil {
 			cDescriptor.timestampWrites = &C.WGPUPassTimestampWrites{
@@ -66,6 +70,7 @@ func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) *Rende
 	cDescriptor := C.WGPURenderPassDescriptor{
 		label: toCStr(descriptor.Label),
 	}
+	pinner.Pin(cDescriptor.label.data)
 
 	if count := C.size_t(len(descriptor.ColorAttachments)); count > 0 {
 		colorAttachments := make([]C.WGPURenderPassColorAttachment, count)
@@ -241,7 +246,13 @@ func (c *CommandEncoder) ClearBuffer(buffer *Buffer, offset uint64, size uint64)
 // InsertDebugMarker inserts a debug marker into the command encoder.
 // The marker label is used to identify the marker in debuggers and profilers.
 func (c *CommandEncoder) InsertDebugMarker(markerLabel string) {
-	C.wgpuCommandEncoderInsertDebugMarker(c.ref, toCStr(markerLabel))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(markerLabel)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuCommandEncoderInsertDebugMarker(c.ref, cLabel)
 }
 
 // PopDebugGroup pops the most recently pushed debug group from the command encoder.
@@ -252,7 +263,13 @@ func (c *CommandEncoder) PopDebugGroup() {
 // PushDebugGroup pushes a debug group into the command encoder with the given label.
 // Debug groups can be nested and are used to group commands in debuggers and profilers.
 func (c *CommandEncoder) PushDebugGroup(groupLabel string) {
-	C.wgpuCommandEncoderPushDebugGroup(c.ref, toCStr(groupLabel))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(groupLabel)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuCommandEncoderPushDebugGroup(c.ref, cLabel)
 }
 
 // ResolveQuerySet resolves an occlusion or timestamp query set to a buffer.
@@ -270,7 +287,13 @@ func (c *CommandEncoder) WriteTimestamp(querySet *QuerySet, queryIndex uint32) {
 // SetLabel sets the debug label for the command encoder.
 // This label appears in debuggers and validation layers.
 func (c *CommandEncoder) SetLabel(label string) {
-	C.wgpuCommandEncoderSetLabel(c.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuCommandEncoderSetLabel(c.ref, cLabel)
 }
 
 // Release releases the command encoder and all associated resources.

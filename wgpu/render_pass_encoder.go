@@ -86,7 +86,13 @@ func (r *RenderPassEncoder) ExecuteBundles(bundles ...*RenderBundle) {
 // InsertDebugMarker inserts a debug marker into the render pass.
 // The marker label is used to identify the marker in debuggers and profilers.
 func (r *RenderPassEncoder) InsertDebugMarker(markerLabel string) {
-	C.wgpuRenderPassEncoderInsertDebugMarker(r.ref, toCStr(markerLabel))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(markerLabel)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuRenderPassEncoderInsertDebugMarker(r.ref, cLabel)
 }
 
 // PopDebugGroup pops the most recently pushed debug group from the render pass.
@@ -97,7 +103,13 @@ func (r *RenderPassEncoder) PopDebugGroup() {
 // PushDebugGroup pushes a debug group into the render pass with the given label.
 // Debug groups can be nested and are used to group commands in debuggers and profilers.
 func (r *RenderPassEncoder) PushDebugGroup(groupLabel string) {
-	C.wgpuRenderPassEncoderPushDebugGroup(r.ref, toCStr(groupLabel))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(groupLabel)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuRenderPassEncoderPushDebugGroup(r.ref, cLabel)
 }
 
 // SetStencilReference sets the stencil reference value for subsequent stencil operations.
@@ -161,7 +173,13 @@ func (r *RenderPassEncoder) End() {
 // SetLabel sets the debug label for the render pass encoder.
 // This label appears in debuggers and validation layers.
 func (r *RenderPassEncoder) SetLabel(label string) {
-	C.wgpuRenderPassEncoderSetLabel(r.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuRenderPassEncoderSetLabel(r.ref, cLabel)
 }
 
 // Release releases the device and all associated resources.

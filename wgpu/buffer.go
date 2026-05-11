@@ -9,6 +9,7 @@ extern void cgo_callback_BufferMapCallback(WGPUMapAsyncStatus status, WGPUString
 */
 import "C"
 import (
+	"runtime"
 	"runtime/cgo"
 	"unsafe"
 )
@@ -91,7 +92,13 @@ func (b *Buffer) GetConstMappedRange(offset int, size int) []byte {
 // SetLabel sets the debug label for the buffer.
 // This label appears in debuggers and validation layers.
 func (b *Buffer) SetLabel(label string) {
-	C.wgpuBufferSetLabel(b.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuBufferSetLabel(b.ref, cLabel)
 }
 
 // GetUsage returns the usage flags for the buffer.

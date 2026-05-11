@@ -6,6 +6,7 @@ package wgpu
 #include "webgpu.h"
 */
 import "C"
+import "runtime"
 
 // ComputePipeline represents a compute pipeline that can execute compute shaders.
 // Compute pipelines are created from a device and a compute pipeline descriptor.
@@ -22,7 +23,13 @@ func (c *ComputePipeline) GetBindGroupLayout(groupIndex uint32) *BindGroupLayout
 // SetLabel sets the debug label for the compute pipeline.
 // This label appears in debuggers and validation layers.
 func (c *ComputePipeline) SetLabel(label string) {
-	C.wgpuComputePipelineSetLabel(c.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuComputePipelineSetLabel(c.ref, cLabel)
 }
 
 // Release releases the compute pipeline and all associated resources.

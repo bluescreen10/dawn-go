@@ -34,6 +34,7 @@ func (d *Device) CreateBindGroup(descriptor BindGroupDescriptor) *BindGroup {
 	cDescriptor := C.WGPUBindGroupDescriptor{
 		label: toCStr(descriptor.Label),
 	}
+	pinner.Pin(cDescriptor.label.data)
 
 	if descriptor.Layout != nil {
 		cDescriptor.layout = descriptor.Layout.ref
@@ -76,6 +77,7 @@ func (d *Device) CreateBindGroupLayout(descriptor BindGroupLayoutDescriptor) *Bi
 	cDescriptor := C.WGPUBindGroupLayoutDescriptor{
 		label: toCStr(descriptor.Label),
 	}
+	pinner.Pin(cDescriptor.label.data)
 
 	if count := C.size_t(len(descriptor.Entries)); count > 0 {
 		entries := make([]C.WGPUBindGroupLayoutEntry, count)
@@ -132,12 +134,16 @@ func (d *Device) CreateBufferInit(descriptor BufferInitDescriptor) *Buffer {
 // CreateBuffer creates a new buffer with the given descriptor.
 // Buffers are used to store data that can be read and written by shaders.
 func (d *Device) CreateBuffer(descriptor BufferDescriptor) *Buffer {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
 	cDescriptor := C.WGPUBufferDescriptor{
 		label:            toCStr(descriptor.Label),
 		usage:            C.WGPUBufferUsage(descriptor.Usage),
 		size:             C.uint64_t(descriptor.Size),
 		mappedAtCreation: toCBool(descriptor.MappedAtCreation),
 	}
+	pinner.Pin(cDescriptor.label.data)
 
 	return &Buffer{ref: C.wgpuDeviceCreateBuffer(d.ref, &cDescriptor)}
 }
@@ -145,6 +151,8 @@ func (d *Device) CreateBuffer(descriptor BufferDescriptor) *Buffer {
 // CreateCommandEncoder creates a command encoder from the given descriptor.
 // Command encoders are used to record commands that will be submitted to the GPU queue.
 func (d *Device) CreateCommandEncoder(descriptor *CommandEncoderDescriptor) *CommandEncoder {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
 
 	var cDescriptor *C.WGPUCommandEncoderDescriptor
 
@@ -152,6 +160,7 @@ func (d *Device) CreateCommandEncoder(descriptor *CommandEncoderDescriptor) *Com
 		cDescriptor = &C.WGPUCommandEncoderDescriptor{
 			label: toCStr(descriptor.Label),
 		}
+		pinner.Pin(cDescriptor.label.data)
 	}
 
 	return &CommandEncoder{ref: C.wgpuDeviceCreateCommandEncoder(d.ref, cDescriptor)}
@@ -160,10 +169,10 @@ func (d *Device) CreateCommandEncoder(descriptor *CommandEncoderDescriptor) *Com
 // CreateComputePipeline creates a compute pipeline from the given descriptor.
 // Compute pipelines execute compute shaders on the GPU.
 func (d *Device) CreateComputePipeline(descriptor ComputePipelineDescriptor) *ComputePipeline {
-	pinner := &runtime.Pinner{}
+	var pinner runtime.Pinner
 	defer pinner.Unpin()
 
-	cDescriptor := toCComputePipelineDescriptor(pinner, descriptor)
+	cDescriptor := toCComputePipelineDescriptor(&pinner, descriptor)
 	return &ComputePipeline{ref: C.wgpuDeviceCreateComputePipeline(d.ref, &cDescriptor)}
 }
 
@@ -195,10 +204,10 @@ func goCreateComputePipelineAsyncCallbackHandler(status C.WGPUCreatePipelineAsyn
 // The callback is called when the pipeline is ready or an error occurs.
 func (d *Device) CreateComputePipelineAsync(descriptor ComputePipelineDescriptor, callback CreateComputePipelineAsyncCallback) Future {
 
-	pinner := &runtime.Pinner{}
+	var pinner runtime.Pinner
 	defer pinner.Unpin()
 
-	cDescriptor := toCComputePipelineDescriptor(pinner, descriptor)
+	cDescriptor := toCComputePipelineDescriptor(&pinner, descriptor)
 
 	handle := cgo.NewHandle(callback)
 
@@ -221,6 +230,7 @@ func (d *Device) CreatePipelineLayout(descriptor PipelineLayoutDescriptor) *Pipe
 	cDescriptor := C.WGPUPipelineLayoutDescriptor{
 		label: toCStr(descriptor.Label),
 	}
+	pinner.Pin(cDescriptor.label.data)
 
 	if count := C.size_t(len(descriptor.BindGroupLayouts)); count > 0 {
 		layouts := make([]C.WGPUBindGroupLayout, count)
@@ -240,11 +250,15 @@ func (d *Device) CreatePipelineLayout(descriptor PipelineLayoutDescriptor) *Pipe
 // CreateQuerySet creates a query set from the given descriptor.
 // Query sets are used to collect timestamp and occlusion query results.
 func (d *Device) CreateQuerySet(descriptor QuerySetDescriptor) QuerySet {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
 	cDescriptor := C.WGPUQuerySetDescriptor{
 		label: toCStr(descriptor.Label),
 		count: C.uint32_t(descriptor.Count),
 		_type: C.WGPUQueryType(descriptor.Type),
 	}
+	pinner.Pin(cDescriptor.label.data)
 
 	return QuerySet{ref: C.wgpuDeviceCreateQuerySet(d.ref, &cDescriptor)}
 }
@@ -277,9 +291,9 @@ func goCreateRenderPipelineAsyncCallbackHandler(status C.WGPUCreatePipelineAsync
 // The callback is called when the pipeline is ready or an error occurs.
 func (d *Device) CreateRenderPipelineAsync(descriptor RenderPipelineDescriptor, callback CreateRenderPipelineAsyncCallback) Future {
 
-	pinner := &runtime.Pinner{}
+	var pinner runtime.Pinner
 	defer pinner.Unpin()
-	cDescriptor := toCRenderPipelineDescriptor(pinner, descriptor)
+	cDescriptor := toCRenderPipelineDescriptor(&pinner, descriptor)
 
 	handle := cgo.NewHandle(callback)
 
@@ -306,6 +320,7 @@ func (d *Device) CreateRenderBundleEncoder(descriptor RenderBundleEncoderDescrip
 		depthReadOnly:      toCBool(descriptor.DepthReadOnly),
 		stencilReadOnly:    toCBool(descriptor.StencilReadOnly),
 	}
+	pinner.Pin(cDescriptor.label.data)
 
 	if count := C.size_t(len(descriptor.ColorFormats)); count > 0 {
 		colorFormats := make([]C.WGPUTextureFormat, count)
@@ -325,16 +340,19 @@ func (d *Device) CreateRenderBundleEncoder(descriptor RenderBundleEncoderDescrip
 // CreateRenderPipeline creates a render pipeline from the given descriptor.
 // Render pipelines define how graphics are rendered.
 func (d *Device) CreateRenderPipeline(descriptor RenderPipelineDescriptor) *RenderPipeline {
-	pinner := &runtime.Pinner{}
+	var pinner runtime.Pinner
 	defer pinner.Unpin()
 
-	cDescriptor := toCRenderPipelineDescriptor(pinner, descriptor)
+	cDescriptor := toCRenderPipelineDescriptor(&pinner, descriptor)
 	return &RenderPipeline{ref: C.wgpuDeviceCreateRenderPipeline(d.ref, &cDescriptor)}
 }
 
 // CreateSampler creates a sampler from the given descriptor.
 // Samplers define how textures are sampled in shaders.
 func (d *Device) CreateSampler(descriptor *SamplerDescriptor) *Sampler {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
 	var cDescriptor *C.WGPUSamplerDescriptor
 
 	if descriptor != nil {
@@ -351,6 +369,7 @@ func (d *Device) CreateSampler(descriptor *SamplerDescriptor) *Sampler {
 			compare:       C.WGPUCompareFunction(descriptor.Compare),
 			maxAnisotropy: C.uint16_t(descriptor.MaxAnisotropy),
 		}
+		pinner.Pin(cDescriptor.label.data)
 	}
 
 	return &Sampler{ref: C.wgpuDeviceCreateSampler(d.ref, cDescriptor)}
@@ -365,6 +384,7 @@ func (d *Device) CreateShaderModule(descriptor ShaderModuleDescriptor) *ShaderMo
 	cDescriptor := C.WGPUShaderModuleDescriptor{
 		label: toCStr(descriptor.Label),
 	}
+	pinner.Pin(cDescriptor.label.data)
 
 	if descriptor.WGSLSource != nil {
 		wgslSource := C.WGPUShaderSourceWGSL{
@@ -375,11 +395,11 @@ func (d *Device) CreateShaderModule(descriptor ShaderModuleDescriptor) *ShaderMo
 			code: toCStr(descriptor.WGSLSource.Code),
 		}
 		pinner.Pin(&wgslSource)
+		pinner.Pin(wgslSource.code.data)
 		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(&wgslSource))
 	}
 
 	if descriptor.SPIRVSource != nil {
-		pinner.Pin(&descriptor.SPIRVSource.Code[0])
 		spirvSource := C.WGPUShaderSourceSPIRV{
 			chain: C.WGPUChainedStruct{
 				next:  nil,
@@ -390,6 +410,7 @@ func (d *Device) CreateShaderModule(descriptor ShaderModuleDescriptor) *ShaderMo
 		}
 
 		pinner.Pin(&spirvSource)
+		pinner.Pin(&spirvSource.code)
 		cDescriptor.nextInChain = (*C.WGPUChainedStruct)(unsafe.Pointer(&spirvSource))
 	}
 
@@ -419,6 +440,7 @@ func (d *Device) CreateTexture(descriptor *TextureDescriptor) *Texture {
 		}
 
 		cDescriptor.label = toCStr(descriptor.Label)
+		pinner.Pin(cDescriptor.label.data)
 
 		if count := C.size_t(len(descriptor.ViewFormats)); count > 0 {
 			viewFormats := make([]C.WGPUTextureFormat, count)
@@ -566,7 +588,12 @@ func (d *Device) GetQueue() *Queue {
 // SetLabel sets the debug label for the device.
 // This label appears in debuggers and validation layers.
 func (d *Device) SetLabel(label string) {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
 	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
 	C.wgpuDeviceSetLabel(d.ref, cLabel)
 }
 
@@ -642,6 +669,7 @@ func toCComputePipelineDescriptor(pinner *runtime.Pinner, descriptor ComputePipe
 	cDescriptor := C.WGPUComputePipelineDescriptor{
 		label: toCStr(descriptor.Label),
 	}
+	pinner.Pin(cDescriptor.label.data)
 
 	if descriptor.Layout != nil {
 		cDescriptor.layout = descriptor.Layout.ref
@@ -649,6 +677,7 @@ func toCComputePipelineDescriptor(pinner *runtime.Pinner, descriptor ComputePipe
 
 	cDescriptor.compute.module = descriptor.Compute.Module.ref
 	cDescriptor.compute.entryPoint = toCStr(descriptor.Compute.EntryPoint)
+	pinner.Pin(cDescriptor.compute.entryPoint.data)
 
 	if count := C.size_t(len(descriptor.Compute.Constants)); count > 0 {
 		constants := make([]C.WGPUConstantEntry, count)
@@ -663,6 +692,7 @@ func toCComputePipelineDescriptor(pinner *runtime.Pinner, descriptor ComputePipe
 				key:   toCStr(k),
 				value: C.double(v),
 			}
+			pinner.Pin(constants[i].key.data)
 			i++
 		}
 	}
@@ -674,6 +704,7 @@ func toCRenderPipelineDescriptor(pinner *runtime.Pinner, descriptor RenderPipeli
 	cDescriptor := C.WGPURenderPipelineDescriptor{
 		label: toCStr(descriptor.Label),
 	}
+	pinner.Pin(cDescriptor.label.data)
 
 	if descriptor.Layout != nil {
 		cDescriptor.layout = descriptor.Layout.ref
@@ -684,6 +715,7 @@ func toCRenderPipelineDescriptor(pinner *runtime.Pinner, descriptor RenderPipeli
 	}
 
 	cDescriptor.vertex.entryPoint = toCStr(descriptor.Vertex.EntryPoint)
+	pinner.Pin(cDescriptor.vertex.entryPoint.data)
 
 	if count := C.size_t(len(descriptor.Vertex.Constants)); count > 0 {
 		constants := make([]C.WGPUConstantEntry, count)
@@ -698,6 +730,7 @@ func toCRenderPipelineDescriptor(pinner *runtime.Pinner, descriptor RenderPipeli
 				key:   toCStr(k),
 				value: C.double(v),
 			}
+			pinner.Pin(constants[i].key.data)
 			i++
 		}
 	}
@@ -779,6 +812,7 @@ func toCRenderPipelineDescriptor(pinner *runtime.Pinner, descriptor RenderPipeli
 		cDescriptor.fragment = fragment
 
 		fragment.entryPoint = toCStr(descriptor.Fragment.EntryPoint)
+		pinner.Pin(fragment.entryPoint.data)
 
 		if descriptor.Fragment.Module != nil {
 			fragment.module = descriptor.Fragment.Module.ref
@@ -798,6 +832,7 @@ func toCRenderPipelineDescriptor(pinner *runtime.Pinner, descriptor RenderPipeli
 					key:   toCStr(k),
 					value: C.double(v),
 				}
+				pinner.Pin(constants[i].key.data)
 				i++
 			}
 

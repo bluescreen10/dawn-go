@@ -6,6 +6,7 @@ package wgpu
 #include "webgpu.h"
 */
 import "C"
+import "runtime"
 
 // CommandBuffer represents a sequence of GPU commands that can be submitted to a queue.
 // Command buffers are created from a command encoder and contain recorded commands.
@@ -16,7 +17,13 @@ type CommandBuffer struct {
 // SetLabel sets the debug label for the command buffer.
 // This label appears in debuggers and validation layers.
 func (c *CommandBuffer) SetLabel(label string) {
-	C.wgpuCommandBufferSetLabel(c.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuCommandBufferSetLabel(c.ref, cLabel)
 }
 
 // Release releases the command buffer and all associated resources.

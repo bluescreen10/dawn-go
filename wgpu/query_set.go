@@ -6,6 +6,7 @@ package wgpu
 #include "webgpu.h"
 */
 import "C"
+import "runtime"
 
 // QuerySet represents a query set that can be used to collect timestamp and occlusion query results.
 // Query sets are created from a device and have a specific type and count.
@@ -16,7 +17,13 @@ type QuerySet struct {
 // SetLabel sets the debug label for the query set.
 // This label appears in debuggers and validation layers.
 func (q *QuerySet) SetLabel(label string) {
-	C.wgpuQuerySetSetLabel(q.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuQuerySetSetLabel(q.ref, cLabel)
 }
 
 // GetType returns the type of the query set (timestamp or occlusion).

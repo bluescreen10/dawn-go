@@ -236,6 +236,7 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 
 	if descriptor != nil {
 		cDescriptor.label = toCStr(descriptor.Label)
+		pinner.Pin(cDescriptor.label.data)
 
 		featuresCount := len(descriptor.RequiredFeatures)
 		if featuresCount > 0 {
@@ -283,6 +284,7 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 		}
 
 		cDescriptor.defaultQueue.label = toCStr(descriptor.DefaultQueue.Label)
+		pinner.Pin(cDescriptor.defaultQueue.label.data)
 
 		if descriptor.DeviceLostCallback != nil {
 			handle := cgo.NewHandle(descriptor.DeviceLostCallback)

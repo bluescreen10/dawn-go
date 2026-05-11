@@ -148,5 +148,11 @@ func (s *Surface) Unconfigure() {
 // SetLabel sets the debug label for the surface.
 // This label appears in debuggers and validation layers.
 func (s *Surface) SetLabel(label string) {
-	C.wgpuSurfaceSetLabel(s.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuSurfaceSetLabel(s.ref, cLabel)
 }

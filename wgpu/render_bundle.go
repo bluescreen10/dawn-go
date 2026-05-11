@@ -6,7 +6,10 @@ package wgpu
 #include "webgpu.h"
 */
 import "C"
-import "unsafe"
+import (
+	"runtime"
+	"unsafe"
+)
 
 // RenderBundle represents a pre-recorded sequence of render commands that can be executed efficiently multiple times.
 // Render bundles are created from a render bundle encoder and can be executed in render passes.
@@ -17,7 +20,13 @@ type RenderBundle struct {
 // SetLabel sets the debug label for the render bundle.
 // This label appears in debuggers and validation layers.
 func (r *RenderBundle) SetLabel(label string) {
-	C.wgpuRenderBundleSetLabel(r.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuRenderBundleSetLabel(r.ref, cLabel)
 }
 
 // RenderBundleEncoder encodes a sequence of render commands that can be recorded into a render bundle.
@@ -72,7 +81,13 @@ func (r *RenderBundleEncoder) DrawIndexedIndirect(indirectBuffer *Buffer, indire
 // InsertDebugMarker inserts a debug marker into the render bundle encoder.
 // The marker label is used to identify the marker in debuggers and profilers.
 func (r *RenderBundleEncoder) InsertDebugMarker(markerLabel string) {
-	C.wgpuRenderBundleEncoderInsertDebugMarker(r.ref, toCStr(markerLabel))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(markerLabel)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuRenderBundleEncoderInsertDebugMarker(r.ref, cLabel)
 }
 
 // PopDebugGroup pops the most recently pushed debug group from the render bundle encoder.
@@ -83,7 +98,13 @@ func (r *RenderBundleEncoder) PopDebugGroup() {
 // PushDebugGroup pushes a debug group into the render bundle encoder with the given label.
 // Debug groups can be nested and are used to group commands in debuggers and profilers.
 func (r *RenderBundleEncoder) PushDebugGroup(groupLabel string) {
-	C.wgpuRenderBundleEncoderPushDebugGroup(r.ref, toCStr(groupLabel))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(groupLabel)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuRenderBundleEncoderPushDebugGroup(r.ref, cLabel)
 }
 
 // SetVertexBuffer sets a vertex buffer at the specified slot for subsequent draw commands in the bundle.
@@ -101,12 +122,16 @@ func (r *RenderBundleEncoder) SetIndexBuffer(buffer *Buffer, format IndexFormat,
 // Finish finishes recording and returns a render bundle.
 // The descriptor can be used to set the label of the render bundle.
 func (r *RenderBundleEncoder) Finish(descriptor *RenderBundleDescriptor) RenderBundle {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
 	var cDescriptor *C.WGPURenderBundleDescriptor
 
 	if descriptor != nil {
 		cDescriptor = &C.WGPURenderBundleDescriptor{
 			label: toCStr(descriptor.Label),
 		}
+		pinner.Pin(cDescriptor.label.data)
 	}
 
 	return RenderBundle{ref: C.wgpuRenderBundleEncoderFinish(r.ref, cDescriptor)}
@@ -115,5 +140,11 @@ func (r *RenderBundleEncoder) Finish(descriptor *RenderBundleDescriptor) RenderB
 // SetLabel sets the debug label for the render bundle encoder.
 // This label appears in debuggers and validation layers.
 func (r *RenderBundleEncoder) SetLabel(label string) {
-	C.wgpuRenderBundleEncoderSetLabel(r.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuRenderBundleEncoderSetLabel(r.ref, cLabel)
 }

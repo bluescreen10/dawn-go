@@ -9,6 +9,7 @@ extern void cgo_callback_QueueWorkDoneCallback(WGPUQueueWorkDoneStatus status, W
 */
 import "C"
 import (
+	"runtime"
 	"runtime/cgo"
 	"unsafe"
 )
@@ -122,7 +123,13 @@ func (q *Queue) WriteTexture(destination TexelCopyTextureInfo, data []byte, data
 // SetLabel sets the debug label for the queue.
 // This label appears in debuggers and validation layers.
 func (q *Queue) SetLabel(label string) {
-	C.wgpuQueueSetLabel(q.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuQueueSetLabel(q.ref, cLabel)
 }
 
 // Release releases the queue and all associated resources.

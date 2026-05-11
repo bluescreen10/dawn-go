@@ -6,6 +6,7 @@ package wgpu
 #include "webgpu.h"
 */
 import "C"
+import "runtime"
 
 // Texture represents a GPU texture, which is a structured collection of pixels used for rendering and data storage.
 // Textures are created from a device and can be used as render targets or sampled in shaders.
@@ -27,6 +28,8 @@ func (t *Texture) AsImageCopy() TexelCopyTextureInfo {
 // CreateView creates a texture view from this texture.
 // Texture views can have different dimensions and mip level ranges than the underlying texture.
 func (t *Texture) CreateView(descriptor *TextureViewDescriptor) *TextureView {
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
 
 	var cDescriptor *C.WGPUTextureViewDescriptor
 	if descriptor != nil {
@@ -41,6 +44,7 @@ func (t *Texture) CreateView(descriptor *TextureViewDescriptor) *TextureView {
 			aspect:          C.WGPUTextureAspect(descriptor.Aspect),
 			usage:           C.WGPUTextureUsage(descriptor.Usage),
 		}
+		pinner.Pin(cDescriptor.label.data)
 
 		if cDescriptor.mipLevelCount == 0 {
 			cDescriptor.mipLevelCount = MipLevelCountUndefined
@@ -57,7 +61,13 @@ func (t *Texture) CreateView(descriptor *TextureViewDescriptor) *TextureView {
 // SetLabel sets the debug label for the texture.
 // This label appears in debuggers and validation layers.
 func (t *Texture) SetLabel(label string) {
-	C.wgpuTextureSetLabel(t.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuTextureSetLabel(t.ref, cLabel)
 }
 
 // GetWidth returns the width of the texture in pixels.
@@ -122,7 +132,13 @@ type TextureView struct {
 // SetLabel sets the debug label for the texture view.
 // This label appears in debuggers and validation layers.
 func (t *TextureView) SetLabel(label string) {
-	C.wgpuTextureViewSetLabel(t.ref, toCStr(label))
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+
+	cLabel := toCStr(label)
+	pinner.Pin(cLabel.data)
+
+	C.wgpuTextureViewSetLabel(t.ref, cLabel)
 }
 
 // Release releases the texture view and all associated resources.
