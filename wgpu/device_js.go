@@ -25,7 +25,7 @@ func (d *Device) CreateBindGroup(descriptor BindGroupDescriptor) *BindGroup {
 			if e.Offset != 0 {
 				resource["offset"] = e.Offset
 			}
-			if e.Size != 0 {
+			if e.Size != 0 && e.Size != WholeSize {
 				resource["size"] = e.Size
 			}
 			entry["resource"] = resource
@@ -61,7 +61,7 @@ func (d *Device) CreateBindGroupLayout(descriptor BindGroupLayoutDescriptor) *Bi
 			entry["buffer"] = map[string]any{
 				"type":             e.Buffer.Type.toJS(),
 				"hasDynamicOffset": e.Buffer.HasDynamicOffset,
-				"minBindingSize":   e.Buffer.MinBindingSize,
+				"minBindingSize":   sizeOrUndefined(e.Buffer.MinBindingSize),
 			}
 		case e.Sampler.Type >= SamplerBindingTypeFiltering:
 			entry["sampler"] = map[string]any{

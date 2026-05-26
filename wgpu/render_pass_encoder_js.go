@@ -107,13 +107,13 @@ func (r *RenderPassEncoder) SetScissorRect(x uint32, y uint32, width uint32, hei
 // SetVertexBuffer sets a vertex buffer at the specified slot for subsequent draw commands.
 // The offset and size specify the region of the buffer to use.
 func (r *RenderPassEncoder) SetVertexBuffer(slot uint32, buffer *Buffer, offset uint64, size uint64) {
-	r.ref.Call("setVertexBuffer", slot, buffer.ref, offset, size)
+	r.ref.Call("setVertexBuffer", slot, buffer.ref, offset, sizeOrUndefined(size))
 }
 
 // SetIndexBuffer sets an index buffer for subsequent indexed draw commands.
 // The format specifies the type of indices and the offset and size specify the region of the buffer to use.
 func (r *RenderPassEncoder) SetIndexBuffer(buffer *Buffer, format IndexFormat, offset uint64, size uint64) {
-	r.ref.Call("setIndexBuffer", buffer.ref, format.toJS(), offset, size)
+	r.ref.Call("setIndexBuffer", buffer.ref, format.toJS(), offset, sizeOrUndefined(size))
 }
 
 // BeginOcclusionQuery begins an occlusion query at the specified query index.

@@ -194,7 +194,7 @@ func (c *CommandEncoder) CopyTextureToTexture(source TexelCopyTextureInfo, desti
 // The offset and size specify the range of the buffer to clear.
 // If size is 0, the whole buffer is cleared.
 func (c *CommandEncoder) ClearBuffer(buffer *Buffer, offset uint64, size uint64) {
-	c.ref.Call("clearBuffer", buffer.ref, offset, size)
+	c.ref.Call("clearBuffer", buffer.ref, offset, sizeOrUndefined(size))
 }
 
 // InsertDebugMarker inserts a debug marker into the command encoder.

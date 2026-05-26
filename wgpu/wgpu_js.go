@@ -7,6 +7,15 @@ import (
 	"syscall/js"
 )
 
+// sizeOrUndefined returns js.Undefined when size is WholeSize (letting the browser use the rest of the buffer),
+// or a JS number otherwise.
+func sizeOrUndefined(size uint64) js.Value {
+	if size == WholeSize {
+		return js.Undefined()
+	}
+	return js.ValueOf(size)
+}
+
 // awaitPromise blocks until the JS promise resolves or rejects.
 func awaitPromise(promise js.Value) (js.Value, error) {
 	res := make(chan js.Value, 1)
