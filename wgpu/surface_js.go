@@ -38,19 +38,19 @@ func (s *Surface) Configure(config SurfaceConfiguration) {
 // GetCapabilities returns the capabilities of the surface when used with the given adapter.
 // The capabilities include supported usages, formats, present modes, and alpha modes.
 func (s *Surface) GetCapabilities(adapter *Adapter) (SurfaceCapabilities, error) {
-	// In JS WebGPU, capabilities are determined by what the browser supports.
-	// Return commonly supported formats.
-	preferredFormat := s.ref.Call("getPreferredCanvasFormat", adapter.ref)
-	var fmt_ TextureFormat
+	// getPreferredCanvasFormat lives on navigator.gpu, not on the canvas context, and takes no arguments.
+	gpu := js.Global().Get("navigator").Get("gpu")
+	var format TextureFormat
+	preferredFormat := gpu.Call("getPreferredCanvasFormat")
 	if !preferredFormat.IsUndefined() && !preferredFormat.IsNull() {
-		fmt_ = textureFormatFromJS(preferredFormat.String())
+		format = textureFormatFromJS(preferredFormat.String())
 	} else {
-		fmt_ = TextureFormatBGRA8Unorm
+		format = TextureFormatBGRA8Unorm
 	}
 
 	return SurfaceCapabilities{
 		Usages:       TextureUsageRenderAttachment,
-		Formats:      []TextureFormat{fmt_, TextureFormatRGBA8Unorm},
+		Formats:      []TextureFormat{format, TextureFormatRGBA8Unorm},
 		PresentModes: []PresentMode{PresentModeFifo},
 		AlphaModes:   []CompositeAlphaMode{CompositeAlphaModeAuto, CompositeAlphaModeOpaque, CompositeAlphaModePremultiplied},
 	}, nil
