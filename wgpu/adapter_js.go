@@ -62,7 +62,7 @@ func (a *Adapter) TryGetInfo() (AdapterInfo, error) {
 // Returns true if the feature is supported, false otherwise.
 func (a *Adapter) HasFeature(feature FeatureName) bool {
 	name := feature.toJS()
-	if name == "" {
+	if name.IsUndefined() || name.IsNull() {
 		return false
 	}
 	return a.ref.Get("features").Call("has", name).Bool()
@@ -94,7 +94,7 @@ func (a *Adapter) TryRequestDevice(descriptor *DeviceDescriptor) (*Device, error
 		if len(descriptor.RequiredFeatures) > 0 {
 			features := make([]any, 0, len(descriptor.RequiredFeatures))
 			for _, f := range descriptor.RequiredFeatures {
-				if name := f.toJS(); name != "" {
+				if name := f.toJS(); !name.IsUndefined() {
 					features = append(features, name)
 				}
 			}

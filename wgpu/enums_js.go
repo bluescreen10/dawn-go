@@ -4,212 +4,212 @@ package wgpu
 
 import "syscall/js"
 
-func (f TextureFormat) toJS() string {
+func (f TextureFormat) toJS() js.Value {
 	switch f {
 	case TextureFormatR8Unorm:
-		return "r8unorm"
+		return js.ValueOf("r8unorm")
 	case TextureFormatR8Snorm:
-		return "r8snorm"
+		return js.ValueOf("r8snorm")
 	case TextureFormatR8Uint:
-		return "r8uint"
+		return js.ValueOf("r8uint")
 	case TextureFormatR8Sint:
-		return "r8sint"
+		return js.ValueOf("r8sint")
 	case TextureFormatR16Unorm:
-		return "r16unorm"
+		return js.ValueOf("r16unorm")
 	case TextureFormatR16Snorm:
-		return "r16snorm"
+		return js.ValueOf("r16snorm")
 	case TextureFormatR16Uint:
-		return "r16uint"
+		return js.ValueOf("r16uint")
 	case TextureFormatR16Sint:
-		return "r16sint"
+		return js.ValueOf("r16sint")
 	case TextureFormatR16Float:
-		return "r16float"
+		return js.ValueOf("r16float")
 	case TextureFormatRG8Unorm:
-		return "rg8unorm"
+		return js.ValueOf("rg8unorm")
 	case TextureFormatRG8Snorm:
-		return "rg8snorm"
+		return js.ValueOf("rg8snorm")
 	case TextureFormatRG8Uint:
-		return "rg8uint"
+		return js.ValueOf("rg8uint")
 	case TextureFormatRG8Sint:
-		return "rg8sint"
+		return js.ValueOf("rg8sint")
 	case TextureFormatR32Float:
-		return "r32float"
+		return js.ValueOf("r32float")
 	case TextureFormatR32Uint:
-		return "r32uint"
+		return js.ValueOf("r32uint")
 	case TextureFormatR32Sint:
-		return "r32sint"
+		return js.ValueOf("r32sint")
 	case TextureFormatRG16Unorm:
-		return "rg16unorm"
+		return js.ValueOf("rg16unorm")
 	case TextureFormatRG16Snorm:
-		return "rg16snorm"
+		return js.ValueOf("rg16snorm")
 	case TextureFormatRG16Uint:
-		return "rg16uint"
+		return js.ValueOf("rg16uint")
 	case TextureFormatRG16Sint:
-		return "rg16sint"
+		return js.ValueOf("rg16sint")
 	case TextureFormatRG16Float:
-		return "rg16float"
+		return js.ValueOf("rg16float")
 	case TextureFormatRGBA8Unorm:
-		return "rgba8unorm"
+		return js.ValueOf("rgba8unorm")
 	case TextureFormatRGBA8UnormSRGB:
-		return "rgba8unorm-srgb"
+		return js.ValueOf("rgba8unorm-srgb")
 	case TextureFormatRGBA8Snorm:
-		return "rgba8snorm"
+		return js.ValueOf("rgba8snorm")
 	case TextureFormatRGBA8Uint:
-		return "rgba8uint"
+		return js.ValueOf("rgba8uint")
 	case TextureFormatRGBA8Sint:
-		return "rgba8sint"
+		return js.ValueOf("rgba8sint")
 	case TextureFormatBGRA8Unorm:
-		return "bgra8unorm"
+		return js.ValueOf("bgra8unorm")
 	case TextureFormatBGRA8UnormSRGB:
-		return "bgra8unorm-srgb"
+		return js.ValueOf("bgra8unorm-srgb")
 	case TextureFormatRGB10A2Uint:
-		return "rgb10a2uint"
+		return js.ValueOf("rgb10a2uint")
 	case TextureFormatRGB10A2Unorm:
-		return "rgb10a2unorm"
+		return js.ValueOf("rgb10a2unorm")
 	case TextureFormatRG11B10Ufloat:
-		return "rg11b10ufloat"
+		return js.ValueOf("rg11b10ufloat")
 	case TextureFormatRGB9E5Ufloat:
-		return "rgb9e5ufloat"
+		return js.ValueOf("rgb9e5ufloat")
 	case TextureFormatRG32Float:
-		return "rg32float"
+		return js.ValueOf("rg32float")
 	case TextureFormatRG32Uint:
-		return "rg32uint"
+		return js.ValueOf("rg32uint")
 	case TextureFormatRG32Sint:
-		return "rg32sint"
+		return js.ValueOf("rg32sint")
 	case TextureFormatRGBA16Unorm:
-		return "rgba16unorm"
+		return js.ValueOf("rgba16unorm")
 	case TextureFormatRGBA16Snorm:
-		return "rgba16snorm"
+		return js.ValueOf("rgba16snorm")
 	case TextureFormatRGBA16Uint:
-		return "rgba16uint"
+		return js.ValueOf("rgba16uint")
 	case TextureFormatRGBA16Sint:
-		return "rgba16sint"
+		return js.ValueOf("rgba16sint")
 	case TextureFormatRGBA16Float:
-		return "rgba16float"
+		return js.ValueOf("rgba16float")
 	case TextureFormatRGBA32Float:
-		return "rgba32float"
+		return js.ValueOf("rgba32float")
 	case TextureFormatRGBA32Uint:
-		return "rgba32uint"
+		return js.ValueOf("rgba32uint")
 	case TextureFormatRGBA32Sint:
-		return "rgba32sint"
+		return js.ValueOf("rgba32sint")
 	case TextureFormatStencil8:
-		return "stencil8"
+		return js.ValueOf("stencil8")
 	case TextureFormatDepth16Unorm:
-		return "depth16unorm"
+		return js.ValueOf("depth16unorm")
 	case TextureFormatDepth24Plus:
-		return "depth24plus"
+		return js.ValueOf("depth24plus")
 	case TextureFormatDepth24PlusStencil8:
-		return "depth24plus-stencil8"
+		return js.ValueOf("depth24plus-stencil8")
 	case TextureFormatDepth32Float:
-		return "depth32float"
+		return js.ValueOf("depth32float")
 	case TextureFormatDepth32FloatStencil8:
-		return "depth32float-stencil8"
+		return js.ValueOf("depth32float-stencil8")
 	case TextureFormatBC1RGBAUnorm:
-		return "bc1-rgba-unorm"
+		return js.ValueOf("bc1-rgba-unorm")
 	case TextureFormatBC1RGBAUnormSRGB:
-		return "bc1-rgba-unorm-srgb"
+		return js.ValueOf("bc1-rgba-unorm-srgb")
 	case TextureFormatBC2RGBAUnorm:
-		return "bc2-rgba-unorm"
+		return js.ValueOf("bc2-rgba-unorm")
 	case TextureFormatBC2RGBAUnormSRGB:
-		return "bc2-rgba-unorm-srgb"
+		return js.ValueOf("bc2-rgba-unorm-srgb")
 	case TextureFormatBC3RGBAUnorm:
-		return "bc3-rgba-unorm"
+		return js.ValueOf("bc3-rgba-unorm")
 	case TextureFormatBC3RGBAUnormSRGB:
-		return "bc3-rgba-unorm-srgb"
+		return js.ValueOf("bc3-rgba-unorm-srgb")
 	case TextureFormatBC4RUnorm:
-		return "bc4-r-unorm"
+		return js.ValueOf("bc4-r-unorm")
 	case TextureFormatBC4RSnorm:
-		return "bc4-r-snorm"
+		return js.ValueOf("bc4-r-snorm")
 	case TextureFormatBC5RGUnorm:
-		return "bc5-rg-unorm"
+		return js.ValueOf("bc5-rg-unorm")
 	case TextureFormatBC5RGSnorm:
-		return "bc5-rg-snorm"
+		return js.ValueOf("bc5-rg-snorm")
 	case TextureFormatBC6HRGBUfloat:
-		return "bc6h-rgb-ufloat"
+		return js.ValueOf("bc6h-rgb-ufloat")
 	case TextureFormatBC6HRGBFloat:
-		return "bc6h-rgb-float"
+		return js.ValueOf("bc6h-rgb-float")
 	case TextureFormatBC7RGBAUnorm:
-		return "bc7-rgba-unorm"
+		return js.ValueOf("bc7-rgba-unorm")
 	case TextureFormatBC7RGBAUnormSRGB:
-		return "bc7-rgba-unorm-srgb"
+		return js.ValueOf("bc7-rgba-unorm-srgb")
 	case TextureFormatETC2RGB8Unorm:
-		return "etc2-rgb8unorm"
+		return js.ValueOf("etc2-rgb8unorm")
 	case TextureFormatETC2RGB8UnormSRGB:
-		return "etc2-rgb8unorm-srgb"
+		return js.ValueOf("etc2-rgb8unorm-srgb")
 	case TextureFormatETC2RGB8A1Unorm:
-		return "etc2-rgb8a1unorm"
+		return js.ValueOf("etc2-rgb8a1unorm")
 	case TextureFormatETC2RGB8A1UnormSRGB:
-		return "etc2-rgb8a1unorm-srgb"
+		return js.ValueOf("etc2-rgb8a1unorm-srgb")
 	case TextureFormatETC2RGBA8Unorm:
-		return "etc2-rgba8unorm"
+		return js.ValueOf("etc2-rgba8unorm")
 	case TextureFormatETC2RGBA8UnormSRGB:
-		return "etc2-rgba8unorm-srgb"
+		return js.ValueOf("etc2-rgba8unorm-srgb")
 	case TextureFormatEACR11Unorm:
-		return "eac-r11unorm"
+		return js.ValueOf("eac-r11unorm")
 	case TextureFormatEACR11Snorm:
-		return "eac-r11snorm"
+		return js.ValueOf("eac-r11snorm")
 	case TextureFormatEACRG11Unorm:
-		return "eac-rg11unorm"
+		return js.ValueOf("eac-rg11unorm")
 	case TextureFormatEACRG11Snorm:
-		return "eac-rg11snorm"
+		return js.ValueOf("eac-rg11snorm")
 	case TextureFormatASTC4x4Unorm:
-		return "astc-4x4-unorm"
+		return js.ValueOf("astc-4x4-unorm")
 	case TextureFormatASTC4x4UnormSRGB:
-		return "astc-4x4-unorm-srgb"
+		return js.ValueOf("astc-4x4-unorm-srgb")
 	case TextureFormatASTC5x4Unorm:
-		return "astc-5x4-unorm"
+		return js.ValueOf("astc-5x4-unorm")
 	case TextureFormatASTC5x4UnormSRGB:
-		return "astc-5x4-unorm-srgb"
+		return js.ValueOf("astc-5x4-unorm-srgb")
 	case TextureFormatASTC5x5Unorm:
-		return "astc-5x5-unorm"
+		return js.ValueOf("astc-5x5-unorm")
 	case TextureFormatASTC5x5UnormSRGB:
-		return "astc-5x5-unorm-srgb"
+		return js.ValueOf("astc-5x5-unorm-srgb")
 	case TextureFormatASTC6x5Unorm:
-		return "astc-6x5-unorm"
+		return js.ValueOf("astc-6x5-unorm")
 	case TextureFormatASTC6x5UnormSRGB:
-		return "astc-6x5-unorm-srgb"
+		return js.ValueOf("astc-6x5-unorm-srgb")
 	case TextureFormatASTC6x6Unorm:
-		return "astc-6x6-unorm"
+		return js.ValueOf("astc-6x6-unorm")
 	case TextureFormatASTC6x6UnormSRGB:
-		return "astc-6x6-unorm-srgb"
+		return js.ValueOf("astc-6x6-unorm-srgb")
 	case TextureFormatASTC8x5Unorm:
-		return "astc-8x5-unorm"
+		return js.ValueOf("astc-8x5-unorm")
 	case TextureFormatASTC8x5UnormSRGB:
-		return "astc-8x5-unorm-srgb"
+		return js.ValueOf("astc-8x5-unorm-srgb")
 	case TextureFormatASTC8x6Unorm:
-		return "astc-8x6-unorm"
+		return js.ValueOf("astc-8x6-unorm")
 	case TextureFormatASTC8x6UnormSRGB:
-		return "astc-8x6-unorm-srgb"
+		return js.ValueOf("astc-8x6-unorm-srgb")
 	case TextureFormatASTC8x8Unorm:
-		return "astc-8x8-unorm"
+		return js.ValueOf("astc-8x8-unorm")
 	case TextureFormatASTC8x8UnormSRGB:
-		return "astc-8x8-unorm-srgb"
+		return js.ValueOf("astc-8x8-unorm-srgb")
 	case TextureFormatASTC10x5Unorm:
-		return "astc-10x5-unorm"
+		return js.ValueOf("astc-10x5-unorm")
 	case TextureFormatASTC10x5UnormSRGB:
-		return "astc-10x5-unorm-srgb"
+		return js.ValueOf("astc-10x5-unorm-srgb")
 	case TextureFormatASTC10x6Unorm:
-		return "astc-10x6-unorm"
+		return js.ValueOf("astc-10x6-unorm")
 	case TextureFormatASTC10x6UnormSRGB:
-		return "astc-10x6-unorm-srgb"
+		return js.ValueOf("astc-10x6-unorm-srgb")
 	case TextureFormatASTC10x8Unorm:
-		return "astc-10x8-unorm"
+		return js.ValueOf("astc-10x8-unorm")
 	case TextureFormatASTC10x8UnormSRGB:
-		return "astc-10x8-unorm-srgb"
+		return js.ValueOf("astc-10x8-unorm-srgb")
 	case TextureFormatASTC10x10Unorm:
-		return "astc-10x10-unorm"
+		return js.ValueOf("astc-10x10-unorm")
 	case TextureFormatASTC10x10UnormSRGB:
-		return "astc-10x10-unorm-srgb"
+		return js.ValueOf("astc-10x10-unorm-srgb")
 	case TextureFormatASTC12x10Unorm:
-		return "astc-12x10-unorm"
+		return js.ValueOf("astc-12x10-unorm")
 	case TextureFormatASTC12x10UnormSRGB:
-		return "astc-12x10-unorm-srgb"
+		return js.ValueOf("astc-12x10-unorm-srgb")
 	case TextureFormatASTC12x12Unorm:
-		return "astc-12x12-unorm"
+		return js.ValueOf("astc-12x12-unorm")
 	case TextureFormatASTC12x12UnormSRGB:
-		return "astc-12x12-unorm-srgb"
+		return js.ValueOf("astc-12x12-unorm-srgb")
 	default:
-		return ""
+		return js.Undefined()
 	}
 }
 
@@ -422,542 +422,540 @@ func textureFormatFromJS(s string) TextureFormat {
 	}
 }
 
-func (f VertexFormat) toJS() string {
+func (f VertexFormat) toJS() js.Value {
 	switch f {
 	case VertexFormatUint8:
-		return "uint8"
+		return js.ValueOf("uint8")
 	case VertexFormatUint8x2:
-		return "uint8x2"
+		return js.ValueOf("uint8x2")
 	case VertexFormatUint8x4:
-		return "uint8x4"
+		return js.ValueOf("uint8x4")
 	case VertexFormatSint8:
-		return "sint8"
+		return js.ValueOf("sint8")
 	case VertexFormatSint8x2:
-		return "sint8x2"
+		return js.ValueOf("sint8x2")
 	case VertexFormatSint8x4:
-		return "sint8x4"
+		return js.ValueOf("sint8x4")
 	case VertexFormatUnorm8:
-		return "unorm8"
+		return js.ValueOf("unorm8")
 	case VertexFormatUnorm8x2:
-		return "unorm8x2"
+		return js.ValueOf("unorm8x2")
 	case VertexFormatUnorm8x4:
-		return "unorm8x4"
+		return js.ValueOf("unorm8x4")
 	case VertexFormatSnorm8:
-		return "snorm8"
+		return js.ValueOf("snorm8")
 	case VertexFormatSnorm8x2:
-		return "snorm8x2"
+		return js.ValueOf("snorm8x2")
 	case VertexFormatSnorm8x4:
-		return "snorm8x4"
+		return js.ValueOf("snorm8x4")
 	case VertexFormatUint16:
-		return "uint16"
+		return js.ValueOf("uint16")
 	case VertexFormatUint16x2:
-		return "uint16x2"
+		return js.ValueOf("uint16x2")
 	case VertexFormatUint16x4:
-		return "uint16x4"
+		return js.ValueOf("uint16x4")
 	case VertexFormatSint16:
-		return "sint16"
+		return js.ValueOf("sint16")
 	case VertexFormatSint16x2:
-		return "sint16x2"
+		return js.ValueOf("sint16x2")
 	case VertexFormatSint16x4:
-		return "sint16x4"
+		return js.ValueOf("sint16x4")
 	case VertexFormatUnorm16:
-		return "unorm16"
+		return js.ValueOf("unorm16")
 	case VertexFormatUnorm16x2:
-		return "unorm16x2"
+		return js.ValueOf("unorm16x2")
 	case VertexFormatUnorm16x4:
-		return "unorm16x4"
+		return js.ValueOf("unorm16x4")
 	case VertexFormatSnorm16:
-		return "snorm16"
+		return js.ValueOf("snorm16")
 	case VertexFormatSnorm16x2:
-		return "snorm16x2"
+		return js.ValueOf("snorm16x2")
 	case VertexFormatSnorm16x4:
-		return "snorm16x4"
+		return js.ValueOf("snorm16x4")
 	case VertexFormatFloat16:
-		return "float16"
+		return js.ValueOf("float16")
 	case VertexFormatFloat16x2:
-		return "float16x2"
+		return js.ValueOf("float16x2")
 	case VertexFormatFloat16x4:
-		return "float16x4"
+		return js.ValueOf("float16x4")
 	case VertexFormatFloat32:
-		return "float32"
+		return js.ValueOf("float32")
 	case VertexFormatFloat32x2:
-		return "float32x2"
+		return js.ValueOf("float32x2")
 	case VertexFormatFloat32x3:
-		return "float32x3"
+		return js.ValueOf("float32x3")
 	case VertexFormatFloat32x4:
-		return "float32x4"
+		return js.ValueOf("float32x4")
 	case VertexFormatUint32:
-		return "uint32"
+		return js.ValueOf("uint32")
 	case VertexFormatUint32x2:
-		return "uint32x2"
+		return js.ValueOf("uint32x2")
 	case VertexFormatUint32x3:
-		return "uint32x3"
+		return js.ValueOf("uint32x3")
 	case VertexFormatUint32x4:
-		return "uint32x4"
+		return js.ValueOf("uint32x4")
 	case VertexFormatSint32:
-		return "sint32"
+		return js.ValueOf("sint32")
 	case VertexFormatSint32x2:
-		return "sint32x2"
+		return js.ValueOf("sint32x2")
 	case VertexFormatSint32x3:
-		return "sint32x3"
+		return js.ValueOf("sint32x3")
 	case VertexFormatSint32x4:
-		return "sint32x4"
+		return js.ValueOf("sint32x4")
 	case VertexFormatUnorm10_10_10_2:
-		return "unorm10-10-10-2"
+		return js.ValueOf("unorm10-10-10-2")
 	case VertexFormatUnorm8x4BGRA:
-		return "unorm8x4-bgra"
-	default:
-		return ""
-	}
-}
-
-func (t PrimitiveTopology) toJS() string {
-	switch t {
-	case PrimitiveTopologyPointList:
-		return "point-list"
-	case PrimitiveTopologyLineList:
-		return "line-list"
-	case PrimitiveTopologyLineStrip:
-		return "line-strip"
-	case PrimitiveTopologyTriangleList:
-		return "triangle-list"
-	case PrimitiveTopologyTriangleStrip:
-		return "triangle-strip"
-	default:
-		return "triangle-list"
-	}
-}
-
-func (f IndexFormat) toJS() string {
-	switch f {
-	case IndexFormatUint16:
-		return "uint16"
-	case IndexFormatUint32:
-		return "uint32"
-	default:
-		return "undefined"
-	}
-}
-
-func (f FrontFace) toJS() string {
-	switch f {
-	case FrontFaceCCW:
-		return "ccw"
-	case FrontFaceCW:
-		return "cw"
-	default:
-		return "ccw"
-	}
-}
-
-func (c CullMode) toJS() string {
-	switch c {
-	case CullModeNone:
-		return "none"
-	case CullModeFront:
-		return "front"
-	case CullModeBack:
-		return "back"
-	default:
-		return "none"
-	}
-}
-
-func (op BlendOperation) toJS() string {
-	switch op {
-	case BlendOperationAdd:
-		return "add"
-	case BlendOperationSubtract:
-		return "subtract"
-	case BlendOperationReverseSubtract:
-		return "reverse-subtract"
-	case BlendOperationMin:
-		return "min"
-	case BlendOperationMax:
-		return "max"
-	default:
-		return "add"
-	}
-}
-
-func (f BlendFactor) toJS() string {
-	switch f {
-	case BlendFactorZero:
-		return "zero"
-	case BlendFactorOne:
-		return "one"
-	case BlendFactorSrc:
-		return "src"
-	case BlendFactorOneMinusSrc:
-		return "one-minus-src"
-	case BlendFactorSrcAlpha:
-		return "src-alpha"
-	case BlendFactorOneMinusSrcAlpha:
-		return "one-minus-src-alpha"
-	case BlendFactorDst:
-		return "dst"
-	case BlendFactorOneMinusDst:
-		return "one-minus-dst"
-	case BlendFactorDstAlpha:
-		return "dst-alpha"
-	case BlendFactorOneMinusDstAlpha:
-		return "one-minus-dst-alpha"
-	case BlendFactorSrcAlphaSaturated:
-		return "src-alpha-saturated"
-	case BlendFactorConstant:
-		return "constant"
-	case BlendFactorOneMinusConstant:
-		return "one-minus-constant"
-	case BlendFactorSrc1:
-		return "src1"
-	case BlendFactorOneMinusSrc1:
-		return "one-minus-src1"
-	case BlendFactorSrc1Alpha:
-		return "src1-alpha"
-	case BlendFactorOneMinusSrc1Alpha:
-		return "one-minus-src1-alpha"
-	default:
-		return "one"
-	}
-}
-
-func (f CompareFunction) toJS() string {
-	switch f {
-	case CompareFunctionNever:
-		return "never"
-	case CompareFunctionLess:
-		return "less"
-	case CompareFunctionEqual:
-		return "equal"
-	case CompareFunctionLessEqual:
-		return "less-equal"
-	case CompareFunctionGreater:
-		return "greater"
-	case CompareFunctionNotEqual:
-		return "not-equal"
-	case CompareFunctionGreaterEqual:
-		return "greater-equal"
-	case CompareFunctionAlways:
-		return "always"
-	default:
-		return "always"
-	}
-}
-
-func (op StencilOperation) toJS() string {
-	switch op {
-	case StencilOperationKeep:
-		return "keep"
-	case StencilOperationZero:
-		return "zero"
-	case StencilOperationReplace:
-		return "replace"
-	case StencilOperationInvert:
-		return "invert"
-	case StencilOperationIncrementClamp:
-		return "increment-clamp"
-	case StencilOperationDecrementClamp:
-		return "decrement-clamp"
-	case StencilOperationIncrementWrap:
-		return "increment-wrap"
-	case StencilOperationDecrementWrap:
-		return "decrement-wrap"
-	default:
-		return "keep"
-	}
-}
-
-func (f FilterMode) toJS() string {
-	switch f {
-	case FilterModeNearest:
-		return "nearest"
-	case FilterModeLinear:
-		return "linear"
-	default:
-		return "nearest"
-	}
-}
-
-func (f MipmapFilterMode) toJS() string {
-	switch f {
-	case MipmapFilterModeNearest:
-		return "nearest"
-	case MipmapFilterModeLinear:
-		return "linear"
-	default:
-		return "nearest"
-	}
-}
-
-func (m AddressMode) toJS() string {
-	switch m {
-	case AddressModeClampToEdge:
-		return "clamp-to-edge"
-	case AddressModeRepeat:
-		return "repeat"
-	case AddressModeMirrorRepeat:
-		return "mirror-repeat"
-	default:
-		return "clamp-to-edge"
-	}
-}
-
-func (op LoadOp) toJS() string {
-	switch op {
-	case LoadOpLoad:
-		return "load"
-	case LoadOpClear:
-		return "clear"
-	default:
-		return "load"
-	}
-}
-
-func (op StoreOp) toJS() string {
-	switch op {
-	case StoreOpStore:
-		return "store"
-	case StoreOpDiscard:
-		return "discard"
-	default:
-		return "store"
-	}
-}
-
-func (d TextureDimension) toJS() string {
-	switch d {
-	case TextureDimension1D:
-		return "1d"
-	case TextureDimension2D:
-		return "2d"
-	case TextureDimension3D:
-		return "3d"
-	default:
-		return "2d"
-	}
-}
-
-func (d TextureViewDimension) toJS() string {
-	switch d {
-	case TextureViewDimension1D:
-		return "1d"
-	case TextureViewDimension2D:
-		return "2d"
-	case TextureViewDimension2DArray:
-		return "2d-array"
-	case TextureViewDimensionCube:
-		return "cube"
-	case TextureViewDimensionCubeArray:
-		return "cube-array"
-	case TextureViewDimension3D:
-		return "3d"
-	default:
-		return "2d"
-	}
-}
-
-func (a TextureAspect) toJS() string {
-	switch a {
-	case TextureAspectAll:
-		return "all"
-	case TextureAspectStencilOnly:
-		return "stencil-only"
-	case TextureAspectDepthOnly:
-		return "depth-only"
-	default:
-		return "all"
-	}
-}
-
-func (m VertexStepMode) toJS() string {
-	switch m {
-	case VertexStepModeVertex:
-		return "vertex"
-	case VertexStepModeInstance:
-		return "instance"
-	default:
-		return "vertex"
-	}
-}
-
-func (m PresentMode) toJS() string {
-	switch m {
-	case PresentModeFifo:
-		return "fifo"
-	case PresentModeFifoRelaxed:
-		return "fifo-relaxed"
-	case PresentModeImmediate:
-		return "immediate"
-	case PresentModeMailbox:
-		return "mailbox"
-	default:
-		return "fifo"
-	}
-}
-
-func (m CompositeAlphaMode) toJS() string {
-	switch m {
-	case CompositeAlphaModeOpaque:
-		return "opaque"
-	case CompositeAlphaModePremultiplied:
-		return "premultiplied"
-	default:
-		// Auto, Unpremultiplied, and Inherit have no browser WebGPU equivalent;
-		// return "" so callers can omit the field and let the browser default to opaque.
-		return ""
-	}
-}
-
-func (t QueryType) toJS() string {
-	switch t {
-	case QueryTypeOcclusion:
-		return "occlusion"
-	case QueryTypeTimestamp:
-		return "timestamp"
-	default:
-		return "occlusion"
-	}
-}
-
-func (p PowerPreference) toJS() string {
-	switch p {
-	case PowerPreferenceLowPower:
-		return "low-power"
-	case PowerPreferenceHighPerformance:
-		return "high-performance"
-	default:
-		return ""
-	}
-}
-
-func (f ErrorFilter) toJS() string {
-	switch f {
-	case ErrorFilterValidation:
-		return "validation"
-	case ErrorFilterOutOfMemory:
-		return "out-of-memory"
-	case ErrorFilterInternal:
-		return "internal"
-	default:
-		return "validation"
-	}
-}
-
-func (t BufferBindingType) toJS() string {
-	switch t {
-	case BufferBindingTypeUniform:
-		return "uniform"
-	case BufferBindingTypeStorage:
-		return "storage"
-	case BufferBindingTypeReadOnlyStorage:
-		return "read-only-storage"
-	default:
-		return ""
-	}
-}
-
-func (t SamplerBindingType) toJS() string {
-	switch t {
-	case SamplerBindingTypeFiltering:
-		return "filtering"
-	case SamplerBindingTypeNonFiltering:
-		return "non-filtering"
-	case SamplerBindingTypeComparison:
-		return "comparison"
-	default:
-		return ""
-	}
-}
-
-func (t TextureSampleType) toJS() string {
-	switch t {
-	case TextureSampleTypeFloat:
-		return "float"
-	case TextureSampleTypeUnfilterableFloat:
-		return "unfilterable-float"
-	case TextureSampleTypeDepth:
-		return "depth"
-	case TextureSampleTypeSint:
-		return "sint"
-	case TextureSampleTypeUint:
-		return "uint"
-	default:
-		return ""
-	}
-}
-
-func (a StorageTextureAccess) toJS() string {
-	switch a {
-	case StorageTextureAccessWriteOnly:
-		return "write-only"
-	case StorageTextureAccessReadOnly:
-		return "read-only"
-	case StorageTextureAccessReadWrite:
-		return "read-write"
-	default:
-		return ""
-	}
-}
-
-func (b OptionalBool) toJS() any {
-	switch b {
-	case OptionalBoolTrue:
-		return true
-	case OptionalBoolFalse:
-		return false
+		return js.ValueOf("unorm8x4-bgra")
 	default:
 		return js.Undefined()
 	}
 }
 
-func (f FeatureName) toJS() string {
+func (t PrimitiveTopology) toJS() js.Value {
+	switch t {
+	case PrimitiveTopologyPointList:
+		return js.ValueOf("point-list")
+	case PrimitiveTopologyLineList:
+		return js.ValueOf("line-list")
+	case PrimitiveTopologyLineStrip:
+		return js.ValueOf("line-strip")
+	case PrimitiveTopologyTriangleList:
+		return js.ValueOf("triangle-list")
+	case PrimitiveTopologyTriangleStrip:
+		return js.ValueOf("triangle-strip")
+	default:
+		return js.ValueOf("triangle-list")
+	}
+}
+
+func (f IndexFormat) toJS() js.Value {
+	switch f {
+	case IndexFormatUint16:
+		return js.ValueOf("uint16")
+	case IndexFormatUint32:
+		return js.ValueOf("uint32")
+	default:
+		return js.Undefined()
+	}
+}
+
+func (f FrontFace) toJS() js.Value {
+	switch f {
+	case FrontFaceCCW:
+		return js.ValueOf("ccw")
+	case FrontFaceCW:
+		return js.ValueOf("cw")
+	default:
+		return js.ValueOf("ccw")
+	}
+}
+
+func (c CullMode) toJS() js.Value {
+	switch c {
+	case CullModeNone:
+		return js.ValueOf("none")
+	case CullModeFront:
+		return js.ValueOf("front")
+	case CullModeBack:
+		return js.ValueOf("back")
+	default:
+		return js.ValueOf("none")
+	}
+}
+
+func (op BlendOperation) toJS() js.Value {
+	switch op {
+	case BlendOperationAdd:
+		return js.ValueOf("add")
+	case BlendOperationSubtract:
+		return js.ValueOf("subtract")
+	case BlendOperationReverseSubtract:
+		return js.ValueOf("reverse-subtract")
+	case BlendOperationMin:
+		return js.ValueOf("min")
+	case BlendOperationMax:
+		return js.ValueOf("max")
+	default:
+		return js.ValueOf("add")
+	}
+}
+
+func (f BlendFactor) toJS() js.Value {
+	switch f {
+	case BlendFactorZero:
+		return js.ValueOf("zero")
+	case BlendFactorOne:
+		return js.ValueOf("one")
+	case BlendFactorSrc:
+		return js.ValueOf("src")
+	case BlendFactorOneMinusSrc:
+		return js.ValueOf("one-minus-src")
+	case BlendFactorSrcAlpha:
+		return js.ValueOf("src-alpha")
+	case BlendFactorOneMinusSrcAlpha:
+		return js.ValueOf("one-minus-src-alpha")
+	case BlendFactorDst:
+		return js.ValueOf("dst")
+	case BlendFactorOneMinusDst:
+		return js.ValueOf("one-minus-dst")
+	case BlendFactorDstAlpha:
+		return js.ValueOf("dst-alpha")
+	case BlendFactorOneMinusDstAlpha:
+		return js.ValueOf("one-minus-dst-alpha")
+	case BlendFactorSrcAlphaSaturated:
+		return js.ValueOf("src-alpha-saturated")
+	case BlendFactorConstant:
+		return js.ValueOf("constant")
+	case BlendFactorOneMinusConstant:
+		return js.ValueOf("one-minus-constant")
+	case BlendFactorSrc1:
+		return js.ValueOf("src1")
+	case BlendFactorOneMinusSrc1:
+		return js.ValueOf("one-minus-src1")
+	case BlendFactorSrc1Alpha:
+		return js.ValueOf("src1-alpha")
+	case BlendFactorOneMinusSrc1Alpha:
+		return js.ValueOf("one-minus-src1-alpha")
+	default:
+		return js.ValueOf("one")
+	}
+}
+
+func (f CompareFunction) toJS() js.Value {
+	switch f {
+	case CompareFunctionNever:
+		return js.ValueOf("never")
+	case CompareFunctionLess:
+		return js.ValueOf("less")
+	case CompareFunctionEqual:
+		return js.ValueOf("equal")
+	case CompareFunctionLessEqual:
+		return js.ValueOf("less-equal")
+	case CompareFunctionGreater:
+		return js.ValueOf("greater")
+	case CompareFunctionNotEqual:
+		return js.ValueOf("not-equal")
+	case CompareFunctionGreaterEqual:
+		return js.ValueOf("greater-equal")
+	case CompareFunctionAlways:
+		return js.ValueOf("always")
+	default:
+		return js.Undefined()
+	}
+}
+
+func (op StencilOperation) toJS() js.Value {
+	switch op {
+	case StencilOperationKeep:
+		return js.ValueOf("keep")
+	case StencilOperationZero:
+		return js.ValueOf("zero")
+	case StencilOperationReplace:
+		return js.ValueOf("replace")
+	case StencilOperationInvert:
+		return js.ValueOf("invert")
+	case StencilOperationIncrementClamp:
+		return js.ValueOf("increment-clamp")
+	case StencilOperationDecrementClamp:
+		return js.ValueOf("decrement-clamp")
+	case StencilOperationIncrementWrap:
+		return js.ValueOf("increment-wrap")
+	case StencilOperationDecrementWrap:
+		return js.ValueOf("decrement-wrap")
+	default:
+		return js.ValueOf("keep")
+	}
+}
+
+func (f FilterMode) toJS() js.Value {
+	switch f {
+	case FilterModeNearest:
+		return js.ValueOf("nearest")
+	case FilterModeLinear:
+		return js.ValueOf("linear")
+	default:
+		return js.ValueOf("nearest")
+	}
+}
+
+func (f MipmapFilterMode) toJS() js.Value {
+	switch f {
+	case MipmapFilterModeNearest:
+		return js.ValueOf("nearest")
+	case MipmapFilterModeLinear:
+		return js.ValueOf("linear")
+	default:
+		return js.ValueOf("nearest")
+	}
+}
+
+func (m AddressMode) toJS() js.Value {
+	switch m {
+	case AddressModeClampToEdge:
+		return js.ValueOf("clamp-to-edge")
+	case AddressModeRepeat:
+		return js.ValueOf("repeat")
+	case AddressModeMirrorRepeat:
+		return js.ValueOf("mirror-repeat")
+	default:
+		return js.ValueOf("clamp-to-edge")
+	}
+}
+
+func (op LoadOp) toJS() js.Value {
+	switch op {
+	case LoadOpLoad:
+		return js.ValueOf("load")
+	case LoadOpClear:
+		return js.ValueOf("clear")
+	default:
+		return js.Undefined()
+	}
+}
+
+func (op StoreOp) toJS() js.Value {
+	switch op {
+	case StoreOpStore:
+		return js.ValueOf("store")
+	case StoreOpDiscard:
+		return js.ValueOf("discard")
+	default:
+		return js.Undefined()
+	}
+}
+
+func (d TextureDimension) toJS() js.Value {
+	switch d {
+	case TextureDimension1D:
+		return js.ValueOf("1d")
+	case TextureDimension2D:
+		return js.ValueOf("2d")
+	case TextureDimension3D:
+		return js.ValueOf("3d")
+	default:
+		return js.ValueOf("2d")
+	}
+}
+
+func (d TextureViewDimension) toJS() js.Value {
+	switch d {
+	case TextureViewDimension1D:
+		return js.ValueOf("1d")
+	case TextureViewDimension2D:
+		return js.ValueOf("2d")
+	case TextureViewDimension2DArray:
+		return js.ValueOf("2d-array")
+	case TextureViewDimensionCube:
+		return js.ValueOf("cube")
+	case TextureViewDimensionCubeArray:
+		return js.ValueOf("cube-array")
+	case TextureViewDimension3D:
+		return js.ValueOf("3d")
+	default:
+		return js.Undefined()
+	}
+}
+
+func (a TextureAspect) toJS() js.Value {
+	switch a {
+	case TextureAspectAll:
+		return js.ValueOf("all")
+	case TextureAspectStencilOnly:
+		return js.ValueOf("stencil-only")
+	case TextureAspectDepthOnly:
+		return js.ValueOf("depth-only")
+	default:
+		return js.ValueOf("all")
+	}
+}
+
+func (m VertexStepMode) toJS() js.Value {
+	switch m {
+	case VertexStepModeVertex:
+		return js.ValueOf("vertex")
+	case VertexStepModeInstance:
+		return js.ValueOf("instance")
+	default:
+		return js.ValueOf("vertex")
+	}
+}
+
+func (m PresentMode) toJS() js.Value {
+	switch m {
+	case PresentModeFifo:
+		return js.ValueOf("fifo")
+	case PresentModeFifoRelaxed:
+		return js.ValueOf("fifo-relaxed")
+	case PresentModeImmediate:
+		return js.ValueOf("immediate")
+	case PresentModeMailbox:
+		return js.ValueOf("mailbox")
+	default:
+		return js.ValueOf("fifo")
+	}
+}
+
+func (m CompositeAlphaMode) toJS() js.Value {
+	switch m {
+	case CompositeAlphaModeOpaque:
+		return js.ValueOf("opaque")
+	case CompositeAlphaModePremultiplied:
+		return js.ValueOf("premultiplied")
+	default:
+		return js.Undefined()
+	}
+}
+
+func (t QueryType) toJS() js.Value {
+	switch t {
+	case QueryTypeOcclusion:
+		return js.ValueOf("occlusion")
+	case QueryTypeTimestamp:
+		return js.ValueOf("timestamp")
+	default:
+		return js.Undefined()
+	}
+}
+
+func (p PowerPreference) toJS() js.Value {
+	switch p {
+	case PowerPreferenceLowPower:
+		return js.ValueOf("low-power")
+	case PowerPreferenceHighPerformance:
+		return js.ValueOf("high-performance")
+	default:
+		return js.Undefined()
+	}
+}
+
+func (f ErrorFilter) toJS() js.Value {
+	switch f {
+	case ErrorFilterValidation:
+		return js.ValueOf("validation")
+	case ErrorFilterOutOfMemory:
+		return js.ValueOf("out-of-memory")
+	case ErrorFilterInternal:
+		return js.ValueOf("internal")
+	default:
+		return js.ValueOf("validation")
+	}
+}
+
+func (t BufferBindingType) toJS() js.Value {
+	switch t {
+	case BufferBindingTypeUniform:
+		return js.ValueOf("uniform")
+	case BufferBindingTypeStorage:
+		return js.ValueOf("storage")
+	case BufferBindingTypeReadOnlyStorage:
+		return js.ValueOf("read-only-storage")
+	default:
+		return js.Undefined()
+	}
+}
+
+func (t SamplerBindingType) toJS() js.Value {
+	switch t {
+	case SamplerBindingTypeFiltering:
+		return js.ValueOf("filtering")
+	case SamplerBindingTypeNonFiltering:
+		return js.ValueOf("non-filtering")
+	case SamplerBindingTypeComparison:
+		return js.ValueOf("comparison")
+	default:
+		return js.Undefined()
+	}
+}
+
+func (t TextureSampleType) toJS() js.Value {
+	switch t {
+	case TextureSampleTypeFloat:
+		return js.ValueOf("float")
+	case TextureSampleTypeUnfilterableFloat:
+		return js.ValueOf("unfilterable-float")
+	case TextureSampleTypeDepth:
+		return js.ValueOf("depth")
+	case TextureSampleTypeSint:
+		return js.ValueOf("sint")
+	case TextureSampleTypeUint:
+		return js.ValueOf("uint")
+	default:
+		return js.Undefined()
+	}
+}
+
+func (a StorageTextureAccess) toJS() js.Value {
+	switch a {
+	case StorageTextureAccessWriteOnly:
+		return js.ValueOf("write-only")
+	case StorageTextureAccessReadOnly:
+		return js.ValueOf("read-only")
+	case StorageTextureAccessReadWrite:
+		return js.ValueOf("read-write")
+	default:
+		return js.Undefined()
+	}
+}
+
+func (b OptionalBool) toJS() js.Value {
+	switch b {
+	case OptionalBoolTrue:
+		return js.ValueOf(true)
+	case OptionalBoolFalse:
+		return js.ValueOf(false)
+	default:
+		return js.Undefined()
+	}
+}
+
+func (f FeatureName) toJS() js.Value {
 	switch f {
 	case FeatureNameCoreFeaturesAndLimits:
-		return "core-features-and-limits"
+		return js.ValueOf("core-features-and-limits")
 	case FeatureNameDepthClipControl:
-		return "depth-clip-control"
+		return js.ValueOf("depth-clip-control")
 	case FeatureNameDepth32FloatStencil8:
-		return "depth32float-stencil8"
+		return js.ValueOf("depth32float-stencil8")
 	case FeatureNameTextureCompressionBC:
-		return "texture-compression-bc"
+		return js.ValueOf("texture-compression-bc")
 	case FeatureNameTextureCompressionBCSliced3D:
-		return "texture-compression-bc-sliced-3d"
+		return js.ValueOf("texture-compression-bc-sliced-3d")
 	case FeatureNameTextureCompressionETC2:
-		return "texture-compression-etc2"
+		return js.ValueOf("texture-compression-etc2")
 	case FeatureNameTextureCompressionASTC:
-		return "texture-compression-astc"
+		return js.ValueOf("texture-compression-astc")
 	case FeatureNameTextureCompressionASTCSliced3D:
-		return "texture-compression-astc-sliced-3d"
+		return js.ValueOf("texture-compression-astc-sliced-3d")
 	case FeatureNameTimestampQuery:
-		return "timestamp-query"
+		return js.ValueOf("timestamp-query")
 	case FeatureNameIndirectFirstInstance:
-		return "indirect-first-instance"
+		return js.ValueOf("indirect-first-instance")
 	case FeatureNameShaderF16:
-		return "shader-f16"
+		return js.ValueOf("shader-f16")
 	case FeatureNameRG11B10UfloatRenderable:
-		return "rg11b10ufloat-renderable"
+		return js.ValueOf("rg11b10ufloat-renderable")
 	case FeatureNameBGRA8UnormStorage:
-		return "bgra8unorm-storage"
+		return js.ValueOf("bgra8unorm-storage")
 	case FeatureNameFloat32Filterable:
-		return "float32-filterable"
+		return js.ValueOf("float32-filterable")
 	case FeatureNameFloat32Blendable:
-		return "float32-blendable"
+		return js.ValueOf("float32-blendable")
 	case FeatureNameClipDistances:
-		return "clip-distances"
+		return js.ValueOf("clip-distances")
 	case FeatureNameDualSourceBlending:
-		return "dual-source-blending"
+		return js.ValueOf("dual-source-blending")
 	case FeatureNameSubgroups:
-		return "subgroups"
+		return js.ValueOf("subgroups")
 	case FeatureNameTextureFormatsTier1:
-		return "texture-formats-tier-1"
+		return js.ValueOf("texture-formats-tier-1")
 	case FeatureNameTextureFormatsTier2:
-		return "texture-formats-tier-2"
+		return js.ValueOf("texture-formats-tier-2")
 	case FeatureNamePrimitiveIndex:
-		return "primitive-index"
+		return js.ValueOf("primitive-index")
 	case FeatureNameTextureComponentSwizzle:
-		return "texture-component-swizzle"
+		return js.ValueOf("texture-component-swizzle")
 	default:
-		return ""
+		return js.Undefined()
 	}
 }
 

@@ -28,9 +28,7 @@ func (i *Instance) CreateSurface(descriptor SurfaceDescriptor) *Surface {
 func (i *Instance) RequestAdapter(options *RequestAdapterOptions) (*Adapter, error) {
 	opts := map[string]any{}
 	if options != nil {
-		if pp := options.PowerPreference.toJS(); pp != "" {
-			opts["powerPreference"] = pp
-		}
+		opts["powerPreference"] = options.PowerPreference.toJS()
 		if options.ForceFallbackAdapter {
 			opts["forceFallbackAdapter"] = true
 		}

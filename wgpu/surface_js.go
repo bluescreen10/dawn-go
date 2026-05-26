@@ -18,12 +18,10 @@ type Surface struct {
 // The configuration defines the format, size, and present mode for the surface.
 func (s *Surface) Configure(config SurfaceConfiguration) {
 	desc := map[string]any{
-		"device": config.Device.ref,
-		"format": config.Format.toJS(),
-		"usage":  int(config.Usage),
-	}
-	if alphaMode := config.AlphaMode.toJS(); alphaMode != "" {
-		desc["alphaMode"] = alphaMode
+		"device":    config.Device.ref,
+		"format":    config.Format.toJS(),
+		"usage":     int(config.Usage),
+		"alphaMode": config.AlphaMode.toJS(),
 	}
 	if len(config.ViewFormats) > 0 {
 		vf := make([]any, len(config.ViewFormats))

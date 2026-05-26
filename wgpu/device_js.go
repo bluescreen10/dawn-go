@@ -290,7 +290,7 @@ func (d *Device) GetLimits() (Limits, error) {
 // Returns true if the feature is supported, false otherwise.
 func (d *Device) HasFeature(feature FeatureName) bool {
 	name := feature.toJS()
-	if name == "" {
+	if name.IsUndefined() || name.IsNull() {
 		return false
 	}
 	return d.ref.Get("features").Call("has", name).Bool()
