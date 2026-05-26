@@ -797,18 +797,14 @@ func (m PresentMode) toJS() string {
 
 func (m CompositeAlphaMode) toJS() string {
 	switch m {
-	case CompositeAlphaModeAuto:
-		return "auto"
 	case CompositeAlphaModeOpaque:
 		return "opaque"
 	case CompositeAlphaModePremultiplied:
 		return "premultiplied"
-	case CompositeAlphaModeUnpremultiplied:
-		return "unpremultiplied"
-	case CompositeAlphaModeInherit:
-		return "inherit"
 	default:
-		return "auto"
+		// Auto, Unpremultiplied, and Inherit have no browser WebGPU equivalent;
+		// return "" so callers can omit the field and let the browser default to opaque.
+		return ""
 	}
 }
 
