@@ -207,10 +207,6 @@ type FragmentState struct {
 	Targets    []ColorTargetState
 }
 
-// Future represents a handle to an asynchronous operation that can be waited on.
-type Future struct {
-	id uint64
-}
 
 // InstanceDescriptor describes an instance, including required features and limits.
 type InstanceDescriptor struct {
@@ -485,12 +481,14 @@ type SurfaceConfiguration struct {
 }
 
 // SurfaceDescriptor describes a surface, which can be created from various platform-specific sources like Metal layer, Windows HWND, or Wayland surface.
+// When targeting WebAssembly/JS, set CanvasID to the HTML canvas element ID.
 type SurfaceDescriptor struct {
 	Label          string
 	MetalLayer     *SurfaceSourceMetalLayer
 	WaylandSurface *SurfaceSourceWaylandSurface
 	XlibWindow     *SurfaceSourceXlibWindow
 	WindowsHWND    *SurfaceSourceWindowsHWND
+	CanvasID       string // JS/WASM only: HTML canvas element ID
 }
 
 // SurfaceSourceMetalLayer contains a pointer to a Metal layer for creating a surface on macOS and iOS.

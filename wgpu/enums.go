@@ -1,11 +1,6 @@
 package wgpu
 
-/*
-#include "webgpu.h"
-*/
-import "C"
-
-type WGSLLanguageFeatureName C.WGPUWGSLLanguageFeatureName
+type WGSLLanguageFeatureName uint32
 
 const (
 	WGSLLanguageFeatureNameReadonlyAndReadwriteStorageTextures WGSLLanguageFeatureName = 1
@@ -44,7 +39,7 @@ func (f WGSLLanguageFeatureName) String() string {
 	}
 }
 
-type AdapterType C.WGPUAdapterType
+type AdapterType uint32
 
 const (
 	AdapterTypeDiscreteGPU   AdapterType = 1
@@ -66,7 +61,7 @@ func (a AdapterType) String() string {
 	}
 }
 
-type AddressMode C.WGPUAddressMode
+type AddressMode uint32
 
 const (
 	AddressModeUndefined    AddressMode = 0
@@ -75,7 +70,7 @@ const (
 	AddressModeMirrorRepeat AddressMode = 3
 )
 
-type BackendType C.WGPUBackendType
+type BackendType uint32
 
 const (
 	BackendTypeUndefined BackendType = 0
@@ -112,7 +107,7 @@ func (b BackendType) String() string {
 	}
 }
 
-type BlendFactor C.WGPUBlendFactor
+type BlendFactor uint32
 
 const (
 	BlendFactorUndefined         BlendFactor = 0
@@ -135,7 +130,7 @@ const (
 	BlendFactorOneMinusSrc1Alpha BlendFactor = 17
 )
 
-type BlendOperation C.WGPUBlendOperation
+type BlendOperation uint32
 
 const (
 	BlendOperationUndefined       BlendOperation = 0
@@ -146,7 +141,7 @@ const (
 	BlendOperationMax             BlendOperation = 5
 )
 
-type BufferBindingType C.WGPUBufferBindingType
+type BufferBindingType uint32
 
 const (
 	BufferBindingTypeBindingNotUsed  BufferBindingType = 0
@@ -156,7 +151,7 @@ const (
 	BufferBindingTypeReadOnlyStorage BufferBindingType = 4
 )
 
-type BufferMapState C.WGPUBufferMapState
+type BufferMapState uint32
 
 const (
 	BufferMapStateUnmapped BufferMapState = 1
@@ -164,7 +159,7 @@ const (
 	BufferMapStateMapped   BufferMapState = 3
 )
 
-type BufferUsage C.WGPUBufferUsage
+type BufferUsage uint32
 
 const (
 	BufferUsageNone         BufferUsage = 0
@@ -181,7 +176,7 @@ const (
 	BufferUsageTexelBuffer  BufferUsage = 1024
 )
 
-type callbackMode C.WGPUCallbackMode
+type callbackMode uint32
 
 const (
 	callbackModeWaitAnyOnly        callbackMode = 1
@@ -189,7 +184,7 @@ const (
 	callbackModeAllowSpontaneous   callbackMode = 3
 )
 
-type ColorWriteMask C.WGPUColorWriteMask
+type ColorWriteMask uint32
 
 const (
 	ColorWriteMaskNone  ColorWriteMask = 0
@@ -200,7 +195,7 @@ const (
 	ColorWriteMaskAll   ColorWriteMask = 15
 )
 
-type CompareFunction C.WGPUCompareFunction
+type CompareFunction uint32
 
 const (
 	CompareFunctionUndefined    CompareFunction = 0
@@ -214,14 +209,14 @@ const (
 	CompareFunctionAlways       CompareFunction = 8
 )
 
-type compilationInfoRequestStatus C.WGPUCompilationInfoRequestStatus
+type compilationInfoRequestStatus uint32
 
 const (
 	compilationInfoRequestStatusSuccess           compilationInfoRequestStatus = 1
 	compilationInfoRequestStatusCallbackCancelled compilationInfoRequestStatus = 2
 )
 
-type CompilationMessageType C.WGPUCompilationMessageType
+type CompilationMessageType uint32
 
 const (
 	CompilationMessageTypeError   CompilationMessageType = 1
@@ -229,7 +224,7 @@ const (
 	CompilationMessageTypeInfo    CompilationMessageType = 3
 )
 
-type ComponentSwizzle C.WGPUComponentSwizzle
+type ComponentSwizzle uint32
 
 const (
 	ComponentSwizzleUndefined ComponentSwizzle = 0
@@ -241,7 +236,7 @@ const (
 	ComponentSwizzleA         ComponentSwizzle = 6
 )
 
-type CompositeAlphaMode C.WGPUCompositeAlphaMode
+type CompositeAlphaMode uint32
 
 const (
 	CompositeAlphaModeAuto            CompositeAlphaMode = 0
@@ -251,7 +246,7 @@ const (
 	CompositeAlphaModeInherit         CompositeAlphaMode = 4
 )
 
-type CreatePipelineAsyncStatus C.WGPUCreatePipelineAsyncStatus
+type CreatePipelineAsyncStatus uint32
 
 const (
 	CreatePipelineAsyncStatusSuccess           CreatePipelineAsyncStatus = 1
@@ -260,7 +255,7 @@ const (
 	CreatePipelineAsyncStatusInternalError     CreatePipelineAsyncStatus = 4
 )
 
-type CullMode C.WGPUCullMode
+type CullMode uint32
 
 const (
 	CullModeUndefined CullMode = 0
@@ -269,7 +264,7 @@ const (
 	CullModeBack      CullMode = 3
 )
 
-type DeviceLostReason C.WGPUDeviceLostReason
+type DeviceLostReason uint32
 
 const (
 	DeviceLostReasonUnknown           DeviceLostReason = 1
@@ -278,7 +273,7 @@ const (
 	DeviceLostReasonFailedCreation    DeviceLostReason = 4
 )
 
-type ErrorFilter C.WGPUErrorType
+type ErrorFilter uint32
 
 const (
 	ErrorFilterValidation  ErrorFilter = 1
@@ -299,7 +294,7 @@ func (e ErrorFilter) String() string {
 	}
 }
 
-type ErrorType C.WGPUErrorType
+type ErrorType uint32
 
 const (
 	ErrorTypeNoError     ErrorType = 1
@@ -324,7 +319,7 @@ func (e ErrorType) String() string {
 	}
 }
 
-type FeatureLevel C.WGPUFeatureLevel
+type FeatureLevel uint32
 
 const (
 	FeatureLevelUndefined     FeatureLevel = 0
@@ -332,7 +327,7 @@ const (
 	FeatureLevelCore          FeatureLevel = 2
 )
 
-type FeatureName C.WGPUFeatureName
+type FeatureName uint32
 
 const (
 	FeatureNameCoreFeaturesAndLimits          FeatureName = 1
@@ -359,7 +354,7 @@ const (
 	FeatureNameTextureComponentSwizzle        FeatureName = 22
 )
 
-type FilterMode C.WGPUFilterMode
+type FilterMode uint32
 
 const (
 	FilterModeUndefined FilterMode = 0
@@ -367,7 +362,7 @@ const (
 	FilterModeLinear    FilterMode = 2
 )
 
-type FrontFace C.WGPUFrontFace
+type FrontFace uint32
 
 const (
 	FrontFaceUndefined FrontFace = 0
@@ -375,7 +370,7 @@ const (
 	FrontFaceCW        FrontFace = 2
 )
 
-type IndexFormat C.WGPUIndexFormat
+type IndexFormat uint32
 
 const (
 	IndexFormatUndefined IndexFormat = 0
@@ -383,7 +378,7 @@ const (
 	IndexFormatUint32    IndexFormat = 2
 )
 
-type InstanceFeatureName C.WGPUInstanceFeatureName
+type InstanceFeatureName uint32
 
 const (
 	InstanceFeatureNameTimedWaitAny              InstanceFeatureName = 1
@@ -391,7 +386,7 @@ const (
 	InstanceFeatureNameMultipleDevicesPerAdapter InstanceFeatureName = 3
 )
 
-type LoadOp C.WGPULoadOp
+type LoadOp uint32
 
 const (
 	LoadOpUndefined            LoadOp = 0
@@ -400,7 +395,7 @@ const (
 	LoadOpExpandResolveTexture LoadOp = 3
 )
 
-type MapAsyncStatus C.WGPUMapAsyncStatus
+type MapAsyncStatus uint32
 
 const (
 	MapAsyncStatusSuccess           MapAsyncStatus = 1
@@ -409,7 +404,7 @@ const (
 	MapAsyncStatusAborted           MapAsyncStatus = 4
 )
 
-type MapMode C.WGPUMapMode
+type MapMode uint32
 
 const (
 	MapModeNone  MapMode = 0
@@ -417,7 +412,7 @@ const (
 	MapModeWrite MapMode = 2
 )
 
-type MipmapFilterMode C.WGPUMipmapFilterMode
+type MipmapFilterMode uint32
 
 const (
 	MipmapFilterModeUndefined MipmapFilterMode = 0
@@ -425,7 +420,7 @@ const (
 	MipmapFilterModeLinear    MipmapFilterMode = 2
 )
 
-type OptionalBool C.WGPUOptionalBool
+type OptionalBool uint32
 
 const (
 	OptionalBoolFalse     OptionalBool = 0
@@ -433,7 +428,7 @@ const (
 	OptionalBoolUndefined OptionalBool = 2
 )
 
-type popErrorScopeStatus C.WGPUPopErrorScopeStatus
+type popErrorScopeStatus uint32
 
 const (
 	popErrorScopeStatusSuccess           popErrorScopeStatus = 1
@@ -441,7 +436,7 @@ const (
 	popErrorScopeStatusError             popErrorScopeStatus = 3
 )
 
-type PowerPreference C.WGPUPowerPreference
+type PowerPreference uint32
 
 const (
 	PowerPreferenceUndefined       PowerPreference = 0
@@ -449,7 +444,7 @@ const (
 	PowerPreferenceHighPerformance PowerPreference = 2
 )
 
-type PredefinedColorSpace C.WGPUPredefinedColorSpace
+type PredefinedColorSpace uint32
 
 const (
 	PredefinedColorSpaceSRGB            PredefinedColorSpace = 1
@@ -458,7 +453,7 @@ const (
 	PredefinedColorSpaceDisplayP3Linear PredefinedColorSpace = 4
 )
 
-type PresentMode C.WGPUPresentMode
+type PresentMode uint32
 
 const (
 	PresentModeUndefined   PresentMode = 0
@@ -483,7 +478,7 @@ func (p PresentMode) String() string {
 	}
 }
 
-type PrimitiveTopology C.WGPUPrimitiveTopology
+type PrimitiveTopology uint32
 
 const (
 	PrimitiveTopologyUndefined     PrimitiveTopology = 0
@@ -494,14 +489,14 @@ const (
 	PrimitiveTopologyTriangleStrip PrimitiveTopology = 5
 )
 
-type QueryType C.WGPUQueryType
+type QueryType uint32
 
 const (
 	QueryTypeOcclusion QueryType = 1
 	QueryTypeTimestamp QueryType = 2
 )
 
-type QueueWorkDoneStatus C.WGPUQueueWorkDoneStatus
+type QueueWorkDoneStatus uint32
 
 const (
 	QueueWorkDoneStatusSuccess           QueueWorkDoneStatus = 1
@@ -509,7 +504,7 @@ const (
 	QueueWorkDoneStatusError             QueueWorkDoneStatus = 3
 )
 
-type requestAdapterStatus C.WGPURequestAdapterStatus
+type requestAdapterStatus uint32
 
 const (
 	requestAdapterStatusSuccess           requestAdapterStatus = 1
@@ -518,7 +513,7 @@ const (
 	requestAdapterStatusError             requestAdapterStatus = 4
 )
 
-type requestDeviceStatus C.WGPURequestDeviceStatus
+type requestDeviceStatus uint32
 
 const (
 	requestDeviceStatusSuccess           requestDeviceStatus = 1
@@ -526,7 +521,7 @@ const (
 	requestDeviceStatusError             requestDeviceStatus = 3
 )
 
-type SType C.WGPUSType
+type SType uint32
 
 const (
 	STypeShaderSourceSPIRV                 SType = 1
@@ -547,7 +542,7 @@ const (
 	STypeTextureBindingViewDimension       SType = 16
 )
 
-type SamplerBindingType C.WGPUSamplerBindingType
+type SamplerBindingType uint32
 
 const (
 	SamplerBindingTypeBindingNotUsed SamplerBindingType = 0
@@ -557,7 +552,7 @@ const (
 	SamplerBindingTypeComparison     SamplerBindingType = 4
 )
 
-type ShaderStage C.WGPUShaderStage
+type ShaderStage uint32
 
 const (
 	ShaderStageNone     ShaderStage = 0
@@ -566,14 +561,14 @@ const (
 	ShaderStageCompute  ShaderStage = 4
 )
 
-type statusCode C.WGPUStatus
+type statusCode uint32
 
 const (
 	statusCodeSuccess statusCode = 1
 	statusCodeError   statusCode = 2
 )
 
-type StencilOperation C.WGPUStencilOperation
+type StencilOperation uint32
 
 const (
 	StencilOperationUndefined      StencilOperation = 0
@@ -587,7 +582,7 @@ const (
 	StencilOperationDecrementWrap  StencilOperation = 8
 )
 
-type StorageTextureAccess C.WGPUStorageTextureAccess
+type StorageTextureAccess uint32
 
 const (
 	StorageTextureAccessBindingNotUsed StorageTextureAccess = 0
@@ -597,7 +592,7 @@ const (
 	StorageTextureAccessReadWrite      StorageTextureAccess = 4
 )
 
-type StoreOp C.WGPUStoreOp
+type StoreOp uint32
 
 const (
 	StoreOpUndefined StoreOp = 0
@@ -605,7 +600,7 @@ const (
 	StoreOpDiscard   StoreOp = 2
 )
 
-type surfaceGetCurrentTextureStatus C.WGPUSurfaceGetCurrentTextureStatus
+type surfaceGetCurrentTextureStatus uint32
 
 const (
 	surfaceGetCurrentTextureStatusSuccessOptimal    surfaceGetCurrentTextureStatus = 1
@@ -635,7 +630,7 @@ func (s surfaceGetCurrentTextureStatus) String() string {
 	}
 }
 
-type TextureAspect C.WGPUTextureAspect
+type TextureAspect uint32
 
 const (
 	TextureAspectUndefined   TextureAspect = 0
@@ -647,7 +642,7 @@ const (
 	TextureAspectPlane2Only  TextureAspect = 2
 )
 
-type TextureDimension C.WGPUTextureDimension
+type TextureDimension uint32
 
 const (
 	TextureDimensionUndefined TextureDimension = 0
@@ -656,7 +651,7 @@ const (
 	TextureDimension3D        TextureDimension = 3
 )
 
-type TextureFormat C.WGPUTextureFormat
+type TextureFormat uint32
 
 const (
 	TextureFormatUndefined            TextureFormat = 0
@@ -972,7 +967,7 @@ func (t TextureFormat) String() string {
 	}
 }
 
-type TextureSampleType C.WGPUTextureSampleType
+type TextureSampleType uint32
 
 const (
 	TextureSampleTypeBindingNotUsed    TextureSampleType = 0
@@ -984,7 +979,7 @@ const (
 	TextureSampleTypeUint              TextureSampleType = 6
 )
 
-type TextureUsage C.WGPUTextureUsage
+type TextureUsage uint32
 
 const (
 	TextureUsageNone                TextureUsage = 0
@@ -997,7 +992,7 @@ const (
 	TextureUsageStorageAttachment   TextureUsage = 64
 )
 
-type TextureViewDimension C.WGPUTextureViewDimension
+type TextureViewDimension uint32
 
 const (
 	TextureViewDimensionUndefined TextureViewDimension = 0
@@ -1009,14 +1004,14 @@ const (
 	TextureViewDimension3D        TextureViewDimension = 6
 )
 
-type ToneMappingMode C.WGPUToneMappingMode
+type ToneMappingMode uint32
 
 const (
 	ToneMappingModeStandard ToneMappingMode = 1
 	ToneMappingModeExtended ToneMappingMode = 2
 )
 
-type VertexFormat C.WGPUVertexFormat
+type VertexFormat uint32
 
 const (
 	VertexFormatUint8           VertexFormat = 1
@@ -1122,7 +1117,7 @@ func (f VertexFormat) Size() int {
 	panic("unknown VertexFormat")
 }
 
-type VertexStepMode C.WGPUVertexStepMode
+type VertexStepMode uint32
 
 const (
 	VertexStepModeUndefined VertexStepMode = 0
@@ -1130,7 +1125,7 @@ const (
 	VertexStepModeInstance  VertexStepMode = 2
 )
 
-type waitStatus C.WGPUWaitStatus
+type waitStatus uint32
 
 const (
 	waitStatusSuccess  waitStatus = 1

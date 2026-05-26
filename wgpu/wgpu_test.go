@@ -1,6 +1,7 @@
 package wgpu_test
 
 import (
+	"embed"
 	"fmt"
 	"image"
 	"image/png"
@@ -11,6 +12,9 @@ import (
 
 	"github.com/bluescreen10/dawn-go/wgpu"
 )
+
+//go:embed testdata
+var testdataFS embed.FS
 
 func init() {
 	runtime.LockOSThread()
@@ -277,22 +281,21 @@ func createTestContext() (*wgpuContext, error) {
 }
 
 func loadImage(path string) (image.Image, error) {
-	r, err := os.Open(path)
+	f, err := testdataFS.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	img, _, err := image.Decode(r)
+	img, _, err := image.Decode(f)
 	return img, err
 }
 
+// saveImage writes a PNG to disk. Only useful outside of WASM (no writable FS in browsers).
 func saveImage(path string, img image.Image) error {
-
 	f, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-
 	return png.Encode(f, img)
 }
 

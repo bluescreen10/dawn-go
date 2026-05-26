@@ -63,4 +63,23 @@ jobs:
       - name: Upload coverage
         uses: codecov/codecov-action@v5
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}%      
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      # Setup Node.js + Playwright for WASM tests
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Playwright
+        run: |
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      # Run WASM tests in headless Chromium
+      - name: Run WASM tests
+        run: ./scripts/run_wasm_tests.sh
+        env:
+          # SwiftShader needs these to pick up the Mesa software Vulkan driver
+          VK_ICD_FILENAMES: /usr/share/vulkan/icd.d/lvp_icd.x86_64.json
+          LIBGL_ALWAYS_SOFTWARE: "1"
