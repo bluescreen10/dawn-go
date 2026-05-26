@@ -40,7 +40,7 @@ func (s *Surface) Configure(config SurfaceConfiguration) {
 func (s *Surface) GetCapabilities(adapter *Adapter) (SurfaceCapabilities, error) {
 	// In JS WebGPU, capabilities are determined by what the browser supports.
 	// Return commonly supported formats.
-	preferredFormat := s.ref.Call("getPreferredFormat", adapter.ref)
+	preferredFormat := s.ref.Call("getPreferredCanvasFormat", adapter.ref)
 	var fmt_ TextureFormat
 	if !preferredFormat.IsUndefined() && !preferredFormat.IsNull() {
 		fmt_ = textureFormatFromJS(preferredFormat.String())
