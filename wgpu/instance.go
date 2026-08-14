@@ -3,7 +3,7 @@
 package wgpu
 
 /*
-#include "webgpu.h"
+#include "webgpu/webgpu.h"
 
 extern void cgo_callback_RequestAdapterCallback(WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message, void *userData1, void *userData2);
 */

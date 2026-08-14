@@ -3,7 +3,7 @@
 package wgpu
 
 /*
-#include "webgpu.h"
+#include "webgpu/webgpu.h"
 
 extern void cgo_callback_CompilationInfoCallback(WGPUCompilationInfoRequestStatus status, WGPUCompilationInfo compilationInfo, void *userData1, void *userData2);
 */

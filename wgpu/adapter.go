@@ -10,7 +10,7 @@ import (
 )
 
 /*
-#include "webgpu.h"
+#include "webgpu/webgpu.h"
 extern void cgo_callback_RequestDeviceCallback(WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message, void *userData1, void *userData2);
 extern void cgo_callback_DeviceLostCallback(WGPUDevice device, WGPUDeviceLostReason reason, WGPUStringView message, void *userData1, void *userData2);
 extern void cgo_callback_UncapturedErrorCallback(WGPUDevice device, WGPUErrorType typ, WGPUStringView message, void *userData1, void *userData2);

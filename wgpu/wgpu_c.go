@@ -3,9 +3,7 @@
 package wgpu
 
 /*
-#cgo CFLAGS: -I ${SRCDIR}/lib
-
-#include "webgpu.h"
+#include "webgpu/webgpu.h"
 
 // Forward declarations of Go-exported callback handlers (avoids circular _cgo_export.h include).
 extern void goBufferMapCallbackHandler(WGPUMapAsyncStatus, WGPUStringView, void*, void*);

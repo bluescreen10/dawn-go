@@ -51,6 +51,21 @@ jobs:
             libx11-xcb-dev \
             libxcb1-dev
 
+      # Download the prebuilt Dawn library (no longer vendored in the module)
+      - name: Download Dawn
+        run: |
+          set -euo pipefail
+          asset_url=$(curl -sf https://api.github.com/repos/google/dawn/releases/latest \
+            | jq -r '.assets[] | select(.name | endswith("ubuntu-latest-Release.tar.gz")) | .browser_download_url')
+          if [ -z "$asset_url" ]; then
+            echo "Could not find a matching Dawn release asset" >&2
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/dawn"
+          curl -sfL "$asset_url" | tar xz -C "$RUNNER_TEMP/dawn" --strip-components=1
+          echo "CGO_LDFLAGS=-L$RUNNER_TEMP/dawn/lib64" >> "$GITHUB_ENV"
+          echo "CGO_CFLAGS=-I$RUNNER_TEMP/dawn/include" >> "$GITHUB_ENV"
+
       # Download dependencies (optional but explicit)
       - name: Download modules
         run: go mod download

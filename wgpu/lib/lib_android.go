@@ -1,3 +1,6 @@
 package lib
 
-import _ "bluescreen10.com/wgpu-android"
+/*
+#cgo android LDFLAGS: -lwebgpu_dawn -landroid -lvulkan -lm -llog
+*/
+import "C"

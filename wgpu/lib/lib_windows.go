@@ -1,3 +1,6 @@
 package lib
 
-import _ "bluescreen10.com/wgpu-windows"
+/*
+#cgo windows LDFLAGS: -lwebgpu_dawn -ld3d12 -ldxgi -ld3dcompiler
+*/
+import "C"
