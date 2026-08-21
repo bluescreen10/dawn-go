@@ -121,9 +121,12 @@ func (c *CommandEncoder) BeginRenderPass(descriptor RenderPassDescriptor) *Rende
 	}
 
 	if descriptor.TimestampWrites != nil {
-		cDescriptor.timestampWrites.querySet = descriptor.TimestampWrites.QuerySet.ref
-		cDescriptor.timestampWrites.beginningOfPassWriteIndex = C.uint32_t(descriptor.TimestampWrites.BeginningOfPassWriteIndex)
-		cDescriptor.timestampWrites.endOfPassWriteIndex = C.uint32_t(descriptor.TimestampWrites.EndOfPassWriteIndex)
+		cDescriptor.timestampWrites = &C.WGPUPassTimestampWrites{
+			querySet:                  descriptor.TimestampWrites.QuerySet.ref,
+			beginningOfPassWriteIndex: C.uint32_t(descriptor.TimestampWrites.BeginningOfPassWriteIndex),
+			endOfPassWriteIndex:       C.uint32_t(descriptor.TimestampWrites.EndOfPassWriteIndex),
+		}
+		pinner.Pin(cDescriptor.timestampWrites)
 	}
 
 	return &RenderPassEncoder{ref: C.wgpuCommandEncoderBeginRenderPass(c.ref, &cDescriptor)}
